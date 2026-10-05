@@ -99,6 +99,21 @@ def milliseconds(value):
     return stamp(dt.datetime.fromtimestamp(value / 1000, UTC))
 
 
+def source_due(policy, previous, now):
+    """One attempt per UTC cadence slot, despite runner start-time jitter.
+
+    Failed attempts consume their slot too. A one-minute minimum spacing avoids
+    bursts across a slot boundary; missed slots never create catch-up work.
+    """
+    last_attempt = previous.get('lastAttemptAt')
+    if not last_attempt:
+        return True
+    attempted = dt.datetime.fromisoformat(last_attempt.replace('Z', '+00:00'))
+    elapsed = (now-attempted).total_seconds()
+    cadence = policy['cadenceMinutes']*60
+    return elapsed >= 60 and now.timestamp()//cadence > attempted.timestamp()//cadence
+
+
 class PlainText(HTMLParser):
     def __init__(self):
         super().__init__()
@@ -523,8 +538,7 @@ def run(root, now, fixtures=None):
     reviews = load(root/'config/news-reviews.json', [])
     areas = load(root/'config/admin-places.json', [])
     due = [p for p in policies if p['sourceId'] in sources and
-           (not states.get(p['sourceId'], {}).get('lastAttemptAt') or
-            (now-dt.datetime.fromisoformat(states[p['sourceId']]['lastAttemptAt'].replace('Z','+00:00'))).total_seconds() >= p['cadenceMinutes']*60)]
+           source_due(p, states.get(p['sourceId'], {}), now)]
     changes, source_results = [], []
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
         responses = list(pool.map(lambda p:fetch(p, states.get(p['sourceId'], {}), now_text, fixtures), due))
