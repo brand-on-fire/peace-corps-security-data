@@ -69,7 +69,8 @@ def validate_candidate(root, baseline):
     if len({r['id'] for r in current}) != len(current):
         raise ValueError('Candidate current incidents duplicated')
     for row in current:
-        if row['countryCode'] not in codes or row['historical'] or records.get(row['id']) != row:
+        archived = records.get(row['id'])
+        if row['countryCode'] not in codes or row['historical'] or archived is None or pipeline.public_snapshot_record(archived) != row:
             raise ValueError('Candidate current incident differs from complete archive')
     unsigned = dict(snapshot)
     publication = unsigned.pop('publication')

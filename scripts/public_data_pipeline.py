@@ -6,10 +6,12 @@ saved responses offline. RSS discovery is deliberately separate from incidents.
 """
 import argparse
 import concurrent.futures
+import copy
 import datetime as dt
 import hashlib
 import html
 import gzip
+import io
 import json
 import math
 import os
@@ -31,6 +33,8 @@ INDEX_FIELDS = ('id', 'title', 'countryCode', 'admin1Code', 'admin1Name', 'admin
                 'location', 'sourceIds', 'aiStatus')
 PART_LIMIT = 12_000_000
 MAX_RESPONSE = 20_000_000
+MAX_SNAPSHOT = 10_000_000
+MAX_HISTORY_INDEX = 25_000_000
 KEYWORDS = {
     'earthquake': r'\b(earthquakes?|sismos?|terremotos?|séisme)\b',
     'flood': r'\b(flood(?:s|ed|ing)?|inundaci[oó]n(?:es)?|inondation)\b',
@@ -196,7 +200,7 @@ def fetch(policy, previous, now, fixture=None):
             try:
                 opener = urllib.request.build_opener(ReviewedSourceRedirect(urllib.parse.urlsplit(policy['url']).hostname))
                 with opener.open(request, timeout=30) as response:
-                    raw = response.read()
+                    raw = read_complete(response)
                     status, final_url = response.status, response.url
                     etag, modified = response.headers.get('ETag'), response.headers.get('Last-Modified')
                     encoding = response.headers.get('Content-Encoding','').lower()
@@ -216,9 +220,15 @@ def fetch(policy, previous, now, fixture=None):
             raise ValueError('Complete response exceeds 20MB policy; entire response rejected')
         wire_bytes = len(raw)
         if encoding == 'gzip':
-            raw = gzip.decompress(raw)
+            with gzip.GzipFile(fileobj=io.BytesIO(raw)) as decoded:
+                raw = read_complete(decoded)
         elif encoding == 'deflate':
-            raw = zlib.decompress(raw)
+            decoder = zlib.decompressobj()
+            raw = decoder.decompress(raw, MAX_RESPONSE+1)
+            if len(raw) > MAX_RESPONSE or decoder.unconsumed_tail:
+                raise ValueError('Decoded response exceeds 20MB policy; entire response rejected')
+            if not decoder.eof:
+                raise ValueError('Incomplete compressed response; entire response rejected')
         elif encoding not in ('','identity'):
             raise ValueError('Unsupported HTTP content encoding; no partial parsing')
         if len(raw) > MAX_RESPONSE:
@@ -231,6 +241,19 @@ def fetch(policy, previous, now, fixture=None):
         result.update(status='unavailable', lastSuccessAt=previous.get('lastSuccessAt'),
                       message=str(error))
         return result, None
+
+
+def read_complete(stream):
+    """Bound memory while accepting only an entire response, never a prefix."""
+    chunks, size = [], 0
+    while True:
+        chunk = stream.read(65536)
+        if not chunk:
+            return b''.join(chunks)
+        size += len(chunk)
+        if size > MAX_RESPONSE:
+            raise ValueError('Complete response exceeds 20MB policy; entire response rejected')
+        chunks.append(chunk)
 
 
 def in_ring(ring, lon, lat):
@@ -360,7 +383,7 @@ def official_incidents(source, raw, now, countries, geo, iso3):
                         dict(recordId=feature['id'], magnitude=p['mag'], depthKm=depth, pagerAlert=pager,
                              providerReviewStatus=p.get('status')), feature,
                         {'red':'severe', 'orange':'moderate', 'yellow':'moderate'}.get(pager, 'unknown')))
-    else:
+    elif source['kind'] == 'gdacs':
         if b'<!DOCTYPE' in raw.upper() or b'<!ENTITY' in raw.upper():
             raise ValueError('Feed entity declarations are not permitted')
         root = ET.fromstring(raw)
@@ -377,10 +400,12 @@ def official_incidents(source, raw, now, countries, geo, iso3):
             if not kind or not event:
                 raise ValueError('GDACS event identity missing')
             location = dict(precision='country')
+            representative = None
             try:
                 lon, lat = float(get('geo:Point/geo:long')), float(get('geo:Point/geo:lat'))
-                if math.isfinite(lon) and math.isfinite(lat) and geo.country(lon, lat) == code:
-                    location = dict(precision='point', lon=lon, lat=lat)
+                if math.isfinite(lon) and math.isfinite(lat) and -180 <= lon <= 180 and -90 <= lat <= 90:
+                    representative = dict(lon=lon, lat=lat, precision='provider-representative-point',
+                                          note='GDACS representative coordinate; not a verified occurrence point or impact footprint.')
             except ValueError:
                 pass
             summary = plain(get('description')) + ' GDACS provider alert: '+color+'. Local effects require review.'
@@ -389,9 +414,12 @@ def official_incidents(source, raw, now, countries, geo, iso3):
                         'DR':'weather', 'WF':'weather'}.get(kind, 'other'), date(get('g:fromdate')),
                         date(get('g:datemodified') or get('pubDate')), now, location, get('link'),
                         dict(eventType=kind, eventId=event, episodeId=get('g:episodeid'), providerAlert=color,
-                             providerIsCurrent=get('g:iscurrent'), providerEnd=get('g:todate')),
+                             providerIsCurrent=get('g:iscurrent'), providerEnd=get('g:todate'),
+                             representativePoint=representative),
                         ET.tostring(element, encoding='unicode'),
                         {'Red':'severe', 'Orange':'moderate'}.get(color, 'unknown'), date(get('pubDate'))))
+    else:
+        raise ValueError('Official source kind has no reviewed adapter')
     return rows
 
 
@@ -475,6 +503,24 @@ def read_archive(data, countries):
     return rows
 
 
+def public_snapshot_record(row):
+    """Explicit overview projection; authoritative area details stay in the archive."""
+    compact = copy.deepcopy(row)
+    omitted = compact.get('location', {}).pop('geometry', None) is not None
+    metadata = compact.get('sourceMetadata', {})
+    if 'infoBlocks' in metadata:
+        del metadata['infoBlocks']
+        omitted = True
+    if omitted:
+        compact.setdefault('sourceMetadata', {})['fullDetailInCountryArchive'] = True
+    return compact
+
+
+def current_snapshot_rows(records, countries):
+    return [public_snapshot_record(row) for row in sorted(records.values(), key=lambda r:r['occurredAt'], reverse=True)
+            if not row['historical'] and row['countryCode'] in countries]
+
+
 def write_archive(data, records, countries, public_country_codes=None):
     # Retain complete previously collected country files, while exposing only
     # the currently admitted roster in the public index and manifest.
@@ -483,11 +529,15 @@ def write_archive(data, records, countries, public_country_codes=None):
     public_records = [row for row in ordered if row['countryCode'] in public_codes]
     index, manifest = [], dict(format='explicit-field-projection-with-complete-country-details',
                              recordCount=len(public_records), projectionFields=list(INDEX_FIELDS)+['reports','reportCount'],
-                             omittedFromIndex=['summary','sourceMetadata','revisions','adminAssignment'], countries=[])
+                             omittedFromIndex=['summary','sourceMetadata','revisions','adminAssignment','location.geometry'], countries=[])
     for row in public_records:
         compact = {key:row[key] for key in INDEX_FIELDS if key in row}
+        if 'location' in row:
+            compact['location'] = {key:value for key,value in row['location'].items() if key != 'geometry'}
         compact.update(reports=[], reportCount=len(row['reports']))
         index.append(compact)
+    if len(encode(index)) > MAX_HISTORY_INDEX:
+        raise ValueError('Complete history overview exceeds 25MB; no partial index permitted')
     for code in countries:
         rows = [r for r in ordered if r['countryCode'] == code]
         groups, group, size = [], [], 3
@@ -518,6 +568,9 @@ def write_archive(data, records, countries, public_country_codes=None):
 
 
 def run(root, now, fixtures=None):
+    from public_cap import collect_cap, apply_lifecycle, expire_warnings
+    from public_official import ADAPTERS, prepare_official_policy, request_state, collect_official
+    from local_news_archive import parse_wordpress, jcf_curfew_incidents, expire_curfews
     now_text = stamp(now)
     data = root/'docs/data'
     all_countries = {c['code']:c for c in load(root/'config/countries.json')}
@@ -539,9 +592,11 @@ def run(root, now, fixtures=None):
     areas = load(root/'config/admin-places.json', [])
     due = [p for p in policies if p['sourceId'] in sources and
            source_due(p, states.get(p['sourceId'], {}), now)]
+    due = [prepare_official_policy(p, states.get(p['sourceId'], {}), now_text)
+           if p.get('adapter') in ADAPTERS else p for p in due]
     changes, source_results = [], []
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
-        responses = list(pool.map(lambda p:fetch(p, states.get(p['sourceId'], {}), now_text, fixtures), due))
+        responses = list(pool.map(lambda p:fetch(p, request_state(p, states.get(p['sourceId'], {})), now_text, fixtures), due))
     for policy, (result, raw) in zip(due, responses):
         sid = policy['sourceId']
         previous = states.get(sid, {})
@@ -549,22 +604,51 @@ def run(root, now, fixtures=None):
         try:
             if raw is not None:
                 if policy['mode'] == 'official':
-                    incoming = official_incidents(source, raw, now_text, countries, geo, iso3)
+                    pending_discoveries = []
+                    official_receipts = None
+                    if policy.get('adapter') in ADAPTERS:
+                        collected = collect_official(source, policy, raw, now_text, countries, geo,
+                            previous, records, fetch, fixtures, initial_http_status=result.get('httpStatus', 200))
+                        incoming = collected['incidents']
+                        pending_discoveries = collected['discoveries']
+                        result.update(collected['state'])
+                        official_receipts = result['evidenceReceipts'] = collected['evidence']
+                    elif source['kind'] == 'cap':
+                        messages = collect_cap(source, policy, raw, now_text, countries, areas, fetch, fixtures)
+                        incoming = apply_lifecycle(messages, records, now_text)
+                    else:
+                        incoming = official_incidents(source, raw, now_text, countries, geo, iso3)
                     accepted = len(incoming)
                     message = f'Complete official feed parsed; {accepted} records matched reviewed active-country boundaries/codes.'
-                    pending_discoveries = []
-                else:
-                    items = parse_feed(raw)
+                    if official_receipts is not None:
+                        message += f' {len(official_receipts)} complete source responses validated.'
+                    gap = result.get('coverageGap') or previous.get('coverageGap')
+                    if gap:
+                        result['coverageGap'] = gap
+                        message += f" Missing interval {gap['from']} through {gap['through']}: {gap['reason']}."
+                elif policy['mode'] == 'discovery':
+                    items = parse_wordpress(raw, source) if policy.get('format') == 'wordpress' else parse_feed(raw)
                     pending_discoveries = news_discovery(source, items, now_text, countries)
                     incoming = reviewed_news_incidents(source, items, reviews, now_text, countries, areas)
+                    incoming.extend(jcf_curfew_incidents(source, items, now_text, countries, areas))
                     accepted = len(incoming)
                     message = f'Complete feed parsed ({len(items)} items); {len(pending_discoveries)} keyword discoveries; {accepted} unchanged source representations match explicit incident approvals.'
+                else:
+                    raise ValueError('Collection mode has no reviewed adapter')
                 # Stage all source updates before committing any: a malformed item or
                 # geographic assignment cannot leave a partially accepted response.
                 pending_records = {}
                 for row in incoming:
                         old = records.get(row['id'])
-                        if old and old['reports'][0]['contentHash'] == row['reports'][0]['contentHash']:
+                        if old and date(row['updatedAt']) < date(old['updatedAt']):
+                            # A delayed provider response must not replace newer facts.
+                            # Adapters merge genuinely new evidence into the current
+                            # record before reaching this transaction.
+                            continue
+                        if (old and [(r['id'],r['contentHash']) for r in old['reports']] == [(r['id'],r['contentHash']) for r in row['reports']]
+                                and old['state'] == row['state']
+                                and old['location'] == row['location']
+                                and old.get('sourceMetadata') == row.get('sourceMetadata')):
                             continue
                         if old:
                             row['firstSeenAt'] = old['firstSeenAt']
@@ -596,16 +680,19 @@ def run(root, now, fixtures=None):
             # A failed payload's ETag must not suppress a necessary full retry.
             states[sid]['etag'], states[sid]['lastModified'] = previous.get('etag'), previous.get('lastModified')
         source_results.append(result)
+    prior_states = {key:row['state'] for key,row in records.items()}
+    expire_warnings(records, now_text)
+    expire_curfews(records, now_text)
     for row in records.values():
         row['historical'] = dt.datetime.fromisoformat(row['occurredAt'].replace('Z','+00:00')) < now-dt.timedelta(days=30)
         if row['historical'] and row['state'] == 'reported':
             row['state'] = 'expired'
+    changes = list(dict.fromkeys(changes + [key for key,row in records.items() if row['state'] != prior_states[key]]))
     snapshot['generatedAt'] = now_text
     snapshot['mode'] = 'fixture' if fixtures else 'live'
     snapshot['schemaVersion'] = 1
     snapshot['archiveTotal'] = snapshot['history']['recordCount'] = sum(row['countryCode'] in countries for row in records.values())
-    snapshot['incidents'] = sorted([r for r in records.values() if not r['historical'] and r['countryCode'] in countries],
-                                   key=lambda r:r['occurredAt'], reverse=True)
+    snapshot['incidents'] = current_snapshot_rows(records, countries)
     snapshot['history']['to'] = now_text
     snapshot['collector'] = dict(kind='public-standard-runner', requestedOfficialCadenceMinutes=15,
                                   requestedNewsCadenceMinutes=360, latestRunAt=now_text,
@@ -620,6 +707,8 @@ def run(root, now, fixtures=None):
     snapshot.pop('publication', None)
     snapshot['publication'] = dict(format='peace-corps-public-data-v1', generatedAt=now_text,
                                   revision=publication_revision(snapshot), activeCountryCodes=sorted(countries))
+    if len(encode(snapshot)) > MAX_SNAPSHOT:
+        raise ValueError('Complete current overview exceeds 10MB; no partial snapshot permitted')
     write_archive(data, records, all_countries, countries)
     save(data/'snapshot.json', snapshot)
     save(data/'discovery.json', sorted(discoveries.values(), key=lambda r:r['retrievedAt'], reverse=True))
