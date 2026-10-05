@@ -38,9 +38,15 @@ KEYWORDS = {
     'volcano': r'\b(volcan(?:o|ic)|volc[aá]n|eruption|erupci[oó]n)\b',
     'conflict': r'\b(armed conflict|clashes|airstrike|shelling|gunfire|bombing)\b',
     'unrest': r'\b(riot|curfew|unrest|couvre-feu|toque de queda)\b',
-    'health': r'\b(cholera|chol[eé]ra|dengue|outbreak|epidemic|epidemia|medicine.{0,20}shortage)\b',
-    'transport': r'\b(road.{0,25}(closed|blocked)|bridge.{0,25}collaps|landslide|derailment)\b',
-    'crime': r'\b(kidnap|abduct|shooting|homicide|secuestro|asesinato)\b',
+    'health': r'\b(cholera|chol[eé]ra|dengue|outbreak|epidemic|epidemia|medicine.{0,30}shortages?)\b',
+    'transport': r'\b(road.{0,25}(closed|blocked)|bridge.{0,25}collaps(?:e|ed|es|ing)?|landslide|derailment)\b',
+    # Discovery candidates only. These terms never establish an incident, its
+    # date/location, an ongoing threat, or independent corroboration.
+    'crime': (r'\b(kidnap(?:s|ped|ping)?|abduct(?:ed|ing|ion|ions)?|shootings?|homicides?|'
+              r'murder(?:s|ed)?|robber(?:y|ies)|thefts?|burglar(?:y|ies)|assault(?:s|ed)?|'
+              r'secuestros?|asesinatos?|homicidios?|robos?|asaltos?|agresi[oó]n(?:es)?|'
+              r'meurtres?|assassinats?|braquages?|cambriolages?|agressions?|enl[eè]vements?|'
+              r'vols? (?:à main armée|avec violence))\b'),
     'infrastructure': r'\b(blackout|power outage|water shortage|food insecurity)\b',
 }
 
@@ -454,12 +460,16 @@ def read_archive(data, countries):
     return rows
 
 
-def write_archive(data, records, countries):
-    index, manifest = [], dict(format='explicit-field-projection-with-complete-country-details',
-                             recordCount=len(records), projectionFields=list(INDEX_FIELDS)+['reports','reportCount'],
-                             omittedFromIndex=['summary','sourceMetadata','revisions','adminAssignment'], countries=[])
+def write_archive(data, records, countries, public_country_codes=None):
+    # Retain complete previously collected country files, while exposing only
+    # the currently admitted roster in the public index and manifest.
+    public_codes = set(countries if public_country_codes is None else public_country_codes)
     ordered = sorted(records.values(), key=lambda row:(row['occurredAt'],row['id']), reverse=True)
-    for row in ordered:
+    public_records = [row for row in ordered if row['countryCode'] in public_codes]
+    index, manifest = [], dict(format='explicit-field-projection-with-complete-country-details',
+                             recordCount=len(public_records), projectionFields=list(INDEX_FIELDS)+['reports','reportCount'],
+                             omittedFromIndex=['summary','sourceMetadata','revisions','adminAssignment'], countries=[])
+    for row in public_records:
         compact = {key:row[key] for key in INDEX_FIELDS if key in row}
         compact.update(reports=[], reportCount=len(row['reports']))
         index.append(compact)
@@ -486,7 +496,8 @@ def write_archive(data, records, countries):
                 parts.append(name)
             save(data/f'history/{code}.json', dict(format='country-parts', countryCode=code,
                                                  recordCount=len(rows), parts=parts))
-        manifest['countries'].append(dict(code=code, path=f'history/{code}.json', recordCount=len(rows), parts=parts))
+        if code in public_codes:
+            manifest['countries'].append(dict(code=code, path=f'history/{code}.json', recordCount=len(rows), parts=parts))
     save(data/'history.json', index)
     save(data/'history-manifest.json', manifest)
 
@@ -578,7 +589,7 @@ def run(root, now, fixtures=None):
     snapshot['generatedAt'] = now_text
     snapshot['mode'] = 'fixture' if fixtures else 'live'
     snapshot['schemaVersion'] = 1
-    snapshot['archiveTotal'] = snapshot['history']['recordCount'] = len(records)
+    snapshot['archiveTotal'] = snapshot['history']['recordCount'] = sum(row['countryCode'] in countries for row in records.values())
     snapshot['incidents'] = sorted([r for r in records.values() if not r['historical'] and r['countryCode'] in countries],
                                    key=lambda r:r['occurredAt'], reverse=True)
     snapshot['history']['to'] = now_text
@@ -595,12 +606,13 @@ def run(root, now, fixtures=None):
     snapshot.pop('publication', None)
     snapshot['publication'] = dict(format='peace-corps-public-data-v1', generatedAt=now_text,
                                   revision=publication_revision(snapshot), activeCountryCodes=sorted(countries))
-    write_archive(data, records, all_countries)
+    write_archive(data, records, all_countries, countries)
     save(data/'snapshot.json', snapshot)
     save(data/'discovery.json', sorted(discoveries.values(), key=lambda r:r['retrievedAt'], reverse=True))
     save(data/'collector-state.json', states)
     audit = dict(generatedAt=now_text, requested=len(due), changedIncidents=changes,
-                 archiveCount=len(records), currentCount=len(snapshot['incidents']), discoveryCount=len(discoveries),
+                 archiveCount=len(records), publicArchiveCount=snapshot['archiveTotal'],
+                 currentCount=len(snapshot['incidents']), discoveryCount=len(discoveries),
                  activeReviewedCountries=len(countries), sources=source_results)
     save(data/'refresh-status.json', audit)
     return audit
