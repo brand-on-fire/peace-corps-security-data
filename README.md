@@ -11,3 +11,11 @@ The workflow runs only in the public `brand-on-fire/peace-corps-security-data` r
 Country admission expires at the documented review date. A country needs a renewed, evidence-backed roster review to resume new observations. Current coverage excludes offshore hazard effects, does not establish every local-news source, and is not an emergency alert channel. Read each observation's source, precision, evidence status and dates.
 
 The collector stops at explicit data-tree and repository-history growth limits rather than deleting the archive or using paid storage. Publication uses ordinary public Git files, readable at raw.githubusercontent.com. GitHub Pages is not enabled by this workflow.
+
+## Collection health and scheduling
+
+Collection runs in an isolated staging directory with an eight-minute deadline. Only a complete validated archive and snapshot replaces the last good publication; validation checks archived record identities, retained evidence, active-country scope, archive totals, and the browser content revision. A fatal failure or failure of every due source preserves the prior publication and writes only `docs/data/refresh-status.json`. Partial source outages retain prior records and are reported as degraded.
+
+The status document records the GitHub run URL, trigger, attempt, source outcomes, last successful collection time, and most recent observed scheduled run. A successful push or manual run is never recorded as proof of natural scheduling. The workflow publishes a failed-run diagnostic before marking the run failed; preflight, test, or publication failures remain visible in Actions. There are no external scheduler, model, cloud runtime, cache, or artifact dependencies.
+
+The requested schedule is minutes 11, 26, 41 and 56 each UTC hour; official feeds are due once per 15-minute slot and news discovery once per six-hour slot. GitHub may delay or drop scheduled runs, so this is not a guaranteed live emergency-warning service. Inspect the source success timestamps and the public workflow run history, rather than interpreting a snapshot timestamp as proof every source is fresh.

@@ -9,7 +9,7 @@ on:
       - 'scripts/**'
       - 'config/**'
   schedule:
-    - cron: '7,22,37,52 * * * *'
+    - cron: '11,26,41,56 * * * *'
 
 # This workflow is copied only into the audited public DATA repository.
 # The exact-repository identity and public visibility gate are checked before a
@@ -32,6 +32,8 @@ jobs:
     timeout-minutes: 12
     permissions:
       contents: write
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
     steps:
       - name: Read public data repository
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4, verified 2026-10-05
@@ -39,15 +41,24 @@ jobs:
           persist-credentials: false
           fetch-depth: 1
       - name: Audit public bundle and storage limits
+        id: audit
         run: python3 scripts/public_data_publish.py --audit
         env:
           GITHUB_TOKEN: ${{ github.token }}
-      - name: Refresh due free public sources
-        run: python3 scripts/public_data_pipeline.py
+      - name: Verify collector safety and lifecycle rules offline
+        run: python3 -m unittest discover -s scripts -p 'test_*.py' -v
+      - name: Refresh due free public sources transactionally
+        id: collect
+        continue-on-error: true
+        run: python3 scripts/public_data_refresh.py
       - name: Publish changed public JSON only
+        if: always() && steps.audit.outcome == 'success' && (steps.collect.outcome == 'success' || steps.collect.outcome == 'failure')
         run: python3 scripts/public_data_publish.py --publish
         env:
           GITHUB_TOKEN: ${{ github.token }}
+      - name: Surface failed collection after publishing its diagnostic
+        if: always() && steps.collect.outcome == 'failure'
+        run: exit 1
 
 # No cache, upload-artifact, package registry, Pages deployment artifact, larger
 # runner, Cloudflare binding, third-party model, persistent token, or paid API.
