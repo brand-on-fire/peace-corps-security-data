@@ -1,0 +1,53 @@
+name: Refresh public policy hazard data
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/refresh-data.yml'
+      - 'scripts/**'
+      - 'config/**'
+  schedule:
+    - cron: '7,22,37,52 * * * *'
+
+# This workflow is copied only into the audited public DATA repository.
+# The exact-repository identity and public visibility gate are checked before a
+# runner is allocated. It remains inactive in the private application repository.
+permissions:
+  contents: read
+
+concurrency:
+  group: public-data-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    if: >-
+      toJSON(github.event.repository.private) == 'false' &&
+      github.event.repository.visibility == 'public' &&
+      github.repository == 'brand-on-fire/peace-corps-security-data' &&
+      github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    permissions:
+      contents: write
+    steps:
+      - name: Read public data repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4, verified 2026-10-05
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Audit public bundle and storage limits
+        run: python3 scripts/public_data_publish.py --audit
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Refresh due free public sources
+        run: python3 scripts/public_data_pipeline.py
+      - name: Publish changed public JSON only
+        run: python3 scripts/public_data_publish.py --publish
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+# No cache, upload-artifact, package registry, Pages deployment artifact, larger
+# runner, Cloudflare binding, third-party model, persistent token, or paid API.
