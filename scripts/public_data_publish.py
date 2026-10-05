@@ -22,7 +22,8 @@ PATTERNS = (rb'-----BEGIN (?:RSA |OPENSSH |EC )?PRIVATE KEY-----',
 
 
 def command(*args, env=None):
-    return subprocess.run(args, env=env, check=True, capture_output=True, text=True).stdout.strip()
+    # Porcelain status begins with meaningful index/worktree status spaces.
+    return subprocess.run(args, env=env, check=True, capture_output=True, text=True).stdout.rstrip('\r\n')
 
 
 def audit(root, remote=True):
