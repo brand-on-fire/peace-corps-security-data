@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "countryCode": "FJ",
+  "batchSha256": "15175d2a42449ce9748f77e104202577dcb41775814a122de3946b7c3153ca10",
+  "importedAt": "2026-10-06T01:57:34Z",
+  "incidentIds": [
+    "reviewed-fj-nasinu-drowning-20251028",
+    "reviewed-fj-semo-road-20251030",
+    "reviewed-fj-samabula-fire-20251224",
+    "reviewed-fj-bua-homicide-20251226",
+    "reviewed-fj-namaka-road-20251226",
+    "reviewed-fj-korociriciri-road-20251227",
+    "reviewed-fj-serua-road-20251227",
+    "reviewed-fj-waicoka-road-20251226",
+    "reviewed-fj-votualeu-fire-20251225",
+    "reviewed-fj-millers-wharf-20251230",
+    "reviewed-fj-veisari-homicide-20251206",
+    "reviewed-fj-nadi-road-20260125",
+    "reviewed-fj-lami-death-20260222",
+    "reviewed-fj-naqaliso-flood-20260227",
+    "reviewed-fj-laqere-pursuit-20260426",
+    "reviewed-fj-toorak-fire-20260427",
+    "reviewed-fj-wailoku-assault-20260523",
+    "reviewed-fj-lautoka-assault-20260525",
+    "reviewed-fj-navoka-fire-20260527",
+    "reviewed-fj-hotel-stabbing-20260624",
+    "reviewed-fj-bila-fire-20260629",
+    "reviewed-fj-lau-medical-boat-20260729",
+    "reviewed-fj-wailoku-vehicle-theft-20260716",
+    "reviewed-fj-wailoku-child-death-20260731",
+    "reviewed-fj-dokanaisuva-stop-20260829",
+    "reviewed-fj-nakasi-temple-20260911",
+    "reviewed-fj-vunato-death-20261004",
+    "reviewed-fj-macuata-water-20261005",
+    "reviewed-fj-solovi-seizure-20261001",
+    "reviewed-fj-legalega-seizure-2026week40",
+    "reviewed-fj-nasuva-seizure-2026week40",
+    "reviewed-fj-vunika-truck-2026week40"
+  ],
+  "incidentCount": 32,
+  "reportCount": 55,
+  "uniqueArticleCount": 50,
+  "sourceIds": [
+    "news-fj-fiji-one",
+    "news-fj-fiji-sun"
+  ],
+  "categories": {
+    "other": 8,
+    "transport": 8,
+    "crime": 14,
+    "flood": 1,
+    "infrastructure": 1
+  },
+  "reviewMethod": "Complete source text reviewed; source-specific factual paraphrases, original headlines and links retained. No automated incident promotion.",
+  "coverage": {
+    "from": "2025-10-05",
+    "through": "2026-10-05",
+    "method": "Fiji One monthly RSS pages 1-4 for 13 months plus six follow-up searches; five current public Fiji Sun articles.",
+    "monthlyResponses": 52,
+    "monthlyArticleCount": 520,
+    "completeYear": false,
+    "unqueried": "Monthly pages 5 onward and other source archives remain unreviewed.",
+    "newStandingAreaMappings": 0
+  },
+  "geography": {
+    "sourceSupportedAdministrativeAssignments": 3,
+    "eventCoordinatesAdded": 0
+  },
+  "corrections": "Rescue resolution and not-guilty plea retained; Nauluvatu held for contradictory chronology and dismissal of charges.",
+  "rawArticleTextPublished": false
+}
