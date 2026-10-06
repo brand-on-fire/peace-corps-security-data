@@ -43,7 +43,16 @@ KEYWORDS = {
     'conflict': r'\b(armed conflict|clashes|airstrike|shelling|gunfire|bombing)\b',
     'unrest': r'\b(riot|curfew|unrest|couvre-feu|toque de queda)\b',
     'health': r'\b(cholera|chol[eé]ra|dengue|outbreak|epidemic|epidemia|medicine.{0,30}shortages?)\b',
-    'transport': r'\b(road.{0,25}(closed|blocked)|bridge.{0,25}collaps(?:e|ed|es|ing)?|landslide|derailment)\b',
+    'transport': (r'\b(road.{0,25}(closed|blocked)|bridge.{0,25}collaps(?:e|ed|es|ing)?|landslide|derailment|'
+                  r'deslizamientos?|derrumbes?|descarrilamientos?|d[eé]raillements?|'
+                  r'(?:carreteras?|rutas?|v[ií]as?|puentes?|t[uú]neles?|aeropuertos?|vuelos?|trenes?)'
+                  r'.{0,60}(?:cerrad[oa]s?|cierres?|bloquead[oa]s?|bloqueos?|colaps\w*|suspendid[oa]s?|cancelad[oa]s?)|'
+                  r'(?:cierres?|bloqueos?|colaps\w*|suspensi[oó]n|cancelaci[oó]n).{0,60}'
+                  r'(?:carreteras?|rutas?|v[ií]as?|puentes?|t[uú]neles?|aeropuertos?|vuelos?|trenes?)|'
+                  r'(?:routes?|ponts?|tunnels?|a[eé]roports?|vols?|trains?).{0,60}'
+                  r'(?:ferm[eé][es]*|coup[eé][es]*|bloqu[eé][es]*|effondr\w*|suspendu[es]*|annul[eé][es]*)|'
+                  r'(?:fermetures?|blocages?|effondrements?|suspensions?|annulations?).{0,60}'
+                  r'(?:routes?|ponts?|tunnels?|a[eé]roports?|vols?|trains?))\b'),
     # Discovery candidates only. These terms never establish an incident, its
     # date/location, an ongoing threat, or independent corroboration.
     'crime': (r'\b(kidnap(?:s|ped|ping)?|abduct(?:ed|ing|ion|ions)?|shootings?|homicides?|'

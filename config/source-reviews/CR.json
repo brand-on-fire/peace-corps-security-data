@@ -1,0 +1,2276 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-06T00:35:00Z",
+  "countryCode": "CR",
+  "sources": [
+    {
+      "id": "news-cr-la-voz-de-guanacaste",
+      "name": "La Voz de Guanacaste",
+      "url": "https://vozdeguanacaste.com/quienes-somos/",
+      "countryCodes": [
+        "CR"
+      ],
+      "tier": "local-news",
+      "language": "es",
+      "kind": "rss",
+      "cadenceMinutes": 360,
+      "enabled": true,
+      "access": "public-feed",
+      "feedUrl": "https://vozdeguanacaste.com/feed/",
+      "verifiedAt": "2026-10-06T00:35:00Z",
+      "notes": "Public RSS checked for metadata discovery every six hours. Incident inclusion requires source and location review. Geographic reach is recorded separately; this feed does not establish complete local coverage.",
+      "termsUrl": "https://vozdeguanacaste.com/terminos-y-condiciones/"
+    },
+    {
+      "id": "news-cr-periodico-mensaje",
+      "name": "Periódico Mensaje",
+      "url": "https://www.periodicomensaje.com/",
+      "countryCodes": [
+        "CR"
+      ],
+      "tier": "local-news",
+      "language": "es",
+      "kind": "rss",
+      "cadenceMinutes": 360,
+      "enabled": true,
+      "access": "public-feed",
+      "feedUrl": "https://www.periodicomensaje.com/?format=feed&type=rss",
+      "verifiedAt": "2026-10-06T00:35:00Z",
+      "notes": "Public RSS checked for metadata discovery every six hours. Incident inclusion requires source and location review. Geographic reach is recorded separately; this feed does not establish complete local coverage."
+    },
+    {
+      "id": "news-cr-caribe-actual",
+      "name": "Caribe Actual",
+      "url": "https://caribeactual.com/",
+      "countryCodes": [
+        "CR"
+      ],
+      "tier": "local-news",
+      "language": "es",
+      "kind": "rss",
+      "cadenceMinutes": 360,
+      "enabled": true,
+      "access": "public-feed",
+      "feedUrl": "https://caribeactual.com/feed/",
+      "verifiedAt": "2026-10-06T00:35:00Z",
+      "notes": "Public RSS checked for metadata discovery every six hours. Incident inclusion requires source and location review. Geographic reach is recorded separately; this feed does not establish complete local coverage.",
+      "termsUrl": "https://caribeactual.com/terminos-de-servicio-de-caribe-actual/"
+    },
+    {
+      "id": "news-cr-cartago-actual",
+      "name": "Cartago Actual",
+      "url": "https://cartagoactual.com/",
+      "countryCodes": [
+        "CR"
+      ],
+      "tier": "local-news",
+      "language": "es",
+      "kind": "rss",
+      "cadenceMinutes": 360,
+      "enabled": true,
+      "access": "public-feed",
+      "feedUrl": "https://cartagoactual.com/feed/",
+      "verifiedAt": "2026-10-06T00:35:00Z",
+      "notes": "Public RSS checked for metadata discovery every six hours. Incident inclusion requires source and location review. Geographic reach is recorded separately; this feed does not establish complete local coverage."
+    },
+    {
+      "id": "news-cr-la-region",
+      "name": "La Región",
+      "url": "https://laregion.cr/categorias/region-norte/",
+      "countryCodes": [
+        "CR"
+      ],
+      "tier": "local-news",
+      "language": "es",
+      "kind": "rss",
+      "cadenceMinutes": 360,
+      "enabled": true,
+      "access": "public-feed",
+      "feedUrl": "https://laregion.cr/feed/",
+      "verifiedAt": "2026-10-06T00:35:00Z",
+      "notes": "Public RSS checked for metadata discovery every six hours. Incident inclusion requires source and location review. Geographic reach is recorded separately; this feed does not establish complete local coverage."
+    },
+    {
+      "id": "news-cr-san-carlos-digital",
+      "name": "San Carlos Digital",
+      "url": "https://sancarlosdigital.com/actualidad/regionales/",
+      "countryCodes": [
+        "CR"
+      ],
+      "tier": "local-news",
+      "language": "es",
+      "kind": "rss",
+      "cadenceMinutes": 360,
+      "enabled": true,
+      "access": "public-feed",
+      "feedUrl": "https://sancarlosdigital.com/feed/",
+      "verifiedAt": "2026-10-06T00:35:00Z",
+      "notes": "Public RSS checked for metadata discovery every six hours. Incident inclusion requires source and location review. Geographic reach is recorded separately; this feed does not establish complete local coverage.",
+      "termsUrl": "https://sancarlosdigital.com/privacy/"
+    },
+    {
+      "id": "news-cr-heredia-hoy",
+      "name": "Heredia Hoy",
+      "url": "https://herediahoy.com/",
+      "countryCodes": [
+        "CR"
+      ],
+      "tier": "local-news",
+      "language": "es",
+      "kind": "rss",
+      "cadenceMinutes": 360,
+      "enabled": true,
+      "access": "public-feed",
+      "feedUrl": "https://herediahoy.com/feed/",
+      "verifiedAt": "2026-10-06T00:35:00Z",
+      "notes": "Public RSS checked for metadata discovery every six hours. Incident inclusion requires source and location review. Geographic reach is recorded separately; this feed does not establish complete local coverage."
+    },
+    {
+      "id": "news-cr-el-sol-de-occidente",
+      "name": "El Sol de Occidente",
+      "url": "https://elsoldeoccidente.com/",
+      "countryCodes": [
+        "CR"
+      ],
+      "tier": "local-news",
+      "language": "es",
+      "kind": "rss",
+      "cadenceMinutes": 360,
+      "enabled": true,
+      "access": "public-feed",
+      "feedUrl": "https://elsoldeoccidente.com/feed/",
+      "verifiedAt": "2026-10-06T00:35:00Z",
+      "notes": "Public RSS checked for metadata discovery every six hours. Incident inclusion requires source and location review. Geographic reach is recorded separately; this feed does not establish complete local coverage."
+    },
+    {
+      "id": "news-cr-periodico-gente",
+      "name": "Periódico Gente",
+      "url": "https://periodicogente.co.cr/",
+      "countryCodes": [
+        "CR"
+      ],
+      "tier": "local-news",
+      "language": "es",
+      "kind": "rss",
+      "cadenceMinutes": 360,
+      "enabled": true,
+      "access": "public-feed",
+      "feedUrl": "https://periodicogente.co.cr/feed/",
+      "verifiedAt": "2026-10-06T00:35:00Z",
+      "notes": "Public RSS checked for metadata discovery every six hours. Incident inclusion requires source and location review. Geographic reach is recorded separately; this feed does not establish complete local coverage."
+    },
+    {
+      "id": "news-cr-periodico-linea-vieja",
+      "name": "Periódico Línea Vieja",
+      "url": "https://periodicolineavieja.com/",
+      "countryCodes": [
+        "CR"
+      ],
+      "tier": "local-news",
+      "language": "es",
+      "kind": "rss",
+      "cadenceMinutes": 360,
+      "enabled": true,
+      "access": "public-feed",
+      "feedUrl": "https://periodicolineavieja.com/feed/",
+      "verifiedAt": "2026-10-06T00:35:00Z",
+      "notes": "Public RSS checked for metadata discovery every six hours. Incident inclusion requires source and location review. Geographic reach is recorded separately; this feed does not establish complete local coverage."
+    },
+    {
+      "id": "news-cr-puntarenas-se-oye",
+      "name": "Puntarenas Se Oye",
+      "url": "https://www.puntarenasseoye.com/",
+      "countryCodes": [
+        "CR"
+      ],
+      "tier": "local-news",
+      "language": "es",
+      "kind": "rss",
+      "cadenceMinutes": 360,
+      "enabled": true,
+      "access": "public-feed",
+      "feedUrl": "https://www.puntarenasseoye.com/feed/",
+      "verifiedAt": "2026-10-06T00:35:00Z",
+      "notes": "Public RSS checked for metadata discovery every six hours. Incident inclusion requires source and location review. Geographic reach is recorded separately; this feed does not establish complete local coverage.",
+      "termsUrl": "https://www.puntarenasseoye.com/politicas-de-privacidad/"
+    }
+  ],
+  "policies": [
+    {
+      "sourceId": "news-cr-la-voz-de-guanacaste",
+      "mode": "discovery",
+      "cadenceMinutes": 360,
+      "url": "https://vozdeguanacaste.com/feed/",
+      "validatedAt": "2026-10-06T00:23:35.496382+00:00",
+      "validationSha256": "c20ae177ca3b34bdaa121310e884d953f9d2bbc29dbef380755e62dfcc3d8e6d"
+    },
+    {
+      "sourceId": "news-cr-periodico-mensaje",
+      "mode": "discovery",
+      "cadenceMinutes": 360,
+      "url": "https://www.periodicomensaje.com/?format=feed&type=rss",
+      "validatedAt": "2026-10-06T00:23:35.551876+00:00",
+      "validationSha256": "f412f95450358dc0854088b19ad36e5af304673cbc13116670d0cde5231ecce8"
+    },
+    {
+      "sourceId": "news-cr-caribe-actual",
+      "mode": "discovery",
+      "cadenceMinutes": 360,
+      "url": "https://caribeactual.com/feed/",
+      "validatedAt": "2026-10-06T00:23:35.416906+00:00",
+      "validationSha256": "81f52656ded686e8f1eb037e097c0df1d4092ee67e746b48e3c252ee5128e5cc"
+    },
+    {
+      "sourceId": "news-cr-cartago-actual",
+      "mode": "discovery",
+      "cadenceMinutes": 360,
+      "url": "https://cartagoactual.com/feed/",
+      "validatedAt": "2026-10-06T00:23:38.494161+00:00",
+      "validationSha256": "dd2286bdd8b937bff1c9910a7c837779b8400d13911a87fb0a8df44e003fbaff"
+    },
+    {
+      "sourceId": "news-cr-la-region",
+      "mode": "discovery",
+      "cadenceMinutes": 360,
+      "url": "https://laregion.cr/feed/",
+      "validatedAt": "2026-10-06T00:23:37.024931+00:00",
+      "validationSha256": "e935b0a68fbadd8c44dac8f0cf7c615525147898bbb603c5ac87c2cc7b2566c9"
+    },
+    {
+      "sourceId": "news-cr-san-carlos-digital",
+      "mode": "discovery",
+      "cadenceMinutes": 360,
+      "url": "https://sancarlosdigital.com/feed/",
+      "validatedAt": "2026-10-06T00:23:37.598624+00:00",
+      "validationSha256": "542b912ec1564972b7037a1035b55d0bd5730dd982a08722f6d4a6aaf0d784e1"
+    },
+    {
+      "sourceId": "news-cr-heredia-hoy",
+      "mode": "discovery",
+      "cadenceMinutes": 360,
+      "url": "https://herediahoy.com/feed/",
+      "validatedAt": "2026-10-06T00:23:39.124878+00:00",
+      "validationSha256": "9fc18217e0178524ad6bd0a1986df2b95c0c0eb0fe6c66a3d9e7441d8648f40f"
+    },
+    {
+      "sourceId": "news-cr-el-sol-de-occidente",
+      "mode": "discovery",
+      "cadenceMinutes": 360,
+      "url": "https://elsoldeoccidente.com/feed/",
+      "validatedAt": "2026-10-06T00:23:38.822117+00:00",
+      "validationSha256": "96251509fe810e2bfa4a99cd9715b46ff341c535b220c0ed62d4c5866ab6bc17"
+    },
+    {
+      "sourceId": "news-cr-periodico-gente",
+      "mode": "discovery",
+      "cadenceMinutes": 360,
+      "url": "https://periodicogente.co.cr/feed/",
+      "validatedAt": "2026-10-06T00:23:40.609704+00:00",
+      "validationSha256": "66acd3c9134e796620e2bd909c7bdb242b90eadda5c81d66597f6ba0c6551538"
+    },
+    {
+      "sourceId": "news-cr-periodico-linea-vieja",
+      "mode": "discovery",
+      "cadenceMinutes": 360,
+      "url": "https://periodicolineavieja.com/feed/",
+      "validatedAt": "2026-10-06T00:23:41.770435+00:00",
+      "validationSha256": "09ed436f811128d98c1e14381b63bb6a849779bce751d5e090d3a8b92b052f33"
+    },
+    {
+      "sourceId": "news-cr-puntarenas-se-oye",
+      "mode": "discovery",
+      "cadenceMinutes": 360,
+      "url": "https://www.puntarenasseoye.com/feed/",
+      "validatedAt": "2026-10-06T00:23:41.789521+00:00",
+      "validationSha256": "acbc7c8982bdc914934a6f2fd8dce596e2b48a55dd70089eac013d18a246913a"
+    }
+  ],
+  "reviews": [
+    {
+      "sourceId": "news-cr-la-voz-de-guanacaste",
+      "reviewedAt": "2026-10-06T00:35:00Z",
+      "admittedUse": "Feed analysis and source-attributed headline/link discovery only",
+      "fullArticleRepublication": false,
+      "automaticIncidentPromotion": false,
+      "accessEvidence": [
+        {
+          "requestedUrl": "https://vozdeguanacaste.com/robots.txt",
+          "retrievedAt": "2026-10-06T00:23:35.229384+00:00",
+          "status": 200,
+          "finalUrl": "https://vozdeguanacaste.com/robots.txt",
+          "bytes": 88,
+          "sha256": "050dda6145170938d123bb329cec356292bdff9af5359220247e80c52c3462c4",
+          "allowsFeed": true
+        },
+        {
+          "requestedUrl": "https://vozdeguanacaste.com/feed/",
+          "retrievedAt": "2026-10-06T00:23:35.496382+00:00",
+          "status": 200,
+          "finalUrl": "https://vozdeguanacaste.com/feed/",
+          "bytes": 284570,
+          "sha256": "c20ae177ca3b34bdaa121310e884d953f9d2bbc29dbef380755e62dfcc3d8e6d",
+          "valid": true,
+          "itemCount": 20
+        }
+      ],
+      "publisherProvenance": {
+        "statement": "Publisher describes a nonprofit association with its own board, newsroom, donors and editorial-independence purpose.",
+        "status": "first-party-organization-and-governance",
+        "evidenceUrls": [
+          "https://vozdeguanacaste.com/quienes-somos/",
+          "https://vozdeguanacaste.com/como-nos-financiamos/"
+        ]
+      },
+      "independenceNote": "Distinct publication identity is recorded. Shared official releases, syndication or common reporting still require report-level deduplication; ownership is not universally audited.",
+      "contentTerms": "Publisher copyright retained; no blanket article reuse permission inferred from RSS access.",
+      "termsEvidence": {
+        "requestedUrl": "https://vozdeguanacaste.com/terminos-y-condiciones/",
+        "retrievedAt": "2026-10-06T00:24:48.836248+00:00",
+        "status": 200,
+        "finalUrl": "https://vozdeguanacaste.com/terminos-y-condiciones/",
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 124444,
+        "sha256": "d4af4f641ee66ef6ff88222db50a74dc6f2af056f6c707ad7c40efde5804b7c9"
+      },
+      "termsLimitation": "Reader-policy link redirects to homepage; reviewed terms disallow commercial use and unauthorized content distribution. No full text is published."
+    },
+    {
+      "sourceId": "news-cr-periodico-mensaje",
+      "reviewedAt": "2026-10-06T00:35:00Z",
+      "admittedUse": "Feed analysis and source-attributed headline/link discovery only",
+      "fullArticleRepublication": false,
+      "automaticIncidentPromotion": false,
+      "accessEvidence": [
+        {
+          "requestedUrl": "https://www.periodicomensaje.com/robots.txt",
+          "retrievedAt": "2026-10-06T00:23:35.229808+00:00",
+          "status": 404,
+          "finalUrl": "https://www.periodicomensaje.com/robots.txt",
+          "bytes": 6440,
+          "sha256": "01a82e4f6f6cf7b6c04c6a6faea30e7dfb378997faffb4ae81d2a3d6e927c829"
+        },
+        {
+          "requestedUrl": "https://www.periodicomensaje.com/?format=feed&type=rss",
+          "retrievedAt": "2026-10-06T00:23:35.551876+00:00",
+          "status": 200,
+          "finalUrl": "https://www.periodicomensaje.com/?format=feed&type=rss",
+          "bytes": 5421,
+          "sha256": "f412f95450358dc0854088b19ad36e5af304673cbc13116670d0cde5231ecce8",
+          "valid": true,
+          "itemCount": 4
+        }
+      ],
+      "publisherProvenance": {
+        "statement": "About page identifies a Guanacaste publication founded in 1950; COLPER lists Periódico Mensaje S.A. separately from other publishers.",
+        "status": "first-party-publication-plus-professional-register",
+        "evidenceUrls": [
+          "https://www.periodicomensaje.com/quienes-somos",
+          "https://colper.or.cr/wp-content/uploads/2025/02/Medios-Acreditados-2025.pdf"
+        ]
+      },
+      "independenceNote": "Distinct publication identity is recorded. Shared official releases, syndication or common reporting still require report-level deduplication; ownership is not universally audited.",
+      "contentTerms": "Publisher copyright retained; no blanket article reuse permission inferred from RSS access.",
+      "termsEvidence": {
+        "status": "No separate reuse policy identified on reviewed publisher page; use limited to supplied feed metadata and source links."
+      }
+    },
+    {
+      "sourceId": "news-cr-caribe-actual",
+      "reviewedAt": "2026-10-06T00:35:00Z",
+      "admittedUse": "Feed analysis and source-attributed headline/link discovery only",
+      "fullArticleRepublication": false,
+      "automaticIncidentPromotion": false,
+      "accessEvidence": [
+        {
+          "requestedUrl": "https://caribeactual.com/robots.txt",
+          "retrievedAt": "2026-10-06T00:23:35.229995+00:00",
+          "status": 200,
+          "finalUrl": "https://caribeactual.com/robots.txt",
+          "bytes": 280,
+          "sha256": "af3fd3cef85a0a2a05902224fbeed7e73e1a9a26ef06ddb1488edd6087f8fa09",
+          "allowsFeed": true
+        },
+        {
+          "requestedUrl": "https://caribeactual.com/feed/",
+          "retrievedAt": "2026-10-06T00:23:35.416906+00:00",
+          "status": 200,
+          "finalUrl": "https://caribeactual.com/feed/",
+          "bytes": 103886,
+          "sha256": "81f52656ded686e8f1eb037e097c0df1d4092ee67e746b48e3c252ee5128e5cc",
+          "valid": true,
+          "itemCount": 10
+        }
+      ],
+      "publisherProvenance": {
+        "statement": "Site identifies Caribe Actual and named reporter Carlos Méndez; beneficial ownership has not been established.",
+        "status": "first-party-masthead-ownership-unresolved",
+        "evidenceUrls": [
+          "https://caribeactual.com/"
+        ]
+      },
+      "independenceNote": "Distinct publication identity is recorded. Shared official releases, syndication or common reporting still require report-level deduplication; ownership is not universally audited.",
+      "contentTerms": "Publisher explicitly permits source-credited links and excerpts; public output retains headline/link metadata only.",
+      "termsEvidence": {
+        "requestedUrl": "https://caribeactual.com/terminos-de-servicio-de-caribe-actual/",
+        "retrievedAt": "2026-10-06T00:24:49.127129+00:00",
+        "status": 200,
+        "finalUrl": "https://caribeactual.com/terminos-de-servicio-de-caribe-actual/",
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 102465,
+        "sha256": "fee563243e49c54729d58057cfbb8de291c2ccca4329b0a8b6571e94cb4d7439"
+      }
+    },
+    {
+      "sourceId": "news-cr-cartago-actual",
+      "reviewedAt": "2026-10-06T00:35:00Z",
+      "admittedUse": "Feed analysis and source-attributed headline/link discovery only",
+      "fullArticleRepublication": false,
+      "automaticIncidentPromotion": false,
+      "accessEvidence": [
+        {
+          "requestedUrl": "https://cartagoactual.com/robots.txt",
+          "retrievedAt": "2026-10-06T00:23:36.260394+00:00",
+          "status": 200,
+          "finalUrl": "https://cartagoactual.com/robots.txt",
+          "bytes": 175,
+          "sha256": "7ca51badd31ed377e6086b0c548b8025bd9b54dcc5d93e451c5e04c51bee751e",
+          "allowsFeed": true
+        },
+        {
+          "requestedUrl": "https://cartagoactual.com/feed/",
+          "retrievedAt": "2026-10-06T00:23:38.494161+00:00",
+          "status": 200,
+          "finalUrl": "https://cartagoactual.com/feed/",
+          "bytes": 54130,
+          "sha256": "dd2286bdd8b937bff1c9910a7c837779b8400d13911a87fb0a8df44e003fbaff",
+          "valid": true,
+          "itemCount": 10
+        }
+      ],
+      "publisherProvenance": {
+        "statement": "About page identifies director Patricia Cubas and describes a Cartago publication operating since 2005.",
+        "status": "first-party-editorial-provenance",
+        "evidenceUrls": [
+          "https://cartagoactual.com/nosotros/"
+        ]
+      },
+      "independenceNote": "Distinct publication identity is recorded. Shared official releases, syndication or common reporting still require report-level deduplication; ownership is not universally audited.",
+      "contentTerms": "Publisher copyright retained; no blanket article reuse permission inferred from RSS access.",
+      "termsEvidence": {
+        "status": "No separate reuse policy identified on reviewed publisher page; use limited to supplied feed metadata and source links."
+      }
+    },
+    {
+      "sourceId": "news-cr-la-region",
+      "reviewedAt": "2026-10-06T00:35:00Z",
+      "admittedUse": "Feed analysis and source-attributed headline/link discovery only",
+      "fullArticleRepublication": false,
+      "automaticIncidentPromotion": false,
+      "accessEvidence": [
+        {
+          "requestedUrl": "https://laregion.cr/robots.txt",
+          "retrievedAt": "2026-10-06T00:23:36.767346+00:00",
+          "status": 200,
+          "finalUrl": "https://laregion.cr/robots.txt",
+          "bytes": 109,
+          "sha256": "c02ce1785d32d68e0a645010e969a438fc80bd0a70d5ccabaaff98e068e5cc77",
+          "allowsFeed": true
+        },
+        {
+          "requestedUrl": "https://laregion.cr/feed/",
+          "retrievedAt": "2026-10-06T00:23:37.024931+00:00",
+          "status": 200,
+          "finalUrl": "https://laregion.cr/feed/",
+          "bytes": 69732,
+          "sha256": "e935b0a68fbadd8c44dac8f0cf7c615525147898bbb603c5ac87c2cc7b2566c9",
+          "valid": true,
+          "itemCount": 10
+        }
+      ],
+      "publisherProvenance": {
+        "statement": "Site identifies La Región; reviewed content names Luis Ramón Carranza and also El Norte Hoy. Ownership needs review; those two brands must not be counted as independent corroboration.",
+        "status": "first-party-publication-ownership-unresolved",
+        "evidenceUrls": [
+          "https://laregion.cr/categorias/region-norte/"
+        ]
+      },
+      "independenceNote": "Distinct publication identity is recorded. Shared official releases, syndication or common reporting still require report-level deduplication; ownership is not universally audited.",
+      "contentTerms": "Publisher copyright retained; no blanket article reuse permission inferred from RSS access.",
+      "termsEvidence": {
+        "status": "No separate reuse policy identified on reviewed publisher page; use limited to supplied feed metadata and source links."
+      }
+    },
+    {
+      "sourceId": "news-cr-san-carlos-digital",
+      "reviewedAt": "2026-10-06T00:35:00Z",
+      "admittedUse": "Feed analysis and source-attributed headline/link discovery only",
+      "fullArticleRepublication": false,
+      "automaticIncidentPromotion": false,
+      "accessEvidence": [
+        {
+          "requestedUrl": "https://sancarlosdigital.com/robots.txt",
+          "retrievedAt": "2026-10-06T00:23:37.312877+00:00",
+          "status": 200,
+          "finalUrl": "https://sancarlosdigital.com/robots.txt",
+          "bytes": 2457,
+          "sha256": "9ae72c4b235ea549732c6003e5a7d964e8b470b20ca3c5a75e28be06301b8a40",
+          "allowsFeed": true
+        },
+        {
+          "requestedUrl": "https://sancarlosdigital.com/feed/",
+          "retrievedAt": "2026-10-06T00:23:37.598624+00:00",
+          "status": 200,
+          "finalUrl": "https://sancarlosdigital.com/feed/",
+          "bytes": 21315,
+          "sha256": "542b912ec1564972b7037a1035b55d0bd5730dd982a08722f6d4a6aaf0d784e1",
+          "valid": true,
+          "itemCount": 10
+        }
+      ],
+      "publisherProvenance": {
+        "statement": "Publisher identifies its registered owner José Rafael Arguedas Pérez and says no business group or political patron stands behind it.",
+        "status": "first-party-owner-and-independence-statement",
+        "evidenceUrls": [
+          "https://sancarlosdigital.com/nosotros/",
+          "https://sancarlosdigital.com/actualidad/regionales/"
+        ]
+      },
+      "independenceNote": "Distinct publication identity is recorded. Shared official releases, syndication or common reporting still require report-level deduplication; ownership is not universally audited.",
+      "contentTerms": "Publisher copyright retained; no blanket article reuse permission inferred from RSS access.",
+      "termsEvidence": {
+        "requestedUrl": "https://sancarlosdigital.com/privacy/",
+        "retrievedAt": "2026-10-06T00:24:50.349279+00:00",
+        "status": 200,
+        "finalUrl": "https://sancarlosdigital.com/privacy/",
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 164146,
+        "sha256": "ffe857de683f7d4b4f7d202504953cd3e4f5b3a997f058baa06061099e8687f1"
+      }
+    },
+    {
+      "sourceId": "news-cr-heredia-hoy",
+      "reviewedAt": "2026-10-06T00:35:00Z",
+      "admittedUse": "Feed analysis and source-attributed headline/link discovery only",
+      "fullArticleRepublication": false,
+      "automaticIncidentPromotion": false,
+      "accessEvidence": [
+        {
+          "requestedUrl": "https://herediahoy.com/robots.txt",
+          "retrievedAt": "2026-10-06T00:23:38.294652+00:00",
+          "status": 200,
+          "finalUrl": "https://herediahoy.com/robots.txt",
+          "bytes": 250,
+          "sha256": "4186b420868e7f034cdc539fc8c124e716b3a3d5e38a24ced6e3150ba891b280",
+          "allowsFeed": true
+        },
+        {
+          "requestedUrl": "https://herediahoy.com/feed/",
+          "retrievedAt": "2026-10-06T00:23:39.124878+00:00",
+          "status": 200,
+          "finalUrl": "https://herediahoy.com/feed/",
+          "bytes": 53476,
+          "sha256": "9fc18217e0178524ad6bd0a1986df2b95c0c0eb0fe6c66a3d9e7441d8648f40f",
+          "valid": true,
+          "itemCount": 10
+        }
+      ],
+      "publisherProvenance": {
+        "statement": "About page identifies director Betania Artavia Ugalde; COLPER identifies the same publication and ten Heredia cantons.",
+        "status": "first-party-director-plus-professional-register",
+        "evidenceUrls": [
+          "https://herediahoy.com/nosotros/",
+          "https://colper.or.cr/wp-content/uploads/2025/02/Medios-Acreditados-2025.pdf"
+        ]
+      },
+      "independenceNote": "Distinct publication identity is recorded. Shared official releases, syndication or common reporting still require report-level deduplication; ownership is not universally audited.",
+      "contentTerms": "Publisher copyright retained; no blanket article reuse permission inferred from RSS access.",
+      "termsEvidence": {
+        "status": "No separate reuse policy identified on reviewed publisher page; use limited to supplied feed metadata and source links."
+      }
+    },
+    {
+      "sourceId": "news-cr-el-sol-de-occidente",
+      "reviewedAt": "2026-10-06T00:35:00Z",
+      "admittedUse": "Feed analysis and source-attributed headline/link discovery only",
+      "fullArticleRepublication": false,
+      "automaticIncidentPromotion": false,
+      "accessEvidence": [
+        {
+          "requestedUrl": "https://elsoldeoccidente.com/robots.txt",
+          "retrievedAt": "2026-10-06T00:23:38.588720+00:00",
+          "status": 200,
+          "finalUrl": "https://elsoldeoccidente.com/robots.txt",
+          "bytes": 42,
+          "sha256": "6288dde2996947fa48d1dd7de610bc66852ec0e288a275a3f8b44c6883d5b7f2",
+          "allowsFeed": true
+        },
+        {
+          "requestedUrl": "https://elsoldeoccidente.com/feed/",
+          "retrievedAt": "2026-10-06T00:23:38.822117+00:00",
+          "status": 200,
+          "finalUrl": "https://elsoldeoccidente.com/feed/",
+          "bytes": 24847,
+          "sha256": "96251509fe810e2bfa4a99cd9715b46ff341c535b220c0ed62d4c5866ab6bc17",
+          "valid": true,
+          "itemCount": 12
+        }
+      ],
+      "publisherProvenance": {
+        "statement": "About page identifies HL Brothers Comunicare S.A. as the founding company and a separate regional newsroom.",
+        "status": "first-party-named-publisher",
+        "evidenceUrls": [
+          "https://elsoldeoccidente.com/quienes-somos/",
+          "https://elsoldeoccidente.com/"
+        ]
+      },
+      "independenceNote": "Distinct publication identity is recorded. Shared official releases, syndication or common reporting still require report-level deduplication; ownership is not universally audited.",
+      "contentTerms": "Publisher copyright retained; no blanket article reuse permission inferred from RSS access.",
+      "termsEvidence": {
+        "status": "No separate reuse policy identified on reviewed publisher page; use limited to supplied feed metadata and source links."
+      }
+    },
+    {
+      "sourceId": "news-cr-periodico-gente",
+      "reviewedAt": "2026-10-06T00:35:00Z",
+      "admittedUse": "Feed analysis and source-attributed headline/link discovery only",
+      "fullArticleRepublication": false,
+      "automaticIncidentPromotion": false,
+      "accessEvidence": [
+        {
+          "requestedUrl": "https://periodicogente.co.cr/robots.txt",
+          "retrievedAt": "2026-10-06T00:23:39.383392+00:00",
+          "status": 200,
+          "finalUrl": "https://periodicogente.co.cr/robots.txt",
+          "bytes": 178,
+          "sha256": "c17c128a29b546b679bfff85929c043edbb2f782d5098a67e1f85bf3032b6f26",
+          "allowsFeed": true
+        },
+        {
+          "requestedUrl": "https://periodicogente.co.cr/feed/",
+          "retrievedAt": "2026-10-06T00:23:40.609704+00:00",
+          "status": 200,
+          "finalUrl": "https://periodicogente.co.cr/feed/",
+          "bytes": 17458,
+          "sha256": "66acd3c9134e796620e2bd909c7bdb242b90eadda5c81d66597f6ba0c6551538",
+          "valid": true,
+          "itemCount": 10
+        }
+      ],
+      "publisherProvenance": {
+        "statement": "About page identifies director José Luis Cojal Estrada, editor Lilliana Pacheco Monge and its editorial council.",
+        "status": "first-party-named-newsroom",
+        "evidenceUrls": [
+          "https://periodicogente.co.cr/quienes-somos/"
+        ]
+      },
+      "independenceNote": "Distinct publication identity is recorded. Shared official releases, syndication or common reporting still require report-level deduplication; ownership is not universally audited.",
+      "contentTerms": "Publisher copyright retained; no blanket article reuse permission inferred from RSS access.",
+      "termsEvidence": {
+        "status": "No separate reuse policy identified on reviewed publisher page; use limited to supplied feed metadata and source links."
+      }
+    },
+    {
+      "sourceId": "news-cr-periodico-linea-vieja",
+      "reviewedAt": "2026-10-06T00:35:00Z",
+      "admittedUse": "Feed analysis and source-attributed headline/link discovery only",
+      "fullArticleRepublication": false,
+      "automaticIncidentPromotion": false,
+      "accessEvidence": [
+        {
+          "requestedUrl": "https://periodicolineavieja.com/robots.txt",
+          "retrievedAt": "2026-10-06T00:23:39.751210+00:00",
+          "status": 200,
+          "finalUrl": "https://periodicolineavieja.com/robots.txt",
+          "bytes": 179,
+          "sha256": "bbf5f93f72ce1709f0663b1171cfb0d7de002481d619c996ae100935e713face",
+          "allowsFeed": true
+        },
+        {
+          "requestedUrl": "https://periodicolineavieja.com/feed/",
+          "retrievedAt": "2026-10-06T00:23:41.770435+00:00",
+          "status": 200,
+          "finalUrl": "https://periodicolineavieja.com/feed/",
+          "bytes": 41412,
+          "sha256": "09ed436f811128d98c1e14381b63bb6a849779bce751d5e090d3a8b92b052f33",
+          "valid": true,
+          "itemCount": 10
+        }
+      ],
+      "publisherProvenance": {
+        "statement": "Publication identifies its regional history since 1997; COLPER lists Patricia Salas Cárdenas for this publication.",
+        "status": "first-party-publication-plus-professional-register",
+        "evidenceUrls": [
+          "https://periodicolineavieja.com/",
+          "https://colper.or.cr/wp-content/uploads/2025/02/Medios-Acreditados-2025.pdf"
+        ]
+      },
+      "independenceNote": "Distinct publication identity is recorded. Shared official releases, syndication or common reporting still require report-level deduplication; ownership is not universally audited.",
+      "contentTerms": "Publisher copyright retained; no blanket article reuse permission inferred from RSS access.",
+      "termsEvidence": {
+        "status": "No separate reuse policy identified on reviewed publisher page; use limited to supplied feed metadata and source links."
+      }
+    },
+    {
+      "sourceId": "news-cr-puntarenas-se-oye",
+      "reviewedAt": "2026-10-06T00:35:00Z",
+      "admittedUse": "Feed analysis and source-attributed headline/link discovery only",
+      "fullArticleRepublication": false,
+      "automaticIncidentPromotion": false,
+      "accessEvidence": [
+        {
+          "requestedUrl": "https://www.puntarenasseoye.com/robots.txt",
+          "retrievedAt": "2026-10-06T00:23:41.512863+00:00",
+          "status": 200,
+          "finalUrl": "https://www.puntarenasseoye.com/robots.txt",
+          "bytes": 181,
+          "sha256": "360c656118385070fa2cb6e087c4e23e79c231b8bd431077e6aab341998008c8",
+          "allowsFeed": true
+        },
+        {
+          "requestedUrl": "https://www.puntarenasseoye.com/feed/",
+          "retrievedAt": "2026-10-06T00:23:41.789521+00:00",
+          "status": 200,
+          "finalUrl": "https://www.puntarenasseoye.com/feed/",
+          "bytes": 21607,
+          "sha256": "acbc7c8982bdc914934a6f2fd8dce596e2b48a55dd70089eac013d18a246913a",
+          "valid": true,
+          "itemCount": 20
+        }
+      ],
+      "publisherProvenance": {
+        "statement": "About page self-identifies independent citizen journalism founded in 2015; current bylines identify Fabricio Alfredo Obando Chan. Beneficial ownership remains unresolved.",
+        "status": "first-party-independence-statement-owner-unresolved",
+        "evidenceUrls": [
+          "https://www.puntarenasseoye.com/sobre-nosotros/",
+          "https://www.puntarenasseoye.com/",
+          "https://www.puntarenasseoye.com/deportes/mariam-salas-espinoza-desde-puntarenas-para-argentina/"
+        ]
+      },
+      "independenceNote": "Distinct publication identity is recorded. Shared official releases, syndication or common reporting still require report-level deduplication; ownership is not universally audited.",
+      "contentTerms": "Publisher copyright retained; no blanket article reuse permission inferred from RSS access.",
+      "termsEvidence": {
+        "requestedUrl": "https://www.puntarenasseoye.com/politicas-de-privacidad/",
+        "retrievedAt": "2026-10-06T00:24:51.183751+00:00",
+        "status": 200,
+        "finalUrl": "https://www.puntarenasseoye.com/politicas-de-privacidad/",
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 131368,
+        "sha256": "a9dbd5768f4c2664e4fb5ebd539d4ed12fc6926f544c60bd700f5ce230676f04"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "areaId": "gb:80129987B30917059240714",
+      "countryCode": "CR",
+      "level": "ADM1",
+      "name": "Provincia Heredia",
+      "sourceId": "news-cr-la-region",
+      "evidenceUrls": [
+        "https://laregion.cr/categorias/region-norte/"
+      ],
+      "basis": "regional-beat-or-within-province-reporting",
+      "qualification": "Partial provincial coverage only; canton-level coverage is recorded separately.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:80129987B30917059240714",
+      "countryCode": "CR",
+      "level": "ADM1",
+      "name": "Provincia Heredia",
+      "sourceId": "news-cr-san-carlos-digital",
+      "evidenceUrls": [
+        "https://sancarlosdigital.com/nosotros/",
+        "https://sancarlosdigital.com/actualidad/regionales/"
+      ],
+      "basis": "regional-beat-or-within-province-reporting",
+      "qualification": "Partial provincial coverage only; canton-level coverage is recorded separately.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:80129987B30917059240714",
+      "countryCode": "CR",
+      "level": "ADM1",
+      "name": "Provincia Heredia",
+      "sourceId": "news-cr-heredia-hoy",
+      "evidenceUrls": [
+        "https://herediahoy.com/nosotros/",
+        "https://colper.or.cr/wp-content/uploads/2025/02/Medios-Acreditados-2025.pdf"
+      ],
+      "basis": "regional-beat-or-within-province-reporting",
+      "qualification": "Partial provincial coverage only; canton-level coverage is recorded separately.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:80129987B30917059240714",
+      "countryCode": "CR",
+      "level": "ADM1",
+      "name": "Provincia Heredia",
+      "sourceId": "news-cr-periodico-gente",
+      "evidenceUrls": [
+        "https://periodicogente.co.cr/quienes-somos/"
+      ],
+      "basis": "regional-beat-or-within-province-reporting",
+      "qualification": "Partial provincial coverage only; canton-level coverage is recorded separately.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:80129987B99098477815223",
+      "countryCode": "CR",
+      "level": "ADM1",
+      "name": "Provincia Guanacaste",
+      "sourceId": "news-cr-la-voz-de-guanacaste",
+      "evidenceUrls": [
+        "https://vozdeguanacaste.com/quienes-somos/",
+        "https://vozdeguanacaste.com/como-nos-financiamos/"
+      ],
+      "basis": "regional-beat-or-within-province-reporting",
+      "qualification": "Partial provincial coverage only; canton-level coverage is recorded separately.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:80129987B99098477815223",
+      "countryCode": "CR",
+      "level": "ADM1",
+      "name": "Provincia Guanacaste",
+      "sourceId": "news-cr-periodico-mensaje",
+      "evidenceUrls": [
+        "https://www.periodicomensaje.com/quienes-somos",
+        "https://colper.or.cr/wp-content/uploads/2025/02/Medios-Acreditados-2025.pdf"
+      ],
+      "basis": "regional-beat-or-within-province-reporting",
+      "qualification": "Partial provincial coverage only; canton-level coverage is recorded separately.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:80129987B99098477815223",
+      "countryCode": "CR",
+      "level": "ADM1",
+      "name": "Provincia Guanacaste",
+      "sourceId": "news-cr-san-carlos-digital",
+      "evidenceUrls": [
+        "https://sancarlosdigital.com/nosotros/",
+        "https://sancarlosdigital.com/actualidad/regionales/"
+      ],
+      "basis": "regional-beat-or-within-province-reporting",
+      "qualification": "Partial provincial coverage only; canton-level coverage is recorded separately.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:80129987B16009817839121",
+      "countryCode": "CR",
+      "level": "ADM1",
+      "name": "Provincia Alajuela",
+      "sourceId": "news-cr-la-region",
+      "evidenceUrls": [
+        "https://laregion.cr/categorias/region-norte/"
+      ],
+      "basis": "regional-beat-or-within-province-reporting",
+      "qualification": "Partial provincial coverage only; canton-level coverage is recorded separately.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:80129987B16009817839121",
+      "countryCode": "CR",
+      "level": "ADM1",
+      "name": "Provincia Alajuela",
+      "sourceId": "news-cr-san-carlos-digital",
+      "evidenceUrls": [
+        "https://sancarlosdigital.com/nosotros/",
+        "https://sancarlosdigital.com/actualidad/regionales/"
+      ],
+      "basis": "regional-beat-or-within-province-reporting",
+      "qualification": "Partial provincial coverage only; canton-level coverage is recorded separately.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:80129987B16009817839121",
+      "countryCode": "CR",
+      "level": "ADM1",
+      "name": "Provincia Alajuela",
+      "sourceId": "news-cr-el-sol-de-occidente",
+      "evidenceUrls": [
+        "https://elsoldeoccidente.com/quienes-somos/",
+        "https://elsoldeoccidente.com/"
+      ],
+      "basis": "regional-beat-or-within-province-reporting",
+      "qualification": "Partial provincial coverage only; canton-level coverage is recorded separately.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:80129987B28144345958142",
+      "countryCode": "CR",
+      "level": "ADM1",
+      "name": "Provincia San José",
+      "sourceId": "news-cr-periodico-gente",
+      "evidenceUrls": [
+        "https://periodicogente.co.cr/quienes-somos/"
+      ],
+      "basis": "regional-beat-or-within-province-reporting",
+      "qualification": "Partial provincial coverage only; canton-level coverage is recorded separately.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:80129987B82779638600484",
+      "countryCode": "CR",
+      "level": "ADM1",
+      "name": "Provincia Puntarenas",
+      "sourceId": "news-cr-puntarenas-se-oye",
+      "evidenceUrls": [
+        "https://www.puntarenasseoye.com/sobre-nosotros/",
+        "https://www.puntarenasseoye.com/",
+        "https://www.puntarenasseoye.com/deportes/mariam-salas-espinoza-desde-puntarenas-para-argentina/"
+      ],
+      "basis": "regional-beat-or-within-province-reporting",
+      "qualification": "Partial provincial coverage only; canton-level coverage is recorded separately.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:80129987B41200343148036",
+      "countryCode": "CR",
+      "level": "ADM1",
+      "name": "Provincia Cartago",
+      "sourceId": "news-cr-cartago-actual",
+      "evidenceUrls": [
+        "https://cartagoactual.com/nosotros/"
+      ],
+      "basis": "regional-beat-or-within-province-reporting",
+      "qualification": "Partial provincial coverage only; canton-level coverage is recorded separately.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:80129987B40271573243189",
+      "countryCode": "CR",
+      "level": "ADM1",
+      "name": "Provincia Limón",
+      "sourceId": "news-cr-caribe-actual",
+      "evidenceUrls": [
+        "https://caribeactual.com/"
+      ],
+      "basis": "regional-beat-or-within-province-reporting",
+      "qualification": "Partial provincial coverage only; canton-level coverage is recorded separately.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:80129987B40271573243189",
+      "countryCode": "CR",
+      "level": "ADM1",
+      "name": "Provincia Limón",
+      "sourceId": "news-cr-periodico-linea-vieja",
+      "evidenceUrls": [
+        "https://periodicolineavieja.com/",
+        "https://colper.or.cr/wp-content/uploads/2025/02/Medios-Acreditados-2025.pdf"
+      ],
+      "basis": "regional-beat-or-within-province-reporting",
+      "qualification": "Partial provincial coverage only; canton-level coverage is recorded separately.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B75428693831232",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Buenos Aires",
+      "sourceId": "news-cr-puntarenas-se-oye",
+      "evidenceUrls": [
+        "https://www.puntarenasseoye.com/",
+        "https://www.puntarenasseoye.com/puntarenas/regionales/la-salud-en-el-sur-avanza-buenos-aires-y-la-ccss-dialogan-sobre-nuevos-proyectos-de-infraestructura/"
+      ],
+      "basis": "observed-named-headline-only",
+      "qualification": "Reviewed homepage identifies this canton in a linked story. The linked story body and sustained beat have not been reviewed; this is a discovery source with limited evidence.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B67962139153797",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Coto Brus",
+      "sourceId": "news-cr-puntarenas-se-oye",
+      "evidenceUrls": [
+        "https://www.puntarenasseoye.com/",
+        "https://www.puntarenasseoye.com/puntarenas/regionales/de-la-zona-sur-para-el-mundo-chef-costarricense-pondra-en-alto-la-gastronomia-tica/"
+      ],
+      "basis": "observed-named-headline-only",
+      "qualification": "Reviewed homepage identifies this canton in a linked story. The linked story body and sustained beat have not been reviewed; this is a discovery source with limited evidence.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B17277375937001",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Talamanca",
+      "sourceId": "news-cr-caribe-actual",
+      "evidenceUrls": [
+        "https://caribeactual.com/"
+      ],
+      "basis": "publisher-named-canton-sections",
+      "qualification": "Navigation explicitly names all six Limón cantons. A complete Pococí crime article was reviewed; other canton article depth remains unmeasured.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B50274844038256",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Limon",
+      "sourceId": "news-cr-caribe-actual",
+      "evidenceUrls": [
+        "https://caribeactual.com/"
+      ],
+      "basis": "publisher-named-canton-sections",
+      "qualification": "Navigation explicitly names all six Limón cantons. A complete Pococí crime article was reviewed; other canton article depth remains unmeasured.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B83376986375247",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Matina",
+      "sourceId": "news-cr-caribe-actual",
+      "evidenceUrls": [
+        "https://caribeactual.com/"
+      ],
+      "basis": "publisher-named-canton-sections",
+      "qualification": "Navigation explicitly names all six Limón cantons. A complete Pococí crime article was reviewed; other canton article depth remains unmeasured.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B38119903555726",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Turrialba",
+      "sourceId": "news-cr-cartago-actual",
+      "evidenceUrls": [
+        "https://cartagoactual.com/nosotros/"
+      ],
+      "basis": "publisher-explicit-all-cantons-claim",
+      "qualification": "About page explicitly describes reporting among communities of all Cartago cantons. No five-year recall or per-canton publishing rate established.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B31180817365439",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Jimenez",
+      "sourceId": "news-cr-cartago-actual",
+      "evidenceUrls": [
+        "https://cartagoactual.com/nosotros/"
+      ],
+      "basis": "publisher-explicit-all-cantons-claim",
+      "qualification": "About page explicitly describes reporting among communities of all Cartago cantons. No five-year recall or per-canton publishing rate established.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B14644895644866",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Alvarado",
+      "sourceId": "news-cr-cartago-actual",
+      "evidenceUrls": [
+        "https://cartagoactual.com/nosotros/"
+      ],
+      "basis": "publisher-explicit-all-cantons-claim",
+      "qualification": "About page explicitly describes reporting among communities of all Cartago cantons. No five-year recall or per-canton publishing rate established.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B47231661736374",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Siquirres",
+      "sourceId": "news-cr-caribe-actual",
+      "evidenceUrls": [
+        "https://caribeactual.com/"
+      ],
+      "basis": "publisher-named-canton-sections",
+      "qualification": "Navigation explicitly names all six Limón cantons. A complete Pococí crime article was reviewed; other canton article depth remains unmeasured.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B47231661736374",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Siquirres",
+      "sourceId": "news-cr-periodico-linea-vieja",
+      "evidenceUrls": [
+        "https://periodicolineavieja.com/",
+        "https://colper.or.cr/wp-content/uploads/2025/02/Medios-Acreditados-2025.pdf"
+      ],
+      "basis": "registered-canton-beat",
+      "qualification": "COLPER explicitly names these three cantons. Do not extend its broad Limón description to every canton without further evidence. Its current RSS contains untitled items.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B32500402146996",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Guacimo",
+      "sourceId": "news-cr-caribe-actual",
+      "evidenceUrls": [
+        "https://caribeactual.com/"
+      ],
+      "basis": "publisher-named-canton-sections",
+      "qualification": "Navigation explicitly names all six Limón cantons. A complete Pococí crime article was reviewed; other canton article depth remains unmeasured.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B32500402146996",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Guacimo",
+      "sourceId": "news-cr-periodico-linea-vieja",
+      "evidenceUrls": [
+        "https://periodicolineavieja.com/",
+        "https://colper.or.cr/wp-content/uploads/2025/02/Medios-Acreditados-2025.pdf"
+      ],
+      "basis": "registered-canton-beat",
+      "qualification": "COLPER explicitly names these three cantons. Do not extend its broad Limón description to every canton without further evidence. Its current RSS contains untitled items.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B34064705280782",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Paraiso",
+      "sourceId": "news-cr-cartago-actual",
+      "evidenceUrls": [
+        "https://cartagoactual.com/nosotros/"
+      ],
+      "basis": "publisher-explicit-all-cantons-claim",
+      "qualification": "About page explicitly describes reporting among communities of all Cartago cantons. No five-year recall or per-canton publishing rate established.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B47119988095233",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Oreamuno",
+      "sourceId": "news-cr-cartago-actual",
+      "evidenceUrls": [
+        "https://cartagoactual.com/nosotros/"
+      ],
+      "basis": "publisher-explicit-all-cantons-claim",
+      "qualification": "About page explicitly describes reporting among communities of all Cartago cantons. No five-year recall or per-canton publishing rate established.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B47934258203273",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Vazquez de Coronado",
+      "sourceId": "news-cr-periodico-gente",
+      "evidenceUrls": [
+        "https://periodicogente.co.cr/quienes-somos/"
+      ],
+      "basis": "publisher-explicit-canton-beat",
+      "qualification": "About page explicitly lists five cantons and a security/community-affairs mission. Some biographies/statistics are old; current public publishing was sampled.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B79132997728490",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Goicoechea",
+      "sourceId": "news-cr-periodico-gente",
+      "evidenceUrls": [
+        "https://periodicogente.co.cr/quienes-somos/"
+      ],
+      "basis": "publisher-explicit-canton-beat",
+      "qualification": "About page explicitly lists five cantons and a security/community-affairs mission. Some biographies/statistics are old; current public publishing was sampled.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B87567829139505",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "El Guarco",
+      "sourceId": "news-cr-cartago-actual",
+      "evidenceUrls": [
+        "https://cartagoactual.com/nosotros/"
+      ],
+      "basis": "publisher-explicit-all-cantons-claim",
+      "qualification": "About page explicitly describes reporting among communities of all Cartago cantons. No five-year recall or per-canton publishing rate established.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B19971785414820",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Cartago",
+      "sourceId": "news-cr-cartago-actual",
+      "evidenceUrls": [
+        "https://cartagoactual.com/nosotros/"
+      ],
+      "basis": "publisher-explicit-all-cantons-claim",
+      "qualification": "About page explicitly describes reporting among communities of all Cartago cantons. No five-year recall or per-canton publishing rate established.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B23984119166299",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "La Union",
+      "sourceId": "news-cr-cartago-actual",
+      "evidenceUrls": [
+        "https://cartagoactual.com/nosotros/"
+      ],
+      "basis": "publisher-explicit-all-cantons-claim",
+      "qualification": "About page explicitly describes reporting among communities of all Cartago cantons. No five-year recall or per-canton publishing rate established.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B8745227271040",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Moravia",
+      "sourceId": "news-cr-periodico-gente",
+      "evidenceUrls": [
+        "https://periodicogente.co.cr/quienes-somos/"
+      ],
+      "basis": "publisher-explicit-canton-beat",
+      "qualification": "About page explicitly lists five cantons and a security/community-affairs mission. Some biographies/statistics are old; current public publishing was sampled.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B23001731443143",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "San Isidro",
+      "sourceId": "news-cr-heredia-hoy",
+      "evidenceUrls": [
+        "https://herediahoy.com/nosotros/",
+        "https://colper.or.cr/wp-content/uploads/2025/02/Medios-Acreditados-2025.pdf"
+      ],
+      "basis": "registered-canton-beat-and-provincial-mission",
+      "qualification": "COLPER names the ten cantons; current mission covers Heredia province. The register PDF filename says 2025 but its page heading says 2024.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B13959019821859",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Tibas",
+      "sourceId": "news-cr-periodico-gente",
+      "evidenceUrls": [
+        "https://periodicogente.co.cr/quienes-somos/"
+      ],
+      "basis": "publisher-explicit-canton-beat",
+      "qualification": "About page explicitly lists five cantons and a security/community-affairs mission. Some biographies/statistics are old; current public publishing was sampled.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B42528660936066",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Santo Domingo",
+      "sourceId": "news-cr-heredia-hoy",
+      "evidenceUrls": [
+        "https://herediahoy.com/nosotros/",
+        "https://colper.or.cr/wp-content/uploads/2025/02/Medios-Acreditados-2025.pdf"
+      ],
+      "basis": "registered-canton-beat-and-provincial-mission",
+      "qualification": "COLPER names the ten cantons; current mission covers Heredia province. The register PDF filename says 2025 but its page heading says 2024.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B42528660936066",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Santo Domingo",
+      "sourceId": "news-cr-periodico-gente",
+      "evidenceUrls": [
+        "https://periodicogente.co.cr/quienes-somos/"
+      ],
+      "basis": "publisher-explicit-canton-beat",
+      "qualification": "About page explicitly lists five cantons and a security/community-affairs mission. Some biographies/statistics are old; current public publishing was sampled.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B49814687345557",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "San Pablo",
+      "sourceId": "news-cr-heredia-hoy",
+      "evidenceUrls": [
+        "https://herediahoy.com/nosotros/",
+        "https://colper.or.cr/wp-content/uploads/2025/02/Medios-Acreditados-2025.pdf"
+      ],
+      "basis": "registered-canton-beat-and-provincial-mission",
+      "qualification": "COLPER names the ten cantons; current mission covers Heredia province. The register PDF filename says 2025 but its page heading says 2024.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B33619943127012",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "San Rafael",
+      "sourceId": "news-cr-heredia-hoy",
+      "evidenceUrls": [
+        "https://herediahoy.com/nosotros/",
+        "https://colper.or.cr/wp-content/uploads/2025/02/Medios-Acreditados-2025.pdf"
+      ],
+      "basis": "registered-canton-beat-and-provincial-mission",
+      "qualification": "COLPER names the ten cantons; current mission covers Heredia province. The register PDF filename says 2025 but its page heading says 2024.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B27145305633617",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Heredia",
+      "sourceId": "news-cr-heredia-hoy",
+      "evidenceUrls": [
+        "https://herediahoy.com/nosotros/",
+        "https://colper.or.cr/wp-content/uploads/2025/02/Medios-Acreditados-2025.pdf"
+      ],
+      "basis": "registered-canton-beat-and-provincial-mission",
+      "qualification": "COLPER names the ten cantons; current mission covers Heredia province. The register PDF filename says 2025 but its page heading says 2024.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B75019906256139",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Flores",
+      "sourceId": "news-cr-heredia-hoy",
+      "evidenceUrls": [
+        "https://herediahoy.com/nosotros/",
+        "https://colper.or.cr/wp-content/uploads/2025/02/Medios-Acreditados-2025.pdf"
+      ],
+      "basis": "registered-canton-beat-and-provincial-mission",
+      "qualification": "COLPER names the ten cantons; current mission covers Heredia province. The register PDF filename says 2025 but its page heading says 2024.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B97828735780055",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Belen",
+      "sourceId": "news-cr-heredia-hoy",
+      "evidenceUrls": [
+        "https://herediahoy.com/nosotros/",
+        "https://colper.or.cr/wp-content/uploads/2025/02/Medios-Acreditados-2025.pdf"
+      ],
+      "basis": "registered-canton-beat-and-provincial-mission",
+      "qualification": "COLPER names the ten cantons; current mission covers Heredia province. The register PDF filename says 2025 but its page heading says 2024.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B93518789602304",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Barva",
+      "sourceId": "news-cr-heredia-hoy",
+      "evidenceUrls": [
+        "https://herediahoy.com/nosotros/",
+        "https://colper.or.cr/wp-content/uploads/2025/02/Medios-Acreditados-2025.pdf"
+      ],
+      "basis": "registered-canton-beat-and-provincial-mission",
+      "qualification": "COLPER names the ten cantons; current mission covers Heredia province. The register PDF filename says 2025 but its page heading says 2024.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B69757092766150",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Santa Barbara",
+      "sourceId": "news-cr-heredia-hoy",
+      "evidenceUrls": [
+        "https://herediahoy.com/nosotros/",
+        "https://colper.or.cr/wp-content/uploads/2025/02/Medios-Acreditados-2025.pdf"
+      ],
+      "basis": "registered-canton-beat-and-provincial-mission",
+      "qualification": "COLPER names the ten cantons; current mission covers Heredia province. The register PDF filename says 2025 but its page heading says 2024.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B96368575688704",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Pococi",
+      "sourceId": "news-cr-caribe-actual",
+      "evidenceUrls": [
+        "https://caribeactual.com/"
+      ],
+      "basis": "publisher-named-canton-sections",
+      "qualification": "Navigation explicitly names all six Limón cantons. A complete Pococí crime article was reviewed; other canton article depth remains unmeasured.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B96368575688704",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Pococi",
+      "sourceId": "news-cr-periodico-linea-vieja",
+      "evidenceUrls": [
+        "https://periodicolineavieja.com/",
+        "https://colper.or.cr/wp-content/uploads/2025/02/Medios-Acreditados-2025.pdf"
+      ],
+      "basis": "registered-canton-beat",
+      "qualification": "COLPER explicitly names these three cantons. Do not extend its broad Limón description to every canton without further evidence. Its current RSS contains untitled items.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B54791236061025",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Sarapiqui",
+      "sourceId": "news-cr-la-region",
+      "evidenceUrls": [
+        "https://laregion.cr/categorias/region-norte/"
+      ],
+      "basis": "publisher-named-canton-sections",
+      "qualification": "The navigation explicitly names these eight cantons; the sample article verifies public access, not a new localized security incident.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B54791236061025",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Sarapiqui",
+      "sourceId": "news-cr-san-carlos-digital",
+      "evidenceUrls": [
+        "https://sancarlosdigital.com/mediakit/"
+      ],
+      "basis": "publisher-explicit-canton-beat",
+      "qualification": "Current publisher media kit explicitly lists this canton. Source access verified separately; reporting completeness remains unmeasured.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B54791236061025",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Sarapiqui",
+      "sourceId": "news-cr-heredia-hoy",
+      "evidenceUrls": [
+        "https://herediahoy.com/nosotros/",
+        "https://colper.or.cr/wp-content/uploads/2025/02/Medios-Acreditados-2025.pdf"
+      ],
+      "basis": "registered-canton-beat-and-provincial-mission",
+      "qualification": "COLPER names the ten cantons; current mission covers Heredia province. The register PDF filename says 2025 but its page heading says 2024.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B67061549070759",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Alajuela",
+      "sourceId": "news-cr-el-sol-de-occidente",
+      "evidenceUrls": [
+        "https://elsoldeoccidente.com/quienes-somos/",
+        "https://elsoldeoccidente.com/"
+      ],
+      "basis": "publisher-named-canton-sections",
+      "qualification": "Current navigation names these nine western cantons. Palmares maps to the existing misspelled Palmeras ID; correction remains a proposal.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B26047404335903",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Poas",
+      "sourceId": "news-cr-el-sol-de-occidente",
+      "evidenceUrls": [
+        "https://elsoldeoccidente.com/quienes-somos/",
+        "https://elsoldeoccidente.com/"
+      ],
+      "basis": "publisher-named-canton-sections",
+      "qualification": "Current navigation names these nine western cantons. Palmares maps to the existing misspelled Palmeras ID; correction remains a proposal.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B916692676755",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Rio Cuarto",
+      "sourceId": "news-cr-la-region",
+      "evidenceUrls": [
+        "https://laregion.cr/categorias/region-norte/"
+      ],
+      "basis": "publisher-named-canton-sections",
+      "qualification": "The navigation explicitly names these eight cantons; the sample article verifies public access, not a new localized security incident.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B916692676755",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Rio Cuarto",
+      "sourceId": "news-cr-san-carlos-digital",
+      "evidenceUrls": [
+        "https://sancarlosdigital.com/mediakit/"
+      ],
+      "basis": "publisher-explicit-canton-beat",
+      "qualification": "Current publisher media kit explicitly lists this canton. Source access verified separately; reporting completeness remains unmeasured.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B60213245209904",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Grecia",
+      "sourceId": "news-cr-el-sol-de-occidente",
+      "evidenceUrls": [
+        "https://elsoldeoccidente.com/quienes-somos/",
+        "https://elsoldeoccidente.com/"
+      ],
+      "basis": "publisher-named-canton-sections",
+      "qualification": "Current navigation names these nine western cantons. Palmares maps to the existing misspelled Palmeras ID; correction remains a proposal.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B48608079710211",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Sarchi",
+      "sourceId": "news-cr-el-sol-de-occidente",
+      "evidenceUrls": [
+        "https://elsoldeoccidente.com/quienes-somos/",
+        "https://elsoldeoccidente.com/"
+      ],
+      "basis": "publisher-named-canton-sections",
+      "qualification": "Current navigation names these nine western cantons. Palmares maps to the existing misspelled Palmeras ID; correction remains a proposal.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B12549595917957",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Naranjo",
+      "sourceId": "news-cr-el-sol-de-occidente",
+      "evidenceUrls": [
+        "https://elsoldeoccidente.com/quienes-somos/",
+        "https://elsoldeoccidente.com/"
+      ],
+      "basis": "publisher-named-canton-sections",
+      "qualification": "Current navigation names these nine western cantons. Palmares maps to the existing misspelled Palmeras ID; correction remains a proposal.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B69998662066275",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Zarcero",
+      "sourceId": "news-cr-la-region",
+      "evidenceUrls": [
+        "https://laregion.cr/categorias/region-norte/"
+      ],
+      "basis": "publisher-named-canton-sections",
+      "qualification": "The navigation explicitly names these eight cantons; the sample article verifies public access, not a new localized security incident.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B69998662066275",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Zarcero",
+      "sourceId": "news-cr-el-sol-de-occidente",
+      "evidenceUrls": [
+        "https://elsoldeoccidente.com/quienes-somos/",
+        "https://elsoldeoccidente.com/"
+      ],
+      "basis": "publisher-named-canton-sections",
+      "qualification": "Current navigation names these nine western cantons. Palmares maps to the existing misspelled Palmeras ID; correction remains a proposal.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B65263454965640",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Palmeras",
+      "sourceId": "news-cr-el-sol-de-occidente",
+      "evidenceUrls": [
+        "https://elsoldeoccidente.com/quienes-somos/",
+        "https://elsoldeoccidente.com/"
+      ],
+      "basis": "publisher-named-canton-sections",
+      "qualification": "Current navigation names these nine western cantons. Palmares maps to the existing misspelled Palmeras ID; correction remains a proposal.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B19113363200971",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Atenas",
+      "sourceId": "news-cr-el-sol-de-occidente",
+      "evidenceUrls": [
+        "https://elsoldeoccidente.com/quienes-somos/",
+        "https://elsoldeoccidente.com/"
+      ],
+      "basis": "publisher-named-canton-sections",
+      "qualification": "Current navigation names these nine western cantons. Palmares maps to the existing misspelled Palmeras ID; correction remains a proposal.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B51019647816434",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Orotina",
+      "sourceId": "news-cr-puntarenas-se-oye",
+      "evidenceUrls": [
+        "https://www.puntarenasseoye.com/",
+        "https://www.puntarenasseoye.com/sucesos/noche-de-emergencias-cruz-roja-reporta-varios-casos-graves-en-puntarenas-y-orotina/"
+      ],
+      "basis": "observed-named-headline-only",
+      "qualification": "Reviewed homepage identifies this canton in a linked story. The linked story body and sustained beat have not been reviewed; this is a discovery source with limited evidence.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B75539048151546",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "San Ramon",
+      "sourceId": "news-cr-la-region",
+      "evidenceUrls": [
+        "https://laregion.cr/categorias/region-norte/"
+      ],
+      "basis": "publisher-named-canton-sections",
+      "qualification": "The navigation explicitly names these eight cantons; the sample article verifies public access, not a new localized security incident.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B75539048151546",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "San Ramon",
+      "sourceId": "news-cr-el-sol-de-occidente",
+      "evidenceUrls": [
+        "https://elsoldeoccidente.com/quienes-somos/",
+        "https://elsoldeoccidente.com/"
+      ],
+      "basis": "publisher-named-canton-sections",
+      "qualification": "Current navigation names these nine western cantons. Palmares maps to the existing misspelled Palmeras ID; correction remains a proposal.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B94446731774240",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Esparza",
+      "sourceId": "news-cr-puntarenas-se-oye",
+      "evidenceUrls": [
+        "https://www.puntarenasseoye.com/sobre-nosotros/",
+        "https://www.puntarenasseoye.com/",
+        "https://www.puntarenasseoye.com/deportes/mariam-salas-espinoza-desde-puntarenas-para-argentina/"
+      ],
+      "basis": "observed-canton-reporting",
+      "qualification": "The complete sampled article explicitly identifies Puntarenas canton and Esparza. This is evidence of reporting, not guaranteed ongoing coverage.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B99490544719136",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Montes de Oro",
+      "sourceId": "news-cr-puntarenas-se-oye",
+      "evidenceUrls": [
+        "https://www.puntarenasseoye.com/",
+        "https://www.puntarenasseoye.com/puntarenas/municipales/que-paso-en-la-municipalidad-de-montes-de-oro-esto-explico-el-alcalde-anthony-fallas/"
+      ],
+      "basis": "observed-named-headline-only",
+      "qualification": "Reviewed homepage identifies this canton in a linked story. The linked story body and sustained beat have not been reviewed; this is a discovery source with limited evidence.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B93009353653886",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "San Carlos",
+      "sourceId": "news-cr-la-region",
+      "evidenceUrls": [
+        "https://laregion.cr/categorias/region-norte/"
+      ],
+      "basis": "publisher-named-canton-sections",
+      "qualification": "The navigation explicitly names these eight cantons; the sample article verifies public access, not a new localized security incident.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B93009353653886",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "San Carlos",
+      "sourceId": "news-cr-san-carlos-digital",
+      "evidenceUrls": [
+        "https://sancarlosdigital.com/mediakit/"
+      ],
+      "basis": "publisher-explicit-canton-beat",
+      "qualification": "Current publisher media kit explicitly lists this canton. Source access verified separately; reporting completeness remains unmeasured.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B82753262426654",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Los Chiles",
+      "sourceId": "news-cr-la-region",
+      "evidenceUrls": [
+        "https://laregion.cr/categorias/region-norte/"
+      ],
+      "basis": "publisher-named-canton-sections",
+      "qualification": "The navigation explicitly names these eight cantons; the sample article verifies public access, not a new localized security incident.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B82753262426654",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Los Chiles",
+      "sourceId": "news-cr-san-carlos-digital",
+      "evidenceUrls": [
+        "https://sancarlosdigital.com/mediakit/"
+      ],
+      "basis": "publisher-explicit-canton-beat",
+      "qualification": "Current publisher media kit explicitly lists this canton. Source access verified separately; reporting completeness remains unmeasured.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B87915732060573",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Guatuso",
+      "sourceId": "news-cr-la-region",
+      "evidenceUrls": [
+        "https://laregion.cr/categorias/region-norte/"
+      ],
+      "basis": "publisher-named-canton-sections",
+      "qualification": "The navigation explicitly names these eight cantons; the sample article verifies public access, not a new localized security incident.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B87915732060573",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Guatuso",
+      "sourceId": "news-cr-san-carlos-digital",
+      "evidenceUrls": [
+        "https://sancarlosdigital.com/mediakit/"
+      ],
+      "basis": "publisher-explicit-canton-beat",
+      "qualification": "Current publisher media kit explicitly lists this canton. Source access verified separately; reporting completeness remains unmeasured.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B12916636175246",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Tilaran",
+      "sourceId": "news-cr-la-voz-de-guanacaste",
+      "evidenceUrls": [
+        "https://vozdeguanacaste.com/quienes-somos/",
+        "https://vozdeguanacaste.com/como-nos-financiamos/"
+      ],
+      "basis": "publisher-declared-provincial-beat",
+      "qualification": "Publisher states it expanded to communities across Guanacaste. Recent canton-specific evidence was sampled for Liberia only.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B12916636175246",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Tilaran",
+      "sourceId": "news-cr-periodico-mensaje",
+      "evidenceUrls": [
+        "https://www.periodicomensaje.com/quienes-somos",
+        "https://colper.or.cr/wp-content/uploads/2025/02/Medios-Acreditados-2025.pdf"
+      ],
+      "basis": "declared-provincial-news-and-print-distribution",
+      "qualification": "About page explicitly names circulation in all 11 cantons; print distribution is not a measured digital reporting rate.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B12916636175246",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Tilaran",
+      "sourceId": "news-cr-san-carlos-digital",
+      "evidenceUrls": [
+        "https://sancarlosdigital.com/nosotros/",
+        "https://sancarlosdigital.com/actualidad/regionales/"
+      ],
+      "basis": "observed-canton-reporting",
+      "qualification": "Regional index contains named reporting for these cantons; does not prove routine coverage in every other northern canton.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B97209373697434",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Upala",
+      "sourceId": "news-cr-la-region",
+      "evidenceUrls": [
+        "https://laregion.cr/categorias/region-norte/"
+      ],
+      "basis": "publisher-named-canton-sections",
+      "qualification": "The navigation explicitly names these eight cantons; the sample article verifies public access, not a new localized security incident.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B9758970649099",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Puntarenas",
+      "sourceId": "news-cr-puntarenas-se-oye",
+      "evidenceUrls": [
+        "https://www.puntarenasseoye.com/sobre-nosotros/",
+        "https://www.puntarenasseoye.com/",
+        "https://www.puntarenasseoye.com/deportes/mariam-salas-espinoza-desde-puntarenas-para-argentina/"
+      ],
+      "basis": "observed-canton-reporting",
+      "qualification": "The complete sampled article explicitly identifies Puntarenas canton and Esparza. This is evidence of reporting, not guaranteed ongoing coverage.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B65281330352027",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Canas",
+      "sourceId": "news-cr-la-voz-de-guanacaste",
+      "evidenceUrls": [
+        "https://vozdeguanacaste.com/quienes-somos/",
+        "https://vozdeguanacaste.com/como-nos-financiamos/"
+      ],
+      "basis": "publisher-declared-provincial-beat",
+      "qualification": "Publisher states it expanded to communities across Guanacaste. Recent canton-specific evidence was sampled for Liberia only.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B65281330352027",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Canas",
+      "sourceId": "news-cr-periodico-mensaje",
+      "evidenceUrls": [
+        "https://www.periodicomensaje.com/quienes-somos",
+        "https://colper.or.cr/wp-content/uploads/2025/02/Medios-Acreditados-2025.pdf"
+      ],
+      "basis": "declared-provincial-news-and-print-distribution",
+      "qualification": "About page explicitly names circulation in all 11 cantons; print distribution is not a measured digital reporting rate.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B76041075166072",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Bagaces",
+      "sourceId": "news-cr-la-voz-de-guanacaste",
+      "evidenceUrls": [
+        "https://vozdeguanacaste.com/quienes-somos/",
+        "https://vozdeguanacaste.com/como-nos-financiamos/"
+      ],
+      "basis": "publisher-declared-provincial-beat",
+      "qualification": "Publisher states it expanded to communities across Guanacaste. Recent canton-specific evidence was sampled for Liberia only.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B76041075166072",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Bagaces",
+      "sourceId": "news-cr-periodico-mensaje",
+      "evidenceUrls": [
+        "https://www.periodicomensaje.com/quienes-somos",
+        "https://colper.or.cr/wp-content/uploads/2025/02/Medios-Acreditados-2025.pdf"
+      ],
+      "basis": "declared-provincial-news-and-print-distribution",
+      "qualification": "About page explicitly names circulation in all 11 cantons; print distribution is not a measured digital reporting rate.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B57161008538161",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Liberia",
+      "sourceId": "news-cr-la-voz-de-guanacaste",
+      "evidenceUrls": [
+        "https://vozdeguanacaste.com/quienes-somos/",
+        "https://vozdeguanacaste.com/como-nos-financiamos/"
+      ],
+      "basis": "publisher-declared-provincial-beat",
+      "qualification": "Publisher states it expanded to communities across Guanacaste. Recent canton-specific evidence was sampled for Liberia only.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B57161008538161",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Liberia",
+      "sourceId": "news-cr-periodico-mensaje",
+      "evidenceUrls": [
+        "https://www.periodicomensaje.com/quienes-somos",
+        "https://colper.or.cr/wp-content/uploads/2025/02/Medios-Acreditados-2025.pdf"
+      ],
+      "basis": "declared-provincial-news-and-print-distribution",
+      "qualification": "About page explicitly names circulation in all 11 cantons; print distribution is not a measured digital reporting rate.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B52146458356886",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "La Cruz",
+      "sourceId": "news-cr-la-voz-de-guanacaste",
+      "evidenceUrls": [
+        "https://vozdeguanacaste.com/quienes-somos/",
+        "https://vozdeguanacaste.com/como-nos-financiamos/"
+      ],
+      "basis": "publisher-declared-provincial-beat",
+      "qualification": "Publisher states it expanded to communities across Guanacaste. Recent canton-specific evidence was sampled for Liberia only.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B52146458356886",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "La Cruz",
+      "sourceId": "news-cr-periodico-mensaje",
+      "evidenceUrls": [
+        "https://www.periodicomensaje.com/quienes-somos",
+        "https://colper.or.cr/wp-content/uploads/2025/02/Medios-Acreditados-2025.pdf"
+      ],
+      "basis": "declared-provincial-news-and-print-distribution",
+      "qualification": "About page explicitly names circulation in all 11 cantons; print distribution is not a measured digital reporting rate.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B81157491697278",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Carrillo",
+      "sourceId": "news-cr-la-voz-de-guanacaste",
+      "evidenceUrls": [
+        "https://vozdeguanacaste.com/quienes-somos/",
+        "https://vozdeguanacaste.com/como-nos-financiamos/"
+      ],
+      "basis": "publisher-declared-provincial-beat",
+      "qualification": "Publisher states it expanded to communities across Guanacaste. Recent canton-specific evidence was sampled for Liberia only.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B81157491697278",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Carrillo",
+      "sourceId": "news-cr-periodico-mensaje",
+      "evidenceUrls": [
+        "https://www.periodicomensaje.com/quienes-somos",
+        "https://colper.or.cr/wp-content/uploads/2025/02/Medios-Acreditados-2025.pdf"
+      ],
+      "basis": "declared-provincial-news-and-print-distribution",
+      "qualification": "About page explicitly names circulation in all 11 cantons; print distribution is not a measured digital reporting rate.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B7119067190129",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Santa Cruz",
+      "sourceId": "news-cr-la-voz-de-guanacaste",
+      "evidenceUrls": [
+        "https://vozdeguanacaste.com/quienes-somos/",
+        "https://vozdeguanacaste.com/como-nos-financiamos/"
+      ],
+      "basis": "publisher-declared-provincial-beat",
+      "qualification": "Publisher states it expanded to communities across Guanacaste. Recent canton-specific evidence was sampled for Liberia only.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B7119067190129",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Santa Cruz",
+      "sourceId": "news-cr-periodico-mensaje",
+      "evidenceUrls": [
+        "https://www.periodicomensaje.com/quienes-somos",
+        "https://colper.or.cr/wp-content/uploads/2025/02/Medios-Acreditados-2025.pdf"
+      ],
+      "basis": "declared-provincial-news-and-print-distribution",
+      "qualification": "About page explicitly names circulation in all 11 cantons; print distribution is not a measured digital reporting rate.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B54508558874137",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Nicoya",
+      "sourceId": "news-cr-la-voz-de-guanacaste",
+      "evidenceUrls": [
+        "https://vozdeguanacaste.com/quienes-somos/",
+        "https://vozdeguanacaste.com/como-nos-financiamos/"
+      ],
+      "basis": "publisher-declared-provincial-beat",
+      "qualification": "Publisher states it expanded to communities across Guanacaste. Recent canton-specific evidence was sampled for Liberia only.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B54508558874137",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Nicoya",
+      "sourceId": "news-cr-periodico-mensaje",
+      "evidenceUrls": [
+        "https://www.periodicomensaje.com/quienes-somos",
+        "https://colper.or.cr/wp-content/uploads/2025/02/Medios-Acreditados-2025.pdf"
+      ],
+      "basis": "declared-provincial-news-and-print-distribution",
+      "qualification": "About page explicitly names circulation in all 11 cantons; print distribution is not a measured digital reporting rate.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B12403637236294",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Hojancha",
+      "sourceId": "news-cr-la-voz-de-guanacaste",
+      "evidenceUrls": [
+        "https://vozdeguanacaste.com/quienes-somos/",
+        "https://vozdeguanacaste.com/como-nos-financiamos/"
+      ],
+      "basis": "publisher-declared-provincial-beat",
+      "qualification": "Publisher states it expanded to communities across Guanacaste. Recent canton-specific evidence was sampled for Liberia only.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B12403637236294",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Hojancha",
+      "sourceId": "news-cr-periodico-mensaje",
+      "evidenceUrls": [
+        "https://www.periodicomensaje.com/quienes-somos",
+        "https://colper.or.cr/wp-content/uploads/2025/02/Medios-Acreditados-2025.pdf"
+      ],
+      "basis": "declared-provincial-news-and-print-distribution",
+      "qualification": "About page explicitly names circulation in all 11 cantons; print distribution is not a measured digital reporting rate.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B45904534583509",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Nandayure",
+      "sourceId": "news-cr-la-voz-de-guanacaste",
+      "evidenceUrls": [
+        "https://vozdeguanacaste.com/quienes-somos/",
+        "https://vozdeguanacaste.com/como-nos-financiamos/"
+      ],
+      "basis": "publisher-declared-provincial-beat",
+      "qualification": "Publisher states it expanded to communities across Guanacaste. Recent canton-specific evidence was sampled for Liberia only.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B45904534583509",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Nandayure",
+      "sourceId": "news-cr-periodico-mensaje",
+      "evidenceUrls": [
+        "https://www.periodicomensaje.com/quienes-somos",
+        "https://colper.or.cr/wp-content/uploads/2025/02/Medios-Acreditados-2025.pdf"
+      ],
+      "basis": "declared-provincial-news-and-print-distribution",
+      "qualification": "About page explicitly names circulation in all 11 cantons; print distribution is not a measured digital reporting rate.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B17800837418236",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Abangares",
+      "sourceId": "news-cr-la-voz-de-guanacaste",
+      "evidenceUrls": [
+        "https://vozdeguanacaste.com/quienes-somos/",
+        "https://vozdeguanacaste.com/como-nos-financiamos/"
+      ],
+      "basis": "publisher-declared-provincial-beat",
+      "qualification": "Publisher states it expanded to communities across Guanacaste. Recent canton-specific evidence was sampled for Liberia only.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B17800837418236",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Abangares",
+      "sourceId": "news-cr-periodico-mensaje",
+      "evidenceUrls": [
+        "https://www.periodicomensaje.com/quienes-somos",
+        "https://colper.or.cr/wp-content/uploads/2025/02/Medios-Acreditados-2025.pdf"
+      ],
+      "basis": "declared-provincial-news-and-print-distribution",
+      "qualification": "About page explicitly names circulation in all 11 cantons; print distribution is not a measured digital reporting rate.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B76673798564195",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Garabito",
+      "sourceId": "news-cr-puntarenas-se-oye",
+      "evidenceUrls": [
+        "https://www.puntarenasseoye.com/",
+        "https://www.puntarenasseoye.com/puntarenas/regionales/de-la-tierra-al-mar-incentivos-agricolas-y-apoyo-a-pescadores-impulsan-el-desarrollo-en-parrita-quepos-y-garabito/"
+      ],
+      "basis": "observed-named-headline-only",
+      "qualification": "Reviewed homepage identifies this canton in a linked story. The linked story body and sustained beat have not been reviewed; this is a discovery source with limited evidence.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B16992586441876",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Quepos",
+      "sourceId": "news-cr-puntarenas-se-oye",
+      "evidenceUrls": [
+        "https://www.puntarenasseoye.com/",
+        "https://www.puntarenasseoye.com/puntarenas/regionales/conexion-vital-para-quepos-puente-modular-en-londres-beneficia-a-cientos-de-familias-a-partir-de-hoy/"
+      ],
+      "basis": "observed-named-headline-only",
+      "qualification": "Reviewed homepage identifies this canton in a linked story. The linked story body and sustained beat have not been reviewed; this is a discovery source with limited evidence.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B95019586049956",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Parrita",
+      "sourceId": "news-cr-puntarenas-se-oye",
+      "evidenceUrls": [
+        "https://www.puntarenasseoye.com/",
+        "https://www.puntarenasseoye.com/puntarenas/regionales/de-la-tierra-al-mar-incentivos-agricolas-y-apoyo-a-pescadores-impulsan-el-desarrollo-en-parrita-quepos-y-garabito/"
+      ],
+      "basis": "observed-named-headline-only",
+      "qualification": "Reviewed homepage identifies this canton in a linked story. The linked story body and sustained beat have not been reviewed; this is a discovery source with limited evidence.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B97209373697434",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Upala",
+      "sourceId": "news-cr-san-carlos-digital",
+      "evidenceUrls": [
+        "https://sancarlosdigital.com/mediakit/"
+      ],
+      "basis": "publisher-explicit-canton-beat",
+      "qualification": "Current publisher media kit explicitly lists this canton. Source access verified separately; reporting completeness remains unmeasured.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:36466004B69998662066275",
+      "countryCode": "CR",
+      "level": "ADM2",
+      "name": "Zarcero",
+      "sourceId": "news-cr-san-carlos-digital",
+      "evidenceUrls": [
+        "https://sancarlosdigital.com/mediakit/"
+      ],
+      "basis": "publisher-explicit-canton-beat",
+      "qualification": "Current publisher media kit explicitly lists this canton. Source access verified separately; reporting completeness remains unmeasured.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    }
+  ],
+  "geometryChanges": false,
+  "officialLiveSourcesVerified": 0,
+  "continuousCoverageVerified": false,
+  "scope": "Scheduled metadata discovery with explicit publisher-reach evidence. No automatic incident promotion or safety/coverage completeness claim."
+}

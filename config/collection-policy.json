@@ -919,6 +919,94 @@
           "incidentId": "who-mpox-clade-ib-2025-ZM"
         }
       ]
+    },
+    {
+      "sourceId": "news-cr-la-voz-de-guanacaste",
+      "mode": "discovery",
+      "cadenceMinutes": 360,
+      "url": "https://vozdeguanacaste.com/feed/",
+      "validatedAt": "2026-10-06T00:23:35.496382+00:00",
+      "validationSha256": "c20ae177ca3b34bdaa121310e884d953f9d2bbc29dbef380755e62dfcc3d8e6d"
+    },
+    {
+      "sourceId": "news-cr-periodico-mensaje",
+      "mode": "discovery",
+      "cadenceMinutes": 360,
+      "url": "https://www.periodicomensaje.com/?format=feed&type=rss",
+      "validatedAt": "2026-10-06T00:23:35.551876+00:00",
+      "validationSha256": "f412f95450358dc0854088b19ad36e5af304673cbc13116670d0cde5231ecce8"
+    },
+    {
+      "sourceId": "news-cr-caribe-actual",
+      "mode": "discovery",
+      "cadenceMinutes": 360,
+      "url": "https://caribeactual.com/feed/",
+      "validatedAt": "2026-10-06T00:23:35.416906+00:00",
+      "validationSha256": "81f52656ded686e8f1eb037e097c0df1d4092ee67e746b48e3c252ee5128e5cc"
+    },
+    {
+      "sourceId": "news-cr-cartago-actual",
+      "mode": "discovery",
+      "cadenceMinutes": 360,
+      "url": "https://cartagoactual.com/feed/",
+      "validatedAt": "2026-10-06T00:23:38.494161+00:00",
+      "validationSha256": "dd2286bdd8b937bff1c9910a7c837779b8400d13911a87fb0a8df44e003fbaff"
+    },
+    {
+      "sourceId": "news-cr-la-region",
+      "mode": "discovery",
+      "cadenceMinutes": 360,
+      "url": "https://laregion.cr/feed/",
+      "validatedAt": "2026-10-06T00:23:37.024931+00:00",
+      "validationSha256": "e935b0a68fbadd8c44dac8f0cf7c615525147898bbb603c5ac87c2cc7b2566c9"
+    },
+    {
+      "sourceId": "news-cr-san-carlos-digital",
+      "mode": "discovery",
+      "cadenceMinutes": 360,
+      "url": "https://sancarlosdigital.com/feed/",
+      "validatedAt": "2026-10-06T00:23:37.598624+00:00",
+      "validationSha256": "542b912ec1564972b7037a1035b55d0bd5730dd982a08722f6d4a6aaf0d784e1"
+    },
+    {
+      "sourceId": "news-cr-heredia-hoy",
+      "mode": "discovery",
+      "cadenceMinutes": 360,
+      "url": "https://herediahoy.com/feed/",
+      "validatedAt": "2026-10-06T00:23:39.124878+00:00",
+      "validationSha256": "9fc18217e0178524ad6bd0a1986df2b95c0c0eb0fe6c66a3d9e7441d8648f40f"
+    },
+    {
+      "sourceId": "news-cr-el-sol-de-occidente",
+      "mode": "discovery",
+      "cadenceMinutes": 360,
+      "url": "https://elsoldeoccidente.com/feed/",
+      "validatedAt": "2026-10-06T00:23:38.822117+00:00",
+      "validationSha256": "96251509fe810e2bfa4a99cd9715b46ff341c535b220c0ed62d4c5866ab6bc17"
+    },
+    {
+      "sourceId": "news-cr-periodico-gente",
+      "mode": "discovery",
+      "cadenceMinutes": 360,
+      "url": "https://periodicogente.co.cr/feed/",
+      "validatedAt": "2026-10-06T00:23:40.609704+00:00",
+      "validationSha256": "66acd3c9134e796620e2bd909c7bdb242b90eadda5c81d66597f6ba0c6551538"
+    },
+    {
+      "sourceId": "news-cr-periodico-linea-vieja",
+      "mode": "discovery",
+      "cadenceMinutes": 360,
+      "url": "https://periodicolineavieja.com/feed/",
+      "validatedAt": "2026-10-06T00:23:41.770435+00:00",
+      "validationSha256": "09ed436f811128d98c1e14381b63bb6a849779bce751d5e090d3a8b92b052f33"
+    },
+    {
+      "sourceId": "news-cr-puntarenas-se-oye",
+      "mode": "discovery",
+      "cadenceMinutes": 360,
+      "url": "https://www.puntarenasseoye.com/feed/",
+      "validatedAt": "2026-10-06T00:23:41.789521+00:00",
+      "validationSha256": "acbc7c8982bdc914934a6f2fd8dce596e2b48a55dd70089eac013d18a246913a"
     }
   ],
   "policy": {
