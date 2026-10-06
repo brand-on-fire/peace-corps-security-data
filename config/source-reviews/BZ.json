@@ -1,0 +1,2173 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-06T00:58:36Z",
+  "countryCode": "BZ",
+  "sources": [
+    {
+      "id": "gov-bz-national-emergency-management-organization",
+      "name": "National Emergency Management Organization",
+      "url": "https://site.nemo.org.bz/",
+      "countryCodes": [
+        "BZ"
+      ],
+      "kind": "rss",
+      "tier": "official",
+      "language": "en-US",
+      "cadenceMinutes": 360,
+      "enabled": true,
+      "access": "public-feed",
+      "verifiedAt": "2026-10-06T00:43:43Z",
+      "notes": "Government emergency department; its role page describes national emergency responsibilities and nine named emergency committees. The coordinator page separately names district and local offices. Returned feed latest item is 25 May 2026 procurement; warnings visible in this feed are from November 2024. A successful fetch does not establish current emergency-alert delivery. Metadata discovery only; no automatic incident promotion. Geographic completeness remains unverified.",
+      "feedUrl": "https://site.nemo.org.bz/feed/",
+      "socialHandles": [
+        {
+          "platform": "Facebook",
+          "url": "https://www.facebook.com/p/National-Emergency-Management-Organization-NEMO-100064269956449/",
+          "provenanceUrl": "https://site.nemo.org.bz/"
+        }
+      ]
+    },
+    {
+      "id": "news-bz-breaking-belize-news",
+      "name": "Breaking Belize News",
+      "url": "https://www.breakingbelizenews.com/",
+      "countryCodes": [
+        "BZ"
+      ],
+      "kind": "rss",
+      "tier": "local-news",
+      "language": "en-US",
+      "cadenceMinutes": 360,
+      "enabled": true,
+      "access": "public-feed",
+      "verifiedAt": "2026-10-06T00:43:44Z",
+      "notes": "Publisher describes a Belizean-owned newsroom and correspondents in Toledo, Corozal, Orange Walk, Cayo and Belmopan. Beneficial ownership is not established by this statement. Robots declares a 30-second crawl delay. Future same-host retrieval must respect it. The national mission does not establish two local outlets in every district/constituency. Metadata discovery only; no automatic incident promotion. Geographic completeness remains unverified.",
+      "feedUrl": "https://www.breakingbelizenews.com/feed/",
+      "termsUrl": "https://www.breakingbelizenews.com/privacy-policy/"
+    },
+    {
+      "id": "news-bz-amandala",
+      "name": "Amandala",
+      "url": "https://amandala.com.bz/news/",
+      "countryCodes": [
+        "BZ"
+      ],
+      "kind": "rss",
+      "tier": "local-news",
+      "language": "en-US",
+      "cadenceMinutes": 360,
+      "enabled": true,
+      "access": "public-feed",
+      "verifiedAt": "2026-10-06T00:43:44Z",
+      "notes": "First-party about page identifies publisher Evan X Hyde and its relationship with KREM/KREM TV. Those related outlets must not be counted as independent corroboration. Public feed contains links/headlines, including subscriber editions. Subscription-only content must not be bypassed. Current robots response contains explanatory content-signal comments but no actual allow/deny signal. Metadata discovery only; no automatic incident promotion. Geographic completeness remains unverified.",
+      "feedUrl": "https://amandala.com.bz/news/feed/",
+      "termsUrl": "https://amandala.com.bz/news/privacy-policy/"
+    },
+    {
+      "id": "news-bz-san-pedro-sun",
+      "name": "The San Pedro Sun",
+      "url": "https://www.sanpedrosun.com/",
+      "countryCodes": [
+        "BZ"
+      ],
+      "tier": "local-news",
+      "language": "en",
+      "kind": "rss",
+      "cadenceMinutes": 360,
+      "enabled": true,
+      "access": "public-feed",
+      "feedUrl": "https://www.sanpedrosun.com/feed/",
+      "verifiedAt": "2026-10-06T00:43:45Z",
+      "notes": "First-party about page identifies Tamara and Ron Sniffin as owners/operators and an explicit Ambergris Caye/San Pedro community-journalism remit. Distribution elsewhere is not evidence of a local reporting beat. Feed uses HTTP gzip and must be decoded before strict XML parsing; the existing collector supports that encoding. Site privacy policy is not a general content-republication licence. Metadata discovery only; no automatic incident promotion. Geographic completeness remains unverified.",
+      "termsUrl": "https://www.sanpedrosun.com/privacy-policy/"
+    },
+    {
+      "id": "gov-bz-press-office",
+      "name": "Government of Belize Press Office",
+      "url": "https://www.pressoffice.gov.bz/",
+      "countryCodes": [
+        "BZ"
+      ],
+      "tier": "official",
+      "language": "en",
+      "kind": "rss",
+      "cadenceMinutes": 360,
+      "enabled": true,
+      "access": "public-feed",
+      "feedUrl": "https://www.pressoffice.gov.bz/feed/",
+      "verifiedAt": "2026-10-06T00:43:47Z",
+      "notes": "The Economic Development Council government directory links the official Press Office under the Office of the Prime Minister. Current feed contains dated government releases. A general government-release feed, not a guarantee that all police, health or transport incidents are included. Official releases syndicated by news outlets remain one source account. Metadata discovery only; no automatic incident promotion. Geographic completeness remains unverified."
+    },
+    {
+      "id": "gov-bz-police-department",
+      "name": "Belize Police Department",
+      "url": "https://www.belizepolice.bz/",
+      "countryCodes": [
+        "BZ"
+      ],
+      "tier": "official",
+      "language": "en",
+      "kind": "directory",
+      "cadenceMinutes": 360,
+      "enabled": false,
+      "access": "link-only",
+      "verifiedAt": "2026-10-06T00:43:46Z",
+      "notes": "Departmental site describes national police functions and provides forms, official contacts and a commissioner message. The separate .gov directory did not directly authenticate this domain in the reviewed material. Attempted /feed/ returns 404. Robots directives are concatenated into one malformed line, so automated-access permission is unresolved. The station directory page has no readable station listing in the retrieved HTML, so district-specific public update streams are unverified. Metadata discovery only; no automatic incident promotion. Geographic completeness remains unverified."
+    },
+    {
+      "id": "gov-bz-health-wellness",
+      "name": "Ministry of Health and Wellness",
+      "url": "https://www.health.gov.bz/",
+      "countryCodes": [
+        "BZ"
+      ],
+      "tier": "official",
+      "language": "en",
+      "kind": "rss",
+      "cadenceMinutes": 360,
+      "enabled": false,
+      "access": "public-feed",
+      "feedUrl": "https://www.health.gov.bz/feed/",
+      "verifiedAt": "2026-10-06T00:43:47Z",
+      "notes": "The Economic Development Council government directory directly links health.gov.bz. Current homepage is contact-only; the feed is a placeholder, not a health-alert stream. /northern-region/ returns 404 and RSS contains only a 13 June 2025 Hello world entry. Do not activate this as a health monitoring feed. Metadata discovery only; no automatic incident promotion. Geographic completeness remains unverified."
+    },
+    {
+      "id": "gov-bz-infrastructure-housing",
+      "name": "Ministry of Infrastructure Development and Housing",
+      "url": "https://www.midh.gov.bz/",
+      "countryCodes": [
+        "BZ"
+      ],
+      "tier": "official",
+      "language": "en",
+      "kind": "rss",
+      "cadenceMinutes": 360,
+      "enabled": false,
+      "access": "public-feed",
+      "feedUrl": "https://www.midh.gov.bz/feed/",
+      "verifiedAt": "2026-10-06T00:46:50Z",
+      "notes": "Government ministry domain and first-party national road-management/project descriptions. Government directory independently lists the ministry and matching official email domain. Returned feed has five items and newest is 22 October 2021. Project descriptions are background, not current road closures. Do not activate as a live transport-warning feed. Metadata discovery only; no automatic incident promotion. Geographic completeness remains unverified."
+    }
+  ],
+  "policies": [
+    {
+      "sourceId": "news-bz-san-pedro-sun",
+      "mode": "discovery",
+      "cadenceMinutes": 360,
+      "url": "https://www.sanpedrosun.com/feed/",
+      "validatedAt": "2026-10-06T00:43:45Z",
+      "validationSha256": "8ea1b281af476218eb68718d27c3aa46e16f3cac369db79df7869952ddfba736"
+    },
+    {
+      "sourceId": "gov-bz-press-office",
+      "mode": "discovery",
+      "cadenceMinutes": 360,
+      "url": "https://www.pressoffice.gov.bz/feed/",
+      "validatedAt": "2026-10-06T00:43:48Z",
+      "validationSha256": "221eb5ebf6b0035006420473f045e5551ad75644e0729dac62dd6322dadc3b73"
+    }
+  ],
+  "reviews": [
+    {
+      "sourceId": "gov-bz-national-emergency-management-organization",
+      "reviewedAt": "2026-10-06T00:58:36Z",
+      "recommendation": "existing-discovery-stale-content",
+      "admittedUse": "Source-attributed headline/link discovery only; no automatic incident promotion",
+      "fullArticleRepublication": false,
+      "automaticIncidentPromotion": false,
+      "publisherProvenance": {
+        "statement": "Government emergency department; its role page describes national emergency responsibilities and nine named emergency committees. The coordinator page separately names district and local offices.",
+        "evidenceUrls": [
+          "https://site.nemo.org.bz/about-us/"
+        ]
+      },
+      "accessEvidence": [
+        {
+          "name": "nemo-robots",
+          "url": "https://site.nemo.org.bz/robots.txt",
+          "finalUrl": "https://site.nemo.org.bz/robots.txt",
+          "status": 200,
+          "retrievedAt": "2026-10-06T00:43:43Z",
+          "bytes": 117,
+          "sha256": "68f55270f8f1b3434163025fd1a6039c0f8606aa33df15b93974046c64f18b1c",
+          "allowsFeed": true,
+          "crawlDelaySeconds": null
+        },
+        {
+          "name": "nemo-feed",
+          "url": "https://site.nemo.org.bz/feed/",
+          "finalUrl": "https://site.nemo.org.bz/feed/",
+          "status": 200,
+          "retrievedAt": "2026-10-06T00:43:43Z",
+          "bytes": 13561,
+          "sha256": "960b028bc9ccdadfdcf4ed003d220dd902596af9265db0c6d293bd5ba7ac5c3e",
+          "strictXML": true,
+          "collectorParser": true,
+          "itemCount": 10,
+          "collectorItemCount": 10,
+          "decodedBytes": 13561,
+          "decodedSha256": "960b028bc9ccdadfdcf4ed003d220dd902596af9265db0c6d293bd5ba7ac5c3e",
+          "latestItemDate": "Mon, 25 May 2026 21:56:29 +0000"
+        }
+      ],
+      "termsEvidence": null,
+      "contentTerms": "Copyright retained. Reviewed privacy pages do not grant blanket republication rights; publisher terms beyond reviewed pages remain unverified.",
+      "limitation": "Returned feed latest item is 25 May 2026 procurement; warnings visible in this feed are from November 2024. A successful fetch does not establish current emergency-alert delivery.",
+      "continuousCoverageVerified": false
+    },
+    {
+      "sourceId": "news-bz-breaking-belize-news",
+      "reviewedAt": "2026-10-06T00:58:36Z",
+      "recommendation": "existing-discovery",
+      "admittedUse": "Source-attributed headline/link discovery only; no automatic incident promotion",
+      "fullArticleRepublication": false,
+      "automaticIncidentPromotion": false,
+      "publisherProvenance": {
+        "statement": "Publisher describes a Belizean-owned newsroom and correspondents in Toledo, Corozal, Orange Walk, Cayo and Belmopan. Beneficial ownership is not established by this statement.",
+        "evidenceUrls": [
+          "https://www.breakingbelizenews.com/about-us/"
+        ]
+      },
+      "accessEvidence": [
+        {
+          "name": "bbn-robots",
+          "url": "https://www.breakingbelizenews.com/robots.txt",
+          "finalUrl": "https://www.breakingbelizenews.com/robots.txt",
+          "status": 200,
+          "retrievedAt": "2026-10-06T00:43:44Z",
+          "bytes": 180,
+          "sha256": "19e058c3fbc51ca9fc15672cce2a7bd397b64f1fde954718d3469027609edf39",
+          "allowsFeed": true,
+          "crawlDelaySeconds": 30
+        },
+        {
+          "name": "bbn-feed",
+          "url": "https://www.breakingbelizenews.com/feed/",
+          "finalUrl": "https://www.breakingbelizenews.com/feed/",
+          "status": 200,
+          "retrievedAt": "2026-10-06T00:43:44Z",
+          "bytes": 59090,
+          "sha256": "ffab860be49315ed5eee6befcfac5564093a4f92df8341d819550c7dc8364a92",
+          "strictXML": true,
+          "collectorParser": true,
+          "itemCount": 10,
+          "collectorItemCount": 10,
+          "decodedBytes": 59090,
+          "decodedSha256": "ffab860be49315ed5eee6befcfac5564093a4f92df8341d819550c7dc8364a92",
+          "latestItemDate": "Mon, 05 Oct 2026 23:56:00 +0000"
+        }
+      ],
+      "termsEvidence": {
+        "name": "bbn-policy",
+        "url": "https://www.breakingbelizenews.com/privacy-policy/",
+        "finalUrl": "https://www.breakingbelizenews.com/privacy-policy/",
+        "status": 200,
+        "retrievedAt": "2026-10-06T00:46:50Z",
+        "bytes": 297573,
+        "sha256": "9155bc4484f841f9e300b1c9596bc1eb68b51d11e639d8818986e7832aa3d1a6"
+      },
+      "contentTerms": "Copyright retained. Reviewed privacy pages do not grant blanket republication rights; publisher terms beyond reviewed pages remain unverified.",
+      "limitation": "Robots declares a 30-second crawl delay. Future same-host retrieval must respect it. The national mission does not establish two local outlets in every district/constituency.",
+      "continuousCoverageVerified": false
+    },
+    {
+      "sourceId": "news-bz-amandala",
+      "reviewedAt": "2026-10-06T00:58:36Z",
+      "recommendation": "existing-discovery",
+      "admittedUse": "Source-attributed headline/link discovery only; no automatic incident promotion",
+      "fullArticleRepublication": false,
+      "automaticIncidentPromotion": false,
+      "publisherProvenance": {
+        "statement": "First-party about page identifies publisher Evan X Hyde and its relationship with KREM/KREM TV. Those related outlets must not be counted as independent corroboration.",
+        "evidenceUrls": [
+          "https://amandala.com.bz/news/about-us/"
+        ]
+      },
+      "accessEvidence": [
+        {
+          "name": "amandala-robots",
+          "url": "https://amandala.com.bz/robots.txt",
+          "finalUrl": "https://amandala.com.bz/robots.txt",
+          "status": 200,
+          "retrievedAt": "2026-10-06T00:43:45Z",
+          "bytes": 1248,
+          "sha256": "8fa3036c68bfcbd32365f6225d24333264093b7cd38d306e106b4dbdc934fd5b",
+          "allowsFeed": true,
+          "crawlDelaySeconds": null
+        },
+        {
+          "name": "amandala-feed",
+          "url": "https://amandala.com.bz/news/feed/",
+          "finalUrl": "https://amandala.com.bz/news/feed/",
+          "status": 200,
+          "retrievedAt": "2026-10-06T00:43:44Z",
+          "bytes": 9613,
+          "sha256": "8b507729f991950298474588c49e221649b0000c245452a541080ce04f5621f4",
+          "strictXML": true,
+          "collectorParser": true,
+          "itemCount": 10,
+          "collectorItemCount": 10,
+          "decodedBytes": 9613,
+          "decodedSha256": "8b507729f991950298474588c49e221649b0000c245452a541080ce04f5621f4",
+          "latestItemDate": "Fri, 02 Oct 2026 04:20:58 +0000"
+        }
+      ],
+      "termsEvidence": {
+        "name": "amandala-policy",
+        "url": "https://amandala.com.bz/news/privacy-policy/",
+        "finalUrl": "https://amandala.com.bz/news/privacy-policy/",
+        "status": 200,
+        "retrievedAt": "2026-10-06T00:46:49Z",
+        "bytes": 239234,
+        "sha256": "d326c12e12d605764cfcf8381c9bedb0c8414d7659b43554ee554f8a45d5abc8"
+      },
+      "contentTerms": "Copyright retained. Reviewed privacy pages do not grant blanket republication rights; publisher terms beyond reviewed pages remain unverified.",
+      "limitation": "Public feed contains links/headlines, including subscriber editions. Subscription-only content must not be bypassed. Current robots response contains explanatory content-signal comments but no actual allow/deny signal.",
+      "continuousCoverageVerified": false
+    },
+    {
+      "sourceId": "news-bz-san-pedro-sun",
+      "reviewedAt": "2026-10-06T00:58:36Z",
+      "recommendation": "admitted-discovery",
+      "admittedUse": "Source-attributed headline/link discovery only; no automatic incident promotion",
+      "fullArticleRepublication": false,
+      "automaticIncidentPromotion": false,
+      "publisherProvenance": {
+        "statement": "First-party about page identifies Tamara and Ron Sniffin as owners/operators and an explicit Ambergris Caye/San Pedro community-journalism remit. Distribution elsewhere is not evidence of a local reporting beat.",
+        "evidenceUrls": [
+          "https://www.sanpedrosun.com/about-the-san-pedro-sun-newspaper/"
+        ]
+      },
+      "accessEvidence": [
+        {
+          "name": "sun-robots",
+          "url": "https://www.sanpedrosun.com/robots.txt",
+          "finalUrl": "https://www.sanpedrosun.com/robots.txt",
+          "status": 200,
+          "retrievedAt": "2026-10-06T00:43:45Z",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allowsFeed": true,
+          "crawlDelaySeconds": null
+        },
+        {
+          "name": "sun-feed",
+          "url": "https://www.sanpedrosun.com/feed/",
+          "finalUrl": "https://www.sanpedrosun.com/feed/",
+          "status": 200,
+          "retrievedAt": "2026-10-06T00:43:45Z",
+          "bytes": 5194,
+          "sha256": "27f45f4d2a132c167293ca79c1961ba2be1426c62e840478ffc25d1e796aa255",
+          "strictXML": true,
+          "collectorParser": true,
+          "itemCount": 12,
+          "collectorItemCount": 12,
+          "decodedBytes": 21276,
+          "decodedSha256": "8ea1b281af476218eb68718d27c3aa46e16f3cac369db79df7869952ddfba736",
+          "latestItemDate": "Mon, 05 Oct 2026 21:14:39 +0000"
+        }
+      ],
+      "termsEvidence": {
+        "name": "sun-policy",
+        "url": "https://www.sanpedrosun.com/privacy-policy/",
+        "finalUrl": "https://www.sanpedrosun.com/privacy-policy/",
+        "status": 200,
+        "retrievedAt": "2026-10-06T00:46:49Z",
+        "bytes": 186513,
+        "sha256": "97c75f0ef801961c57cb1009047ea2ac20932bc0490e1c3f5ae8d87e81dcfa52"
+      },
+      "contentTerms": "Copyright retained. Reviewed privacy pages do not grant blanket republication rights; publisher terms beyond reviewed pages remain unverified.",
+      "limitation": "Feed uses HTTP gzip and must be decoded before strict XML parsing; the existing collector supports that encoding. Site privacy policy is not a general content-republication licence.",
+      "continuousCoverageVerified": false
+    },
+    {
+      "sourceId": "gov-bz-press-office",
+      "reviewedAt": "2026-10-06T00:58:36Z",
+      "recommendation": "admitted-discovery",
+      "admittedUse": "Source-attributed headline/link discovery only; no automatic incident promotion",
+      "fullArticleRepublication": false,
+      "automaticIncidentPromotion": false,
+      "publisherProvenance": {
+        "statement": "The Economic Development Council government directory links the official Press Office under the Office of the Prime Minister. Current feed contains dated government releases.",
+        "evidenceUrls": [
+          "https://edc.gov.bz/links/governmentagencies/"
+        ]
+      },
+      "accessEvidence": [
+        {
+          "name": "press-robots",
+          "url": "https://www.pressoffice.gov.bz/robots.txt",
+          "finalUrl": "https://www.pressoffice.gov.bz/robots.txt",
+          "status": 200,
+          "retrievedAt": "2026-10-06T00:43:48Z",
+          "bytes": 123,
+          "sha256": "c05c4189c69992801e4e7b3489fc8527ff7c2e1140c4b7cc22fdcb36e243658a",
+          "allowsFeed": true,
+          "crawlDelaySeconds": null
+        },
+        {
+          "name": "press-feed",
+          "url": "https://www.pressoffice.gov.bz/feed/",
+          "finalUrl": "https://www.pressoffice.gov.bz/feed/",
+          "status": 200,
+          "retrievedAt": "2026-10-06T00:43:48Z",
+          "bytes": 39179,
+          "sha256": "221eb5ebf6b0035006420473f045e5551ad75644e0729dac62dd6322dadc3b73",
+          "strictXML": true,
+          "collectorParser": true,
+          "itemCount": 10,
+          "collectorItemCount": 10,
+          "decodedBytes": 39179,
+          "decodedSha256": "221eb5ebf6b0035006420473f045e5551ad75644e0729dac62dd6322dadc3b73",
+          "latestItemDate": "Mon, 05 Oct 2026 15:48:23 +0000"
+        }
+      ],
+      "termsEvidence": null,
+      "contentTerms": "Copyright retained. Reviewed privacy pages do not grant blanket republication rights; publisher terms beyond reviewed pages remain unverified.",
+      "limitation": "A general government-release feed, not a guarantee that all police, health or transport incidents are included. Official releases syndicated by news outlets remain one source account.",
+      "continuousCoverageVerified": false
+    },
+    {
+      "sourceId": "gov-bz-police-department",
+      "reviewedAt": "2026-10-06T00:58:36Z",
+      "recommendation": "manual-no-feed",
+      "admittedUse": "Source-attributed headline/link discovery only; no automatic incident promotion",
+      "fullArticleRepublication": false,
+      "automaticIncidentPromotion": false,
+      "publisherProvenance": {
+        "statement": "Departmental site describes national police functions and provides forms, official contacts and a commissioner message. The separate .gov directory did not directly authenticate this domain in the reviewed material.",
+        "evidenceUrls": [
+          "https://www.belizepolice.bz/about/"
+        ]
+      },
+      "accessEvidence": [
+        {
+          "name": "police-robots",
+          "url": "https://www.belizepolice.bz/robots.txt",
+          "finalUrl": "https://www.belizepolice.bz/robots.txt",
+          "status": 200,
+          "retrievedAt": "2026-10-06T00:43:47Z",
+          "bytes": 160,
+          "sha256": "b73b070d988c8013fac54a2052a34de192e3645deb186ed27b517528d9dd2369",
+          "allowsFeed": null,
+          "crawlDelaySeconds": null,
+          "parseStatus": "malformed-concatenated-directives",
+          "automaticAccessApproved": false
+        },
+        {
+          "name": "police-feed",
+          "url": "https://www.belizepolice.bz/feed/",
+          "retrievedAt": "2026-10-06T00:43:46Z",
+          "error": "HTTP Error 404: Not Found",
+          "strictXML": false,
+          "collectorParser": false
+        }
+      ],
+      "termsEvidence": null,
+      "contentTerms": "Copyright retained. Reviewed privacy pages do not grant blanket republication rights; publisher terms beyond reviewed pages remain unverified.",
+      "limitation": "Attempted /feed/ returns 404. Robots directives are concatenated into one malformed line, so automated-access permission is unresolved. The station directory page has no readable station listing in the retrieved HTML, so district-specific public update streams are unverified.",
+      "continuousCoverageVerified": false
+    },
+    {
+      "sourceId": "gov-bz-health-wellness",
+      "reviewedAt": "2026-10-06T00:58:36Z",
+      "recommendation": "hold-placeholder-feed",
+      "admittedUse": "Source-attributed headline/link discovery only; no automatic incident promotion",
+      "fullArticleRepublication": false,
+      "automaticIncidentPromotion": false,
+      "publisherProvenance": {
+        "statement": "The Economic Development Council government directory directly links health.gov.bz. Current homepage is contact-only; the feed is a placeholder, not a health-alert stream.",
+        "evidenceUrls": [
+          "https://edc.gov.bz/links/governmentagencies/"
+        ]
+      },
+      "accessEvidence": [
+        {
+          "name": "health-robots",
+          "url": "https://www.health.gov.bz/robots.txt",
+          "finalUrl": "https://www.health.gov.bz/robots.txt",
+          "status": 200,
+          "retrievedAt": "2026-10-06T00:43:47Z",
+          "bytes": 116,
+          "sha256": "9108873daa574a303efef7c7cbae1a1fa7fdf1c38068a476c39b5c7425882b6c",
+          "allowsFeed": true,
+          "crawlDelaySeconds": null
+        },
+        {
+          "name": "health-feed",
+          "url": "https://www.health.gov.bz/feed/",
+          "finalUrl": "https://www.health.gov.bz/feed/",
+          "status": 200,
+          "retrievedAt": "2026-10-06T00:43:47Z",
+          "bytes": 2053,
+          "sha256": "1e46dcd48bd2d66c8dd8313617d20e0b648fcf56e82d838648d7f9bf07641474",
+          "strictXML": true,
+          "collectorParser": true,
+          "itemCount": 1,
+          "collectorItemCount": 1,
+          "decodedBytes": 2053,
+          "decodedSha256": "1e46dcd48bd2d66c8dd8313617d20e0b648fcf56e82d838648d7f9bf07641474",
+          "latestItemDate": "Fri, 13 Jun 2025 20:54:58 +0000"
+        }
+      ],
+      "termsEvidence": null,
+      "contentTerms": "Copyright retained. Reviewed privacy pages do not grant blanket republication rights; publisher terms beyond reviewed pages remain unverified.",
+      "limitation": "/northern-region/ returns 404 and RSS contains only a 13 June 2025 Hello world entry. Do not activate this as a health monitoring feed.",
+      "continuousCoverageVerified": false
+    },
+    {
+      "sourceId": "gov-bz-infrastructure-housing",
+      "reviewedAt": "2026-10-06T00:58:36Z",
+      "recommendation": "hold-stale-feed",
+      "admittedUse": "Source-attributed headline/link discovery only; no automatic incident promotion",
+      "fullArticleRepublication": false,
+      "automaticIncidentPromotion": false,
+      "publisherProvenance": {
+        "statement": "Government ministry domain and first-party national road-management/project descriptions. Government directory independently lists the ministry and matching official email domain.",
+        "evidenceUrls": [
+          "https://www.midh.gov.bz/"
+        ]
+      },
+      "accessEvidence": [
+        {
+          "name": "midh-robots",
+          "url": "https://www.midh.gov.bz/robots.txt",
+          "finalUrl": "https://www.midh.gov.bz/robots.txt",
+          "status": 200,
+          "retrievedAt": "2026-10-06T00:46:51Z",
+          "bytes": 468,
+          "sha256": "499cbfd4cfb3413ad44fce6dccc7f12ba6c0972ee7b796918686446077eb5ba9",
+          "allowsFeed": true,
+          "crawlDelaySeconds": null
+        },
+        {
+          "name": "midh-feed",
+          "url": "https://www.midh.gov.bz/feed/",
+          "finalUrl": "https://www.midh.gov.bz/feed/",
+          "status": 200,
+          "retrievedAt": "2026-10-06T00:46:51Z",
+          "bytes": 11290,
+          "sha256": "aee7e5daaf26943c0824207c1513a03c01586ca42fe323ed69183e2f853751d0",
+          "strictXML": true,
+          "collectorParser": true,
+          "itemCount": 5,
+          "collectorItemCount": 5,
+          "decodedBytes": 11290,
+          "decodedSha256": "aee7e5daaf26943c0824207c1513a03c01586ca42fe323ed69183e2f853751d0",
+          "latestItemDate": "Fri, 22 Oct 2021 22:22:00 +0000"
+        }
+      ],
+      "termsEvidence": null,
+      "contentTerms": "Copyright retained. Reviewed privacy pages do not grant blanket republication rights; publisher terms beyond reviewed pages remain unverified.",
+      "limitation": "Returned feed has five items and newest is 22 October 2021. Project descriptions are background, not current road closures. Do not activate as a live transport-warning feed.",
+      "continuousCoverageVerified": false
+    }
+  ],
+  "relationships": [
+    {
+      "areaId": "gb:66346737B60973332075708",
+      "countryCode": "BZ",
+      "level": "ADM1",
+      "name": "Orange Walk",
+      "sourceId": "gov-bz-national-emergency-management-organization",
+      "evidenceUrls": [
+        "https://site.nemo.org.bz/about-us/",
+        "https://site.nemo.org.bz/district-emergency-coordinators/"
+      ],
+      "basis": "official-explicit-district-remit",
+      "qualification": "Named government emergency committee/coordinator, not proof that all local incidents are published or that the RSS is current.",
+      "verification": "declared-remit",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:66346737B60973332075708",
+      "countryCode": "BZ",
+      "level": "ADM1",
+      "name": "Orange Walk",
+      "sourceId": "news-bz-breaking-belize-news",
+      "evidenceUrls": [
+        "https://www.breakingbelizenews.com/about-us/"
+      ],
+      "basis": "publisher-explicit-district-correspondents",
+      "qualification": "Publisher explicitly names correspondents in this district; coverage completeness and detection delay remain unmeasured.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:66346737B23604924227645",
+      "countryCode": "BZ",
+      "level": "ADM1",
+      "name": "Corozal",
+      "sourceId": "gov-bz-national-emergency-management-organization",
+      "evidenceUrls": [
+        "https://site.nemo.org.bz/about-us/",
+        "https://site.nemo.org.bz/district-emergency-coordinators/"
+      ],
+      "basis": "official-explicit-district-remit",
+      "qualification": "Named government emergency committee/coordinator, not proof that all local incidents are published or that the RSS is current.",
+      "verification": "declared-remit",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:66346737B23604924227645",
+      "countryCode": "BZ",
+      "level": "ADM1",
+      "name": "Corozal",
+      "sourceId": "news-bz-breaking-belize-news",
+      "evidenceUrls": [
+        "https://www.breakingbelizenews.com/about-us/"
+      ],
+      "basis": "publisher-explicit-district-correspondents",
+      "qualification": "Publisher explicitly names correspondents in this district; coverage completeness and detection delay remain unmeasured.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:66346737B58775340764376",
+      "countryCode": "BZ",
+      "level": "ADM1",
+      "name": "Belize",
+      "sourceId": "gov-bz-national-emergency-management-organization",
+      "evidenceUrls": [
+        "https://site.nemo.org.bz/about-us/",
+        "https://site.nemo.org.bz/district-emergency-coordinators/"
+      ],
+      "basis": "official-explicit-district-remit",
+      "qualification": "Named government emergency committee/coordinator, not proof that all local incidents are published or that the RSS is current.",
+      "verification": "declared-remit",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:66346737B58775340764376",
+      "countryCode": "BZ",
+      "level": "ADM1",
+      "name": "Belize",
+      "sourceId": "news-bz-san-pedro-sun",
+      "evidenceUrls": [
+        "https://www.sanpedrosun.com/about-the-san-pedro-sun-newspaper/",
+        "https://elections.gov.bz/wp-content/uploads/2025/02/Notice-of-Time-and-Place-of-Nomination-2025.pdf"
+      ],
+      "basis": "local-island-beat-within-district",
+      "qualification": "Explicit San Pedro/Ambergris Caye beat; partial district coverage only. The 2025 official electoral reference names Belize Rural South, missing from current index labels.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:66346737B25506523624111",
+      "countryCode": "BZ",
+      "level": "ADM1",
+      "name": "Cayo",
+      "sourceId": "gov-bz-national-emergency-management-organization",
+      "evidenceUrls": [
+        "https://site.nemo.org.bz/about-us/",
+        "https://site.nemo.org.bz/district-emergency-coordinators/"
+      ],
+      "basis": "official-explicit-district-remit",
+      "qualification": "Named government emergency committee/coordinator, not proof that all local incidents are published or that the RSS is current.",
+      "verification": "declared-remit",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:66346737B25506523624111",
+      "countryCode": "BZ",
+      "level": "ADM1",
+      "name": "Cayo",
+      "sourceId": "news-bz-breaking-belize-news",
+      "evidenceUrls": [
+        "https://www.breakingbelizenews.com/about-us/"
+      ],
+      "basis": "publisher-explicit-district-correspondents",
+      "qualification": "Publisher explicitly names correspondents in this district; coverage completeness and detection delay remain unmeasured.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:66346737B48775360277934",
+      "countryCode": "BZ",
+      "level": "ADM1",
+      "name": "Stann Creek",
+      "sourceId": "gov-bz-national-emergency-management-organization",
+      "evidenceUrls": [
+        "https://site.nemo.org.bz/about-us/",
+        "https://site.nemo.org.bz/district-emergency-coordinators/"
+      ],
+      "basis": "official-explicit-district-remit",
+      "qualification": "Named government emergency committee/coordinator, not proof that all local incidents are published or that the RSS is current.",
+      "verification": "declared-remit",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:66346737B22858594960980",
+      "countryCode": "BZ",
+      "level": "ADM1",
+      "name": "Toledo",
+      "sourceId": "gov-bz-national-emergency-management-organization",
+      "evidenceUrls": [
+        "https://site.nemo.org.bz/about-us/",
+        "https://site.nemo.org.bz/district-emergency-coordinators/"
+      ],
+      "basis": "official-explicit-district-remit",
+      "qualification": "Named government emergency committee/coordinator, not proof that all local incidents are published or that the RSS is current.",
+      "verification": "declared-remit",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:66346737B22858594960980",
+      "countryCode": "BZ",
+      "level": "ADM1",
+      "name": "Toledo",
+      "sourceId": "news-bz-breaking-belize-news",
+      "evidenceUrls": [
+        "https://www.breakingbelizenews.com/about-us/"
+      ],
+      "basis": "publisher-explicit-district-correspondents",
+      "qualification": "Publisher explicitly names correspondents in this district; coverage completeness and detection delay remain unmeasured.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:1456440B54194515366168",
+      "countryCode": "BZ",
+      "level": "ADM2",
+      "name": "Belmopan",
+      "sourceId": "gov-bz-national-emergency-management-organization",
+      "evidenceUrls": [
+        "https://site.nemo.org.bz/district-emergency-coordinators/"
+      ],
+      "basis": "named-locality-service",
+      "qualification": "Belmopan coordinator is explicit, but the service locality has not been proven identical to the indexed electoral constituency boundary.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:1456440B54194515366168",
+      "countryCode": "BZ",
+      "level": "ADM2",
+      "name": "Belmopan",
+      "sourceId": "news-bz-breaking-belize-news",
+      "evidenceUrls": [
+        "https://www.breakingbelizenews.com/about-us/"
+      ],
+      "basis": "named-locality-correspondent",
+      "qualification": "Belmopan correspondent is explicit; constituency-wide coverage is not established.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:1456440B59769308078565",
+      "countryCode": "BZ",
+      "level": "ADM2",
+      "name": "Lake Independence",
+      "sourceId": "gov-bz-infrastructure-housing",
+      "evidenceUrls": [
+        "https://www.midh.gov.bz/"
+      ],
+      "basis": "single-project-mention",
+      "qualification": "One named street-works headline from an old feed; not a standing reporting beat or current hazard notice.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    }
+  ],
+  "areas": [
+    {
+      "areaId": "gb:66346737B60973332075708",
+      "countryCode": "BZ",
+      "level": "ADM1",
+      "name": "Orange Walk",
+      "parentId": "country:BZ",
+      "administrativeType": "Districts",
+      "standingOfficialSourceIds": [
+        "gov-bz-national-emergency-management-organization"
+      ],
+      "standingNewsSourceIds": [
+        "news-bz-breaking-belize-news"
+      ],
+      "limitedEvidenceSourceIds": [],
+      "parentDistrictContextSourceIds": [],
+      "countryContextSourceIds": [
+        "news-bz-amandala",
+        "gov-bz-press-office",
+        "gov-bz-police-department"
+      ],
+      "gaps": [
+        "No continuous reporting or event-detection completeness has been validated.",
+        "At least two independent local reporting beats for this exact indexed area have not been established."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:66346737B23604924227645",
+      "countryCode": "BZ",
+      "level": "ADM1",
+      "name": "Corozal",
+      "parentId": "country:BZ",
+      "administrativeType": "Districts",
+      "standingOfficialSourceIds": [
+        "gov-bz-national-emergency-management-organization"
+      ],
+      "standingNewsSourceIds": [
+        "news-bz-breaking-belize-news"
+      ],
+      "limitedEvidenceSourceIds": [],
+      "parentDistrictContextSourceIds": [],
+      "countryContextSourceIds": [
+        "news-bz-amandala",
+        "gov-bz-press-office",
+        "gov-bz-police-department"
+      ],
+      "gaps": [
+        "No continuous reporting or event-detection completeness has been validated.",
+        "At least two independent local reporting beats for this exact indexed area have not been established."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:66346737B58775340764376",
+      "countryCode": "BZ",
+      "level": "ADM1",
+      "name": "Belize",
+      "parentId": "country:BZ",
+      "administrativeType": "Districts",
+      "standingOfficialSourceIds": [
+        "gov-bz-national-emergency-management-organization"
+      ],
+      "standingNewsSourceIds": [
+        "news-bz-san-pedro-sun"
+      ],
+      "limitedEvidenceSourceIds": [],
+      "parentDistrictContextSourceIds": [],
+      "countryContextSourceIds": [
+        "news-bz-amandala",
+        "gov-bz-press-office",
+        "gov-bz-police-department"
+      ],
+      "gaps": [
+        "No continuous reporting or event-detection completeness has been validated.",
+        "At least two independent local reporting beats for this exact indexed area have not been established."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:66346737B25506523624111",
+      "countryCode": "BZ",
+      "level": "ADM1",
+      "name": "Cayo",
+      "parentId": "country:BZ",
+      "administrativeType": "Districts",
+      "standingOfficialSourceIds": [
+        "gov-bz-national-emergency-management-organization"
+      ],
+      "standingNewsSourceIds": [
+        "news-bz-breaking-belize-news"
+      ],
+      "limitedEvidenceSourceIds": [],
+      "parentDistrictContextSourceIds": [],
+      "countryContextSourceIds": [
+        "news-bz-amandala",
+        "gov-bz-press-office",
+        "gov-bz-police-department"
+      ],
+      "gaps": [
+        "No continuous reporting or event-detection completeness has been validated.",
+        "At least two independent local reporting beats for this exact indexed area have not been established."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:66346737B48775360277934",
+      "countryCode": "BZ",
+      "level": "ADM1",
+      "name": "Stann Creek",
+      "parentId": "country:BZ",
+      "administrativeType": "Districts",
+      "standingOfficialSourceIds": [
+        "gov-bz-national-emergency-management-organization"
+      ],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "parentDistrictContextSourceIds": [],
+      "countryContextSourceIds": [
+        "news-bz-amandala",
+        "gov-bz-press-office",
+        "gov-bz-police-department"
+      ],
+      "gaps": [
+        "No continuous reporting or event-detection completeness has been validated.",
+        "At least two independent local reporting beats for this exact indexed area have not been established."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:66346737B22858594960980",
+      "countryCode": "BZ",
+      "level": "ADM1",
+      "name": "Toledo",
+      "parentId": "country:BZ",
+      "administrativeType": "Districts",
+      "standingOfficialSourceIds": [
+        "gov-bz-national-emergency-management-organization"
+      ],
+      "standingNewsSourceIds": [
+        "news-bz-breaking-belize-news"
+      ],
+      "limitedEvidenceSourceIds": [],
+      "parentDistrictContextSourceIds": [],
+      "countryContextSourceIds": [
+        "news-bz-amandala",
+        "gov-bz-press-office",
+        "gov-bz-police-department"
+      ],
+      "gaps": [
+        "No continuous reporting or event-detection completeness has been validated.",
+        "At least two independent local reporting beats for this exact indexed area have not been established."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:1456440B83071961973491",
+      "countryCode": "BZ",
+      "level": "ADM2",
+      "name": "Stann Creek West",
+      "parentId": "gb:66346737B48775360277934",
+      "administrativeType": "Constituencies",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "parentDistrictContextSourceIds": [
+        "gov-bz-national-emergency-management-organization"
+      ],
+      "countryContextSourceIds": [
+        "news-bz-amandala",
+        "gov-bz-press-office",
+        "gov-bz-police-department"
+      ],
+      "gaps": [
+        "No continuous reporting or event-detection completeness has been validated.",
+        "At least two independent local reporting beats for this exact indexed area have not been established.",
+        "Constituency-specific official alert and news coverage remains unverified; parent-district context is not a local beat."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:1456440B68597198845590",
+      "countryCode": "BZ",
+      "level": "ADM2",
+      "name": "Orange Walk South",
+      "parentId": "gb:66346737B60973332075708",
+      "administrativeType": "Constituencies",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "parentDistrictContextSourceIds": [
+        "gov-bz-national-emergency-management-organization"
+      ],
+      "countryContextSourceIds": [
+        "news-bz-amandala",
+        "gov-bz-press-office",
+        "gov-bz-police-department"
+      ],
+      "gaps": [
+        "No continuous reporting or event-detection completeness has been validated.",
+        "At least two independent local reporting beats for this exact indexed area have not been established.",
+        "Constituency-specific official alert and news coverage remains unverified; parent-district context is not a local beat."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:1456440B92384260503294",
+      "countryCode": "BZ",
+      "level": "ADM2",
+      "name": "Corozal South East",
+      "parentId": "gb:66346737B23604924227645",
+      "administrativeType": "Constituencies",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "parentDistrictContextSourceIds": [
+        "gov-bz-national-emergency-management-organization"
+      ],
+      "countryContextSourceIds": [
+        "news-bz-amandala",
+        "gov-bz-press-office",
+        "gov-bz-police-department"
+      ],
+      "gaps": [
+        "No continuous reporting or event-detection completeness has been validated.",
+        "At least two independent local reporting beats for this exact indexed area have not been established.",
+        "Constituency-specific official alert and news coverage remains unverified; parent-district context is not a local beat."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:1456440B35586034015504",
+      "countryCode": "BZ",
+      "level": "ADM2",
+      "name": "Cayo South",
+      "parentId": "gb:66346737B25506523624111",
+      "administrativeType": "Constituencies",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "parentDistrictContextSourceIds": [
+        "gov-bz-national-emergency-management-organization"
+      ],
+      "countryContextSourceIds": [
+        "news-bz-amandala",
+        "gov-bz-press-office",
+        "gov-bz-police-department"
+      ],
+      "gaps": [
+        "No continuous reporting or event-detection completeness has been validated.",
+        "At least two independent local reporting beats for this exact indexed area have not been established.",
+        "Constituency-specific official alert and news coverage remains unverified; parent-district context is not a local beat."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:1456440B19707016539712",
+      "countryCode": "BZ",
+      "level": "ADM2",
+      "name": "Toledo West",
+      "parentId": "gb:66346737B22858594960980",
+      "administrativeType": "Constituencies",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "parentDistrictContextSourceIds": [
+        "gov-bz-national-emergency-management-organization"
+      ],
+      "countryContextSourceIds": [
+        "news-bz-amandala",
+        "gov-bz-press-office",
+        "gov-bz-police-department"
+      ],
+      "gaps": [
+        "No continuous reporting or event-detection completeness has been validated.",
+        "At least two independent local reporting beats for this exact indexed area have not been established.",
+        "Constituency-specific official alert and news coverage remains unverified; parent-district context is not a local beat."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:1456440B99535609172770",
+      "countryCode": "BZ",
+      "level": "ADM2",
+      "name": "Dangriga",
+      "parentId": "gb:66346737B48775360277934",
+      "administrativeType": "Constituencies",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "parentDistrictContextSourceIds": [
+        "gov-bz-national-emergency-management-organization"
+      ],
+      "countryContextSourceIds": [
+        "news-bz-amandala",
+        "gov-bz-press-office",
+        "gov-bz-police-department"
+      ],
+      "gaps": [
+        "No continuous reporting or event-detection completeness has been validated.",
+        "At least two independent local reporting beats for this exact indexed area have not been established.",
+        "Constituency-specific official alert and news coverage remains unverified; parent-district context is not a local beat."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:1456440B94766097213569",
+      "countryCode": "BZ",
+      "level": "ADM2",
+      "name": "Toledo East",
+      "parentId": "gb:66346737B22858594960980",
+      "administrativeType": "Constituencies",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "parentDistrictContextSourceIds": [
+        "gov-bz-national-emergency-management-organization"
+      ],
+      "countryContextSourceIds": [
+        "news-bz-amandala",
+        "gov-bz-press-office",
+        "gov-bz-police-department"
+      ],
+      "gaps": [
+        "No continuous reporting or event-detection completeness has been validated.",
+        "At least two independent local reporting beats for this exact indexed area have not been established.",
+        "Constituency-specific official alert and news coverage remains unverified; parent-district context is not a local beat."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:1456440B56382702891578",
+      "countryCode": "BZ",
+      "level": "ADM2",
+      "name": "Cayo North East",
+      "parentId": "gb:66346737B25506523624111",
+      "administrativeType": "Constituencies",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "parentDistrictContextSourceIds": [
+        "gov-bz-national-emergency-management-organization"
+      ],
+      "countryContextSourceIds": [
+        "news-bz-amandala",
+        "gov-bz-press-office",
+        "gov-bz-police-department"
+      ],
+      "gaps": [
+        "No continuous reporting or event-detection completeness has been validated.",
+        "At least two independent local reporting beats for this exact indexed area have not been established.",
+        "Constituency-specific official alert and news coverage remains unverified; parent-district context is not a local beat."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:1456440B44452540624114",
+      "countryCode": "BZ",
+      "level": "ADM2",
+      "name": "Cayo North",
+      "parentId": "gb:66346737B25506523624111",
+      "administrativeType": "Constituencies",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "parentDistrictContextSourceIds": [
+        "gov-bz-national-emergency-management-organization"
+      ],
+      "countryContextSourceIds": [
+        "news-bz-amandala",
+        "gov-bz-press-office",
+        "gov-bz-police-department"
+      ],
+      "gaps": [
+        "No continuous reporting or event-detection completeness has been validated.",
+        "At least two independent local reporting beats for this exact indexed area have not been established.",
+        "Constituency-specific official alert and news coverage remains unverified; parent-district context is not a local beat."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:1456440B60992682417348",
+      "countryCode": "BZ",
+      "level": "ADM2",
+      "name": "Cayo West",
+      "parentId": "gb:66346737B25506523624111",
+      "administrativeType": "Constituencies",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "parentDistrictContextSourceIds": [
+        "gov-bz-national-emergency-management-organization"
+      ],
+      "countryContextSourceIds": [
+        "news-bz-amandala",
+        "gov-bz-press-office",
+        "gov-bz-police-department"
+      ],
+      "gaps": [
+        "No continuous reporting or event-detection completeness has been validated.",
+        "At least two independent local reporting beats for this exact indexed area have not been established.",
+        "Constituency-specific official alert and news coverage remains unverified; parent-district context is not a local beat."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:1456440B94896318880673",
+      "countryCode": "BZ",
+      "level": "ADM2",
+      "name": "Cayo Central",
+      "parentId": "gb:66346737B25506523624111",
+      "administrativeType": "Constituencies",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "parentDistrictContextSourceIds": [
+        "gov-bz-national-emergency-management-organization"
+      ],
+      "countryContextSourceIds": [
+        "news-bz-amandala",
+        "gov-bz-press-office",
+        "gov-bz-police-department"
+      ],
+      "gaps": [
+        "No continuous reporting or event-detection completeness has been validated.",
+        "At least two independent local reporting beats for this exact indexed area have not been established.",
+        "Constituency-specific official alert and news coverage remains unverified; parent-district context is not a local beat."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:1456440B54194515366168",
+      "countryCode": "BZ",
+      "level": "ADM2",
+      "name": "Belmopan",
+      "parentId": "gb:66346737B25506523624111",
+      "administrativeType": "Constituencies",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [
+        "gov-bz-national-emergency-management-organization",
+        "news-bz-breaking-belize-news"
+      ],
+      "parentDistrictContextSourceIds": [
+        "gov-bz-national-emergency-management-organization"
+      ],
+      "countryContextSourceIds": [
+        "news-bz-amandala",
+        "gov-bz-press-office",
+        "gov-bz-police-department"
+      ],
+      "gaps": [
+        "No continuous reporting or event-detection completeness has been validated.",
+        "At least two independent local reporting beats for this exact indexed area have not been established.",
+        "Constituency-specific official alert and news coverage remains unverified; parent-district context is not a local beat."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:1456440B17189259529244",
+      "countryCode": "BZ",
+      "level": "ADM2",
+      "name": "Corozal Bay",
+      "parentId": "gb:66346737B23604924227645",
+      "administrativeType": "Constituencies",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "parentDistrictContextSourceIds": [
+        "gov-bz-national-emergency-management-organization"
+      ],
+      "countryContextSourceIds": [
+        "news-bz-amandala",
+        "gov-bz-press-office",
+        "gov-bz-police-department"
+      ],
+      "gaps": [
+        "No continuous reporting or event-detection completeness has been validated.",
+        "At least two independent local reporting beats for this exact indexed area have not been established.",
+        "Constituency-specific official alert and news coverage remains unverified; parent-district context is not a local beat."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:1456440B5266372606878",
+      "countryCode": "BZ",
+      "level": "ADM2",
+      "name": "Corozal North",
+      "parentId": "gb:66346737B23604924227645",
+      "administrativeType": "Constituencies",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "parentDistrictContextSourceIds": [
+        "gov-bz-national-emergency-management-organization"
+      ],
+      "countryContextSourceIds": [
+        "news-bz-amandala",
+        "gov-bz-press-office",
+        "gov-bz-police-department"
+      ],
+      "gaps": [
+        "No continuous reporting or event-detection completeness has been validated.",
+        "At least two independent local reporting beats for this exact indexed area have not been established.",
+        "Constituency-specific official alert and news coverage remains unverified; parent-district context is not a local beat."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:1456440B54087410472023",
+      "countryCode": "BZ",
+      "level": "ADM2",
+      "name": "Corozal South West",
+      "parentId": "gb:66346737B23604924227645",
+      "administrativeType": "Constituencies",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "parentDistrictContextSourceIds": [
+        "gov-bz-national-emergency-management-organization"
+      ],
+      "countryContextSourceIds": [
+        "news-bz-amandala",
+        "gov-bz-press-office",
+        "gov-bz-police-department"
+      ],
+      "gaps": [
+        "No continuous reporting or event-detection completeness has been validated.",
+        "At least two independent local reporting beats for this exact indexed area have not been established.",
+        "Constituency-specific official alert and news coverage remains unverified; parent-district context is not a local beat."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:1456440B42858998503900",
+      "countryCode": "BZ",
+      "level": "ADM2",
+      "name": "Orange Walk North",
+      "parentId": "gb:66346737B60973332075708",
+      "administrativeType": "Constituencies",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "parentDistrictContextSourceIds": [
+        "gov-bz-national-emergency-management-organization"
+      ],
+      "countryContextSourceIds": [
+        "news-bz-amandala",
+        "gov-bz-press-office",
+        "gov-bz-police-department"
+      ],
+      "gaps": [
+        "No continuous reporting or event-detection completeness has been validated.",
+        "At least two independent local reporting beats for this exact indexed area have not been established.",
+        "Constituency-specific official alert and news coverage remains unverified; parent-district context is not a local beat."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:1456440B2347802332561",
+      "countryCode": "BZ",
+      "level": "ADM2",
+      "name": "Orange Walk Central",
+      "parentId": "gb:66346737B60973332075708",
+      "administrativeType": "Constituencies",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "parentDistrictContextSourceIds": [
+        "gov-bz-national-emergency-management-organization"
+      ],
+      "countryContextSourceIds": [
+        "news-bz-amandala",
+        "gov-bz-press-office",
+        "gov-bz-police-department"
+      ],
+      "gaps": [
+        "No continuous reporting or event-detection completeness has been validated.",
+        "At least two independent local reporting beats for this exact indexed area have not been established.",
+        "Constituency-specific official alert and news coverage remains unverified; parent-district context is not a local beat."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:1456440B63332510884225",
+      "countryCode": "BZ",
+      "level": "ADM2",
+      "name": "Orange Walk East",
+      "parentId": "gb:66346737B60973332075708",
+      "administrativeType": "Constituencies",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "parentDistrictContextSourceIds": [
+        "gov-bz-national-emergency-management-organization"
+      ],
+      "countryContextSourceIds": [
+        "news-bz-amandala",
+        "gov-bz-press-office",
+        "gov-bz-police-department"
+      ],
+      "gaps": [
+        "No continuous reporting or event-detection completeness has been validated.",
+        "At least two independent local reporting beats for this exact indexed area have not been established.",
+        "Constituency-specific official alert and news coverage remains unverified; parent-district context is not a local beat."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:1456440B85935550107059",
+      "countryCode": "BZ",
+      "level": "ADM2",
+      "name": "Freetown",
+      "parentId": "gb:66346737B58775340764376",
+      "administrativeType": "Constituencies",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "parentDistrictContextSourceIds": [
+        "gov-bz-national-emergency-management-organization"
+      ],
+      "countryContextSourceIds": [
+        "news-bz-amandala",
+        "gov-bz-press-office",
+        "gov-bz-police-department"
+      ],
+      "gaps": [
+        "No continuous reporting or event-detection completeness has been validated.",
+        "At least two independent local reporting beats for this exact indexed area have not been established.",
+        "Constituency-specific official alert and news coverage remains unverified; parent-district context is not a local beat.",
+        "Duplicate provider label across distinct IDs; official mapping is unresolved and no name-based source assignment is made."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:1456440B62290110422722",
+      "countryCode": "BZ",
+      "level": "ADM2",
+      "name": "Port Loyola",
+      "parentId": "gb:66346737B58775340764376",
+      "administrativeType": "Constituencies",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "parentDistrictContextSourceIds": [
+        "gov-bz-national-emergency-management-organization"
+      ],
+      "countryContextSourceIds": [
+        "news-bz-amandala",
+        "gov-bz-press-office",
+        "gov-bz-police-department"
+      ],
+      "gaps": [
+        "No continuous reporting or event-detection completeness has been validated.",
+        "At least two independent local reporting beats for this exact indexed area have not been established.",
+        "Constituency-specific official alert and news coverage remains unverified; parent-district context is not a local beat."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:1456440B59769308078565",
+      "countryCode": "BZ",
+      "level": "ADM2",
+      "name": "Lake Independence",
+      "parentId": "gb:66346737B58775340764376",
+      "administrativeType": "Constituencies",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [
+        "gov-bz-infrastructure-housing"
+      ],
+      "parentDistrictContextSourceIds": [
+        "gov-bz-national-emergency-management-organization"
+      ],
+      "countryContextSourceIds": [
+        "news-bz-amandala",
+        "gov-bz-press-office",
+        "gov-bz-police-department"
+      ],
+      "gaps": [
+        "No continuous reporting or event-detection completeness has been validated.",
+        "At least two independent local reporting beats for this exact indexed area have not been established.",
+        "Constituency-specific official alert and news coverage remains unverified; parent-district context is not a local beat."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:1456440B38299420542047",
+      "countryCode": "BZ",
+      "level": "ADM2",
+      "name": "Fort George",
+      "parentId": "gb:66346737B58775340764376",
+      "administrativeType": "Constituencies",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "parentDistrictContextSourceIds": [
+        "gov-bz-national-emergency-management-organization"
+      ],
+      "countryContextSourceIds": [
+        "news-bz-amandala",
+        "gov-bz-press-office",
+        "gov-bz-police-department"
+      ],
+      "gaps": [
+        "No continuous reporting or event-detection completeness has been validated.",
+        "At least two independent local reporting beats for this exact indexed area have not been established.",
+        "Constituency-specific official alert and news coverage remains unverified; parent-district context is not a local beat."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:1456440B69828690893614",
+      "countryCode": "BZ",
+      "level": "ADM2",
+      "name": "Albert",
+      "parentId": "gb:66346737B58775340764376",
+      "administrativeType": "Constituencies",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "parentDistrictContextSourceIds": [
+        "gov-bz-national-emergency-management-organization"
+      ],
+      "countryContextSourceIds": [
+        "news-bz-amandala",
+        "gov-bz-press-office",
+        "gov-bz-police-department"
+      ],
+      "gaps": [
+        "No continuous reporting or event-detection completeness has been validated.",
+        "At least two independent local reporting beats for this exact indexed area have not been established.",
+        "Constituency-specific official alert and news coverage remains unverified; parent-district context is not a local beat."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:1456440B41515061278311",
+      "countryCode": "BZ",
+      "level": "ADM2",
+      "name": "Queen Square",
+      "parentId": "gb:66346737B58775340764376",
+      "administrativeType": "Constituencies",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "parentDistrictContextSourceIds": [
+        "gov-bz-national-emergency-management-organization"
+      ],
+      "countryContextSourceIds": [
+        "news-bz-amandala",
+        "gov-bz-press-office",
+        "gov-bz-police-department"
+      ],
+      "gaps": [
+        "No continuous reporting or event-detection completeness has been validated.",
+        "At least two independent local reporting beats for this exact indexed area have not been established.",
+        "Constituency-specific official alert and news coverage remains unverified; parent-district context is not a local beat."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:1456440B30022647812570",
+      "countryCode": "BZ",
+      "level": "ADM2",
+      "name": "Mesopotamia",
+      "parentId": "gb:66346737B58775340764376",
+      "administrativeType": "Constituencies",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "parentDistrictContextSourceIds": [
+        "gov-bz-national-emergency-management-organization"
+      ],
+      "countryContextSourceIds": [
+        "news-bz-amandala",
+        "gov-bz-press-office",
+        "gov-bz-police-department"
+      ],
+      "gaps": [
+        "No continuous reporting or event-detection completeness has been validated.",
+        "At least two independent local reporting beats for this exact indexed area have not been established.",
+        "Constituency-specific official alert and news coverage remains unverified; parent-district context is not a local beat."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:1456440B45455972514267",
+      "countryCode": "BZ",
+      "level": "ADM2",
+      "name": "Freetown",
+      "parentId": "gb:66346737B58775340764376",
+      "administrativeType": "Constituencies",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "parentDistrictContextSourceIds": [
+        "gov-bz-national-emergency-management-organization"
+      ],
+      "countryContextSourceIds": [
+        "news-bz-amandala",
+        "gov-bz-press-office",
+        "gov-bz-police-department"
+      ],
+      "gaps": [
+        "No continuous reporting or event-detection completeness has been validated.",
+        "At least two independent local reporting beats for this exact indexed area have not been established.",
+        "Constituency-specific official alert and news coverage remains unverified; parent-district context is not a local beat.",
+        "Duplicate provider label across distinct IDs; official mapping is unresolved and no name-based source assignment is made."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:1456440B85489993561805",
+      "countryCode": "BZ",
+      "level": "ADM2",
+      "name": "Pickstock",
+      "parentId": "gb:66346737B58775340764376",
+      "administrativeType": "Constituencies",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "parentDistrictContextSourceIds": [
+        "gov-bz-national-emergency-management-organization"
+      ],
+      "countryContextSourceIds": [
+        "news-bz-amandala",
+        "gov-bz-press-office",
+        "gov-bz-police-department"
+      ],
+      "gaps": [
+        "No continuous reporting or event-detection completeness has been validated.",
+        "At least two independent local reporting beats for this exact indexed area have not been established.",
+        "Constituency-specific official alert and news coverage remains unverified; parent-district context is not a local beat."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:1456440B59944424745172",
+      "countryCode": "BZ",
+      "level": "ADM2",
+      "name": "Caribbean Shores",
+      "parentId": "gb:66346737B58775340764376",
+      "administrativeType": "Constituencies",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "parentDistrictContextSourceIds": [
+        "gov-bz-national-emergency-management-organization"
+      ],
+      "countryContextSourceIds": [
+        "news-bz-amandala",
+        "gov-bz-press-office",
+        "gov-bz-police-department"
+      ],
+      "gaps": [
+        "No continuous reporting or event-detection completeness has been validated.",
+        "At least two independent local reporting beats for this exact indexed area have not been established.",
+        "Constituency-specific official alert and news coverage remains unverified; parent-district context is not a local beat."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:1456440B30822357340136",
+      "countryCode": "BZ",
+      "level": "ADM2",
+      "name": "Collet",
+      "parentId": "gb:66346737B58775340764376",
+      "administrativeType": "Constituencies",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "parentDistrictContextSourceIds": [
+        "gov-bz-national-emergency-management-organization"
+      ],
+      "countryContextSourceIds": [
+        "news-bz-amandala",
+        "gov-bz-press-office",
+        "gov-bz-police-department"
+      ],
+      "gaps": [
+        "No continuous reporting or event-detection completeness has been validated.",
+        "At least two independent local reporting beats for this exact indexed area have not been established.",
+        "Constituency-specific official alert and news coverage remains unverified; parent-district context is not a local beat."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:1456440B3381431616278",
+      "countryCode": "BZ",
+      "level": "ADM2",
+      "name": "Belize Rural North",
+      "parentId": "gb:66346737B58775340764376",
+      "administrativeType": "Constituencies",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "parentDistrictContextSourceIds": [
+        "gov-bz-national-emergency-management-organization"
+      ],
+      "countryContextSourceIds": [
+        "news-bz-amandala",
+        "gov-bz-press-office",
+        "gov-bz-police-department"
+      ],
+      "gaps": [
+        "No continuous reporting or event-detection completeness has been validated.",
+        "At least two independent local reporting beats for this exact indexed area have not been established.",
+        "Constituency-specific official alert and news coverage remains unverified; parent-district context is not a local beat.",
+        "Duplicate provider label across distinct IDs; official mapping is unresolved and no name-based source assignment is made."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:1456440B76393603142959",
+      "countryCode": "BZ",
+      "level": "ADM2",
+      "name": "Belize Rural North",
+      "parentId": "gb:66346737B58775340764376",
+      "administrativeType": "Constituencies",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "parentDistrictContextSourceIds": [
+        "gov-bz-national-emergency-management-organization"
+      ],
+      "countryContextSourceIds": [
+        "news-bz-amandala",
+        "gov-bz-press-office",
+        "gov-bz-police-department"
+      ],
+      "gaps": [
+        "No continuous reporting or event-detection completeness has been validated.",
+        "At least two independent local reporting beats for this exact indexed area have not been established.",
+        "Constituency-specific official alert and news coverage remains unverified; parent-district context is not a local beat.",
+        "Duplicate provider label across distinct IDs; official mapping is unresolved and no name-based source assignment is made."
+      ],
+      "continuousCoverageVerified": false
+    }
+  ],
+  "geometryChanges": false,
+  "officialLiveSourcesVerified": 0,
+  "continuousCoverageVerified": false,
+  "scope": "Complete enumeration of current indexed areas with verified source remit, limited evidence and explicit gaps. Two reviewed metadata-discovery policies are ready for integration; this file does not itself activate a collector. No completeness claim.",
+  "sourceIndependence": {
+    "differentDeclaredOwners": [
+      "news-bz-amandala",
+      "news-bz-san-pedro-sun"
+    ],
+    "qualification": "Distinct first-party publisher ownership is evidenced. Report-level independence, syndicated official releases and political neutrality are separate questions."
+  },
+  "geographyExceptions": {
+    "duplicateLabels": {
+      "Freetown": [
+        "gb:1456440B85935550107059",
+        "gb:1456440B45455972514267"
+      ],
+      "Belize Rural North": [
+        "gb:1456440B3381431616278",
+        "gb:1456440B76393603142959"
+      ]
+    },
+    "officialNamesMissingFromCurrentLabels": [
+      "Belize Rural Central",
+      "Belize Rural South"
+    ],
+    "evidenceUrls": [
+      "https://elections.gov.bz/wp-content/uploads/2025/02/Notice-of-Time-and-Place-of-Nomination-2025.pdf",
+      "https://elections.gov.bz/belize-rural/"
+    ],
+    "proposedIdCorrections": [],
+    "note": "Official names are verified; which provider IDs correspond to missing names is unresolved. No ID, parent or geometry is changed."
+  },
+  "socialReferences": [
+    {
+      "sourceId": "gov-bz-health-wellness",
+      "platform": "Facebook",
+      "url": "https://www.facebook.com/Belizehealth",
+      "provenanceUrl": "https://edc.gov.bz/links/governmentagencies/",
+      "automatedAccess": false,
+      "platformActivityVerified": false
+    },
+    {
+      "sourceId": "gov-bz-infrastructure-housing",
+      "platform": "Facebook",
+      "url": "https://www.facebook.com/p/Ministry-of-Infrastructure-Development-Housing-100067110120482/",
+      "provenanceUrl": "https://edc.gov.bz/links/governmentagencies/",
+      "automatedAccess": false,
+      "platformActivityVerified": false
+    },
+    {
+      "sourceId": "gov-bz-national-emergency-management-organization",
+      "platform": "Facebook",
+      "url": "https://www.facebook.com/p/National-Emergency-Management-Organization-NEMO-100064269956449/",
+      "provenanceUrl": "https://site.nemo.org.bz/",
+      "automatedAccess": false,
+      "platformActivityVerified": false
+    },
+    {
+      "sourceId": null,
+      "agency": "Ministry of Youth, Sports and Transport",
+      "platform": "Facebook",
+      "url": "https://www.facebook.com/MOYSTBZ/",
+      "provenanceUrl": "https://edc.gov.bz/links/governmentagencies/",
+      "automatedAccess": false,
+      "platformActivityVerified": false
+    }
+  ],
+  "evidence": {
+    "nemo-home": {
+      "name": "nemo-home",
+      "url": "https://site.nemo.org.bz/",
+      "finalUrl": "https://site.nemo.org.bz/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T00:43:43Z",
+      "bytes": 251738,
+      "sha256": "763452ac1bd9d998d694df14e3b8067c375029199fb95cd36b2b53d43791fae7"
+    },
+    "sun-home": {
+      "name": "sun-home",
+      "url": "https://www.sanpedrosun.com/",
+      "finalUrl": "https://www.sanpedrosun.com/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T00:43:45Z",
+      "bytes": 81556,
+      "sha256": "c1d116926d7c2dab50a3aaded8f76dd3e5e8f4df81f9351b116af95cc3211067"
+    },
+    "bbn-home": {
+      "name": "bbn-home",
+      "url": "https://www.breakingbelizenews.com/",
+      "finalUrl": "https://www.breakingbelizenews.com/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T00:43:44Z",
+      "bytes": 1128186,
+      "sha256": "cb8c17e5b7dba9c545c173bdb5450ed4e48d8a9534e2ae68d5f1af8d6ffe461c"
+    },
+    "nemo-about": {
+      "name": "nemo-about",
+      "url": "https://site.nemo.org.bz/district-emergency-coordinators/",
+      "finalUrl": "https://site.nemo.org.bz/district-emergency-coordinators/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T00:43:43Z",
+      "bytes": 227562,
+      "sha256": "8219f4bc3bcee0157869406a93bc386d37d850327181596455112823e87ed7ca",
+      "acceptedTextBytes": 1243,
+      "acceptedTextSha256": "97a99db7d6f37c8367299ef43e58b1d87cc6010a7dc29bff2e2802d11c6a82bc"
+    },
+    "police-about": {
+      "name": "police-about",
+      "url": "https://www.belizepolice.bz/about/",
+      "finalUrl": "https://www.belizepolice.bz/about/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T00:43:46Z",
+      "bytes": 52884,
+      "sha256": "8e3c1fc5a0c9f2e20de6ae3bb0540f78d949800d8f33229d3bf6dba7fe62107c",
+      "acceptedTextBytes": 6486,
+      "acceptedTextSha256": "5286b9580379e00ce67c11437f1837aa122eb52ed8bc12ad718c445b0cff760f"
+    },
+    "amandala-home": {
+      "name": "amandala-home",
+      "url": "https://amandala.com.bz/news/",
+      "finalUrl": "https://amandala.com.bz/news/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T00:43:44Z",
+      "bytes": 537314,
+      "sha256": "2e6bcf9f34f6de5994cfdcb740d9c5d6465f53e19d2de17ac84db10ca827be02"
+    },
+    "midh-road": {
+      "name": "midh-road",
+      "url": "https://www.midh.gov.bz/philip-goldson-highway-and-remate-bypass-upgrading-project/",
+      "finalUrl": "https://www.midh.gov.bz/philip-goldson-highway-and-remate-bypass-upgrading-project/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T00:46:51Z",
+      "bytes": 110587,
+      "sha256": "bc8de64251ecfeaf3f80016bfd4d827104d80714494ff119ef98c118158e56f0",
+      "acceptedTextBytes": 2410,
+      "acceptedTextSha256": "f31a19a6922626e09eeac604989e6421154a00573bb5949e5a382be8dbc47474"
+    },
+    "bbn-about": {
+      "name": "bbn-about",
+      "url": "https://www.breakingbelizenews.com/about-us/",
+      "finalUrl": "https://www.breakingbelizenews.com/about-us/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T00:43:44Z",
+      "bytes": 293969,
+      "sha256": "c409e60912f00720157efbe67aca0c6564ad122a08c603d282be3080c052a55d",
+      "acceptedTextBytes": 1647,
+      "acceptedTextSha256": "dec768191dd52df19da7df3bc07432bbd25bef7b04663411589faba1e5ad5072"
+    },
+    "amandala-feed": {
+      "name": "amandala-feed",
+      "url": "https://amandala.com.bz/news/feed/",
+      "finalUrl": "https://amandala.com.bz/news/feed/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T00:43:44Z",
+      "bytes": 9613,
+      "sha256": "8b507729f991950298474588c49e221649b0000c245452a541080ce04f5621f4"
+    },
+    "bbn-robots": {
+      "name": "bbn-robots",
+      "url": "https://www.breakingbelizenews.com/robots.txt",
+      "finalUrl": "https://www.breakingbelizenews.com/robots.txt",
+      "status": 200,
+      "retrievedAt": "2026-10-06T00:43:44Z",
+      "bytes": 180,
+      "sha256": "19e058c3fbc51ca9fc15672cce2a7bd397b64f1fde954718d3469027609edf39"
+    },
+    "health-robots": {
+      "name": "health-robots",
+      "url": "https://www.health.gov.bz/robots.txt",
+      "finalUrl": "https://www.health.gov.bz/robots.txt",
+      "status": 200,
+      "retrievedAt": "2026-10-06T00:43:47Z",
+      "bytes": 116,
+      "sha256": "9108873daa574a303efef7c7cbae1a1fa7fdf1c38068a476c39b5c7425882b6c"
+    },
+    "nemo-role": {
+      "name": "nemo-role",
+      "url": "https://site.nemo.org.bz/about-us/",
+      "finalUrl": "https://site.nemo.org.bz/about-us/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T00:46:49Z",
+      "bytes": 236057,
+      "sha256": "ebd7699922d13a0e267b9f05270d1e3adb628d2a001a7cf94b5540d3900f942f",
+      "acceptedTextBytes": 2869,
+      "acceptedTextSha256": "cbb650be67bd9f110d9ae957cf8eee1dc2008336f35162504de7a8ced1778a27"
+    },
+    "police-robots": {
+      "name": "police-robots",
+      "url": "https://www.belizepolice.bz/robots.txt",
+      "finalUrl": "https://www.belizepolice.bz/robots.txt",
+      "status": 200,
+      "retrievedAt": "2026-10-06T00:43:47Z",
+      "bytes": 160,
+      "sha256": "b73b070d988c8013fac54a2052a34de192e3645deb186ed27b517528d9dd2369"
+    },
+    "nemo-feed": {
+      "name": "nemo-feed",
+      "url": "https://site.nemo.org.bz/feed/",
+      "finalUrl": "https://site.nemo.org.bz/feed/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T00:43:43Z",
+      "bytes": 13561,
+      "sha256": "960b028bc9ccdadfdcf4ed003d220dd902596af9265db0c6d293bd5ba7ac5c3e"
+    },
+    "sun-feed": {
+      "name": "sun-feed",
+      "url": "https://www.sanpedrosun.com/feed/",
+      "finalUrl": "https://www.sanpedrosun.com/feed/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T00:43:45Z",
+      "bytes": 5194,
+      "sha256": "27f45f4d2a132c167293ca79c1961ba2be1426c62e840478ffc25d1e796aa255"
+    },
+    "police-government": {
+      "name": "police-government",
+      "url": "https://www.belizepolice.bz/your-government/",
+      "finalUrl": "https://www.belizepolice.bz/your-government/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T00:46:49Z",
+      "bytes": 46629,
+      "sha256": "5ec50c191e5219973dfb5a60eae43dea83402d83e3512ac78ab5eb721f32c87d"
+    },
+    "electoral-2025": {
+      "name": "electoral-2025",
+      "url": "https://elections.gov.bz/wp-content/uploads/2025/02/Notice-of-Time-and-Place-of-Nomination-2025.pdf",
+      "finalUrl": "https://elections.gov.bz/wp-content/uploads/2025/02/Notice-of-Time-and-Place-of-Nomination-2025.pdf",
+      "status": 200,
+      "retrievedAt": "2026-10-06T00:43:48Z",
+      "bytes": 271973,
+      "sha256": "ddf0524aaef0aa1217b9dcfd925b8a1866803e14df642e9ab8929e9f10e07e6e",
+      "acceptedTextBytes": 6218,
+      "acceptedTextSha256": "0ab9a35cf3441e847b053773c66d5b2a33968c0a398e135bd9e829d870c5e444"
+    },
+    "bbn-policy": {
+      "name": "bbn-policy",
+      "url": "https://www.breakingbelizenews.com/privacy-policy/",
+      "finalUrl": "https://www.breakingbelizenews.com/privacy-policy/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T00:46:50Z",
+      "bytes": 297573,
+      "sha256": "9155bc4484f841f9e300b1c9596bc1eb68b51d11e639d8818986e7832aa3d1a6",
+      "acceptedTextBytes": 489,
+      "acceptedTextSha256": "7842524e250cb718ead64c142eca3c3ed83262ea1abd56428a812a9482b5d705"
+    },
+    "bbn-feed": {
+      "name": "bbn-feed",
+      "url": "https://www.breakingbelizenews.com/feed/",
+      "finalUrl": "https://www.breakingbelizenews.com/feed/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T00:43:44Z",
+      "bytes": 59090,
+      "sha256": "ffab860be49315ed5eee6befcfac5564093a4f92df8341d819550c7dc8364a92"
+    },
+    "amandala-robots": {
+      "name": "amandala-robots",
+      "url": "https://amandala.com.bz/robots.txt",
+      "finalUrl": "https://amandala.com.bz/robots.txt",
+      "status": 200,
+      "retrievedAt": "2026-10-06T00:43:45Z",
+      "bytes": 1248,
+      "sha256": "8fa3036c68bfcbd32365f6225d24333264093b7cd38d306e106b4dbdc934fd5b"
+    },
+    "sun-about": {
+      "name": "sun-about",
+      "url": "https://www.sanpedrosun.com/about-the-san-pedro-sun-newspaper/",
+      "finalUrl": "https://www.sanpedrosun.com/about-the-san-pedro-sun-newspaper/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T00:43:45Z",
+      "bytes": 168483,
+      "sha256": "f95e1200dd9b5146bfb6aa78e1625899930700259ffc7c5e53a4b08f61fe92c5",
+      "acceptedTextBytes": 5011,
+      "acceptedTextSha256": "ddaef3be4152c30bc90a6ebccefe34a2d0837819b5052ca472e088b4153211df"
+    },
+    "police-home": {
+      "name": "police-home",
+      "url": "https://www.belizepolice.bz/",
+      "finalUrl": "https://www.belizepolice.bz/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T00:43:46Z",
+      "bytes": 80873,
+      "sha256": "8ca7cbb25da8fddf0f7305965d14ed4ebfcdceffef0f70259d59fc55618ea7fd",
+      "acceptedTextBytes": 3888,
+      "acceptedTextSha256": "495693740d3af8537cfc2562669e5c45c1d4a6f739de15d9722fd0305e5a9493"
+    },
+    "nemo-robots": {
+      "name": "nemo-robots",
+      "url": "https://site.nemo.org.bz/robots.txt",
+      "finalUrl": "https://site.nemo.org.bz/robots.txt",
+      "status": 200,
+      "retrievedAt": "2026-10-06T00:43:43Z",
+      "bytes": 117,
+      "sha256": "68f55270f8f1b3434163025fd1a6039c0f8606aa33df15b93974046c64f18b1c"
+    },
+    "midh-home": {
+      "name": "midh-home",
+      "url": "https://www.midh.gov.bz/",
+      "finalUrl": "https://www.midh.gov.bz/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T00:46:50Z",
+      "bytes": 135104,
+      "sha256": "0445c1b5bef0ecc9511a3ccf763a3eb146500576e171f3849b638fe5cf8103d6",
+      "acceptedTextBytes": 2935,
+      "acceptedTextSha256": "cf251ee40078ba49d965bcfe064037d0d62edbec404ca36b798d585f436870ac"
+    },
+    "electoral-rural": {
+      "name": "electoral-rural",
+      "url": "https://elections.gov.bz/belize-rural/",
+      "finalUrl": "https://elections.gov.bz/belize-rural/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T00:43:48Z",
+      "bytes": 122281,
+      "sha256": "51c6c59a2f476a93317ea2982de02411dce20401d507aa6db48df323e76b1a1d"
+    },
+    "health-home": {
+      "name": "health-home",
+      "url": "https://www.health.gov.bz/",
+      "finalUrl": "https://www.health.gov.bz/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T00:43:47Z",
+      "bytes": 30468,
+      "sha256": "e4e4190b26b8dfd3176bec037b731f9a760345bd32b79c669242098d45fc542f",
+      "acceptedTextBytes": 151,
+      "acceptedTextSha256": "a270626a37ba9f8b6bffdcf04486a3d8776623150eb62ac594f716bbbfced517"
+    },
+    "press-feed": {
+      "name": "press-feed",
+      "url": "https://www.pressoffice.gov.bz/feed/",
+      "finalUrl": "https://www.pressoffice.gov.bz/feed/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T00:43:48Z",
+      "bytes": 39179,
+      "sha256": "221eb5ebf6b0035006420473f045e5551ad75644e0729dac62dd6322dadc3b73"
+    },
+    "amandala-policy": {
+      "name": "amandala-policy",
+      "url": "https://amandala.com.bz/news/privacy-policy/",
+      "finalUrl": "https://amandala.com.bz/news/privacy-policy/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T00:46:49Z",
+      "bytes": 239234,
+      "sha256": "d326c12e12d605764cfcf8381c9bedb0c8414d7659b43554ee554f8a45d5abc8",
+      "acceptedTextBytes": 9386,
+      "acceptedTextSha256": "2460ae32d90fee9d3f992264179ce166b777ba0100b520eab6017966e71e1e19"
+    },
+    "amandala-about": {
+      "name": "amandala-about",
+      "url": "https://amandala.com.bz/news/about-us/",
+      "finalUrl": "https://amandala.com.bz/news/about-us/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T00:43:44Z",
+      "bytes": 233478,
+      "sha256": "3a3826fd9aed01283a26e01b5ffb61cb5ba03a35e7005db3ad624f23887d37be",
+      "acceptedTextBytes": 3599,
+      "acceptedTextSha256": "8b42cb773de1e6d31c86fa0fb2a409050b1837afc86a9afdd27ece3a43b6dbee"
+    },
+    "midh-robots": {
+      "name": "midh-robots",
+      "url": "https://www.midh.gov.bz/robots.txt",
+      "finalUrl": "https://www.midh.gov.bz/robots.txt",
+      "status": 200,
+      "retrievedAt": "2026-10-06T00:46:51Z",
+      "bytes": 468,
+      "sha256": "499cbfd4cfb3413ad44fce6dccc7f12ba6c0972ee7b796918686446077eb5ba9"
+    },
+    "gov-directory": {
+      "name": "gov-directory",
+      "url": "https://edc.gov.bz/links/governmentagencies/",
+      "finalUrl": "https://edc.gov.bz/links/governmentagencies/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T00:46:51Z",
+      "bytes": 98138,
+      "sha256": "93fd39028c1ded36096ae8e6ffd8c64655d18446926b63c478c3001d4e237e5b",
+      "acceptedTextBytes": 14472,
+      "acceptedTextSha256": "810a3ac0bc4e8a6b67fb13d23acbb59caea7e575cbb4737fee78b7f039e4e461"
+    },
+    "sun-robots": {
+      "name": "sun-robots",
+      "url": "https://www.sanpedrosun.com/robots.txt",
+      "finalUrl": "https://www.sanpedrosun.com/robots.txt",
+      "status": 200,
+      "retrievedAt": "2026-10-06T00:43:45Z",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "health-about": {
+      "name": "health-about",
+      "url": "https://www.health.gov.bz/northern-region/",
+      "retrievedAt": "2026-10-06T00:43:47Z",
+      "error": "HTTP Error 404: Not Found"
+    },
+    "press-home": {
+      "name": "press-home",
+      "url": "https://www.pressoffice.gov.bz/",
+      "finalUrl": "https://www.pressoffice.gov.bz/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T00:43:47Z",
+      "bytes": 107452,
+      "sha256": "12c86a757a85a2843a98a6f6953c21c0482b2965564c6a25d6e6b2e2c59cb2ab"
+    },
+    "press-about": {
+      "name": "press-about",
+      "url": "https://www.pressoffice.gov.bz/about-us/",
+      "retrievedAt": "2026-10-06T00:43:48Z",
+      "error": "HTTP Error 404: Not Found"
+    },
+    "police-stations": {
+      "name": "police-stations",
+      "url": "https://www.belizepolice.bz/belize-police-stations/",
+      "finalUrl": "https://www.belizepolice.bz/belize-police-stations/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T00:46:49Z",
+      "bytes": 43620,
+      "sha256": "91569e93b56f08d3bc40b2d829b634f583c8b3177afce35f834d0823e6de468e",
+      "acceptedTextBytes": 1015,
+      "acceptedTextSha256": "e4843f03dbbeea425d72c5e1848f2766dbfa849c192e76c7426c9c066f989397"
+    },
+    "police-feed": {
+      "name": "police-feed",
+      "url": "https://www.belizepolice.bz/feed/",
+      "retrievedAt": "2026-10-06T00:43:46Z",
+      "error": "HTTP Error 404: Not Found"
+    },
+    "press-robots": {
+      "name": "press-robots",
+      "url": "https://www.pressoffice.gov.bz/robots.txt",
+      "finalUrl": "https://www.pressoffice.gov.bz/robots.txt",
+      "status": 200,
+      "retrievedAt": "2026-10-06T00:43:48Z",
+      "bytes": 123,
+      "sha256": "c05c4189c69992801e4e7b3489fc8527ff7c2e1140c4b7cc22fdcb36e243658a"
+    },
+    "sun-policy": {
+      "name": "sun-policy",
+      "url": "https://www.sanpedrosun.com/privacy-policy/",
+      "finalUrl": "https://www.sanpedrosun.com/privacy-policy/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T00:46:49Z",
+      "bytes": 186513,
+      "sha256": "97c75f0ef801961c57cb1009047ea2ac20932bc0490e1c3f5ae8d87e81dcfa52",
+      "acceptedTextBytes": 21246,
+      "acceptedTextSha256": "04074f7cd97b7aee0874a8303dca5837532f37a9103a8a773d85550643ae37c5"
+    },
+    "health-feed": {
+      "name": "health-feed",
+      "url": "https://www.health.gov.bz/feed/",
+      "finalUrl": "https://www.health.gov.bz/feed/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T00:43:47Z",
+      "bytes": 2053,
+      "sha256": "1e46dcd48bd2d66c8dd8313617d20e0b648fcf56e82d838648d7f9bf07641474"
+    },
+    "midh-feed": {
+      "name": "midh-feed",
+      "url": "https://www.midh.gov.bz/feed/",
+      "finalUrl": "https://www.midh.gov.bz/feed/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T00:46:51Z",
+      "bytes": 11290,
+      "sha256": "aee7e5daaf26943c0824207c1513a03c01586ca42fe323ed69183e2f853751d0"
+    }
+  }
+}

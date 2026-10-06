@@ -1007,6 +1007,22 @@
       "url": "https://www.puntarenasseoye.com/feed/",
       "validatedAt": "2026-10-06T00:23:41.789521+00:00",
       "validationSha256": "acbc7c8982bdc914934a6f2fd8dce596e2b48a55dd70089eac013d18a246913a"
+    },
+    {
+      "sourceId": "news-bz-san-pedro-sun",
+      "mode": "discovery",
+      "cadenceMinutes": 360,
+      "url": "https://www.sanpedrosun.com/feed/",
+      "validatedAt": "2026-10-06T00:43:45Z",
+      "validationSha256": "8ea1b281af476218eb68718d27c3aa46e16f3cac369db79df7869952ddfba736"
+    },
+    {
+      "sourceId": "gov-bz-press-office",
+      "mode": "discovery",
+      "cadenceMinutes": 360,
+      "url": "https://www.pressoffice.gov.bz/feed/",
+      "validatedAt": "2026-10-06T00:43:48Z",
+      "validationSha256": "221eb5ebf6b0035006420473f045e5551ad75644e0729dac62dd6322dadc3b73"
     }
   ],
   "policy": {
