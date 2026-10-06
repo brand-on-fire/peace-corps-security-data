@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "countryCode": "FJ",
+  "reviewedAt": "2026-10-06T02:25:53.184258+00:00",
+  "batchSha256": "be27b18f07d1d30de50b2aa3102871b30cfbef79646699834b0df4f2b44ad097",
+  "correctionsSha256": "9726be8bbe7887cfae3177309ae7c64249113728436c7d966e1c7dcfbf133fa7",
+  "incidentIds": [
+    "reviewed-fj-extension-nakaile-fire-20251020",
+    "reviewed-fj-extension-navo-road-20251019",
+    "reviewed-fj-extension-savusavu-yacht-2025week41",
+    "reviewed-fj-extension-raiwai-taxi-20251006",
+    "reviewed-fj-extension-taci-fire-20251112",
+    "reviewed-fj-extension-vusasivo-robbery-2025week46",
+    "reviewed-fj-extension-naboutini-road-20251115",
+    "reviewed-fj-extension-tavua-road-20251110",
+    "reviewed-fj-extension-rewa-closure-20251106",
+    "reviewed-fj-extension-denarau-bus-20251103",
+    "reviewed-fj-extension-tacirua-attempt-20251220",
+    "reviewed-fj-extension-raiwai-topshop-20251214",
+    "reviewed-fj-extension-suva-nightclub-assault-20251209",
+    "reviewed-fj-extension-labasa-road-20251206",
+    "reviewed-fj-extension-qawa-closure-20251201",
+    "reviewed-fj-extension-nausori-highlands-road-20260122",
+    "reviewed-fj-extension-vunilagi-road-20260120",
+    "reviewed-fj-extension-nasovatava-road-20260106",
+    "reviewed-fj-extension-wailekutu-road-20260101",
+    "reviewed-fj-extension-lodoni-road-20260422",
+    "reviewed-fj-extension-rewa-closure-20260105",
+    "reviewed-fj-extension-delainavesi-vehicle-20260316",
+    "reviewed-fj-extension-waimanu-hotel-20260316",
+    "reviewed-fj-extension-samabula-contractor-20260316"
+  ],
+  "incidentCount": 24,
+  "reportCount": 33,
+  "categories": {
+    "other": 2,
+    "transport": 13,
+    "crime": 9
+  },
+  "correctionIds": [
+    "reviewed-fj-legalega-seizure-2026week40",
+    "reviewed-fj-vunika-truck-2026week40"
+  ],
+  "coverage": {
+    "monthlyEndpoints": 13,
+    "nonemptyMonthlyPages": 265,
+    "articleUrls": 2597,
+    "completeYear": false,
+    "remainingHeadlineCandidates": 173
+  },
+  "sourceCoordinatesAdded": 0,
+  "standingAreaMappingsAdded": 0,
+  "rawArticleTextPublished": false
+}

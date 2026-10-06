@@ -308,6 +308,41 @@ class PublicPipelineTests(unittest.TestCase):
         self.assertEqual(persisted['firstSeenAt'],original['firstSeenAt'])
         self.assertEqual(pipeline.load(self.root/'docs/data/snapshot.json')['incidents'][0]['reports'],incoming['reports'])
 
+    def _archived_gdacs_record(self):
+        source=dict(id='gdacs',kind='gdacs',language='en',countryCodes=['GH'])
+        original=pipeline.make_incident(source,'gdacs-reviewed-GH','Prior drought report','Complete evidence',
+            self.country,'weather','2026-04-01T00:00:00Z','2026-10-04T12:00:00Z',
+            '2026-10-04T13:00:00Z',{'precision':'country'},'https://www.gdacs.org/report',
+            {'provider':'GDACS','providerIsCurrent':'false'},'same complete provider feature')
+        original.update(state='expired',historical=True)
+        original['reports'][0]['sourceMetadata']={'rawResponseSha256':'prior-feed-receipt'}
+        return source,original
+
+    def test_archived_replay_updates_source_health_without_growing_revision_history(self):
+        source,original=self._archived_gdacs_record()
+        incoming=json.loads(json.dumps(original));incoming.update(state='reported')
+        incoming['reports'][0].update(retrievedAt=pipeline.stamp(self.now),
+            sourceMetadata={'rawResponseSha256':'new-feed-with-unrelated-changes'})
+        result,persisted=self._run_mock_official_update(source,'gdacs-api',original,incoming)
+        self.assertEqual(result['changedIncidents'],[])
+        self.assertEqual(persisted,original)
+        state=pipeline.load(self.root/'docs/data/collector-state.json')['gdacs']
+        self.assertEqual(state['status'],'healthy')
+        self.assertEqual(state['lastSuccessAt'],pipeline.stamp(self.now))
+        self.assertEqual(state['evidenceReceipts'],[{'sha256':'synthetic-complete-response'}])
+
+    def test_real_correction_to_archived_event_keeps_complete_previous_report(self):
+        source,original=self._archived_gdacs_record()
+        incoming=json.loads(json.dumps(original));incoming.update(state='reported',summary='Corrected provider account')
+        incoming['reports'][0].update(contentHash='changed-provider-feature',excerpt='Complete corrected evidence. 日本語. '*200)
+        result,persisted=self._run_mock_official_update(source,'gdacs-api',original,incoming)
+        self.assertEqual(result['changedIncidents'],[original['id']])
+        self.assertEqual(persisted['state'],'expired')
+        self.assertTrue(persisted['historical'])
+        self.assertEqual(persisted['reports'][0],incoming['reports'][0])
+        self.assertEqual(persisted['revisions'][-1]['previousReports'],original['reports'])
+        self.assertEqual(persisted['firstSeenAt'],original['firstSeenAt'])
+
     def test_stale_official_representation_does_not_roll_back_newer_archive_record(self):
         raw=pipeline.encode(dict(type='FeatureCollection',metadata=dict(count=1),features=[self.feature()]))
         original=pipeline.official_incidents(self.source,raw,pipeline.stamp(self.now),

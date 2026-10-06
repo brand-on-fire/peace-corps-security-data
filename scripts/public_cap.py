@@ -278,6 +278,20 @@ def apply_lifecycle(messages, records, now):
             row['id']=iid;row['firstSeenAt']=old['firstSeenAt']
             for report in row['reports']:report['incidentId']=iid
             row['sourceMetadata']['capMessageKeys']=list(dict.fromkeys(old.get('sourceMetadata',{}).get('capMessageKeys',[])+[c['key']]))
+            if (old['category']=='weather' and old['severity']=='severe'
+                    and row['category']=='weather' and row['severity']!='severe'):
+                # The severe warning is part of incident history even after a
+                # lower-level update. End that warning, retaining its original
+                # severity/footprint and the complete superseding bulletin.
+                update=row;row=copy.deepcopy(old);row['state']='expired';row['updatedAt']=c['sent']
+                meta=row['sourceMetadata'];meta['capMessageKeys']=update['sourceMetadata']['capMessageKeys']
+                if not meta.get('severityDowngrade'):
+                    meta['severityDowngrade']=dict(at=c['sent'],providerSeverity=update['sourceMetadata']['providerSeverity'],url=c['url'])
+                    row['summary']+='\nThe issuer replaced this severe warning with a '+update['sourceMetadata']['providerSeverity']+' warning.'
+                meta['currentProviderSeverity']=update['sourceMetadata']['providerSeverity']
+                meta['downgradeInfoBlocks']=copy.deepcopy(update['sourceMetadata']['infoBlocks'])
+                meta['expires']=min(meta.get('expires') or c['sent'],c['sent'])
+                row['reports']=update['reports']+row['reports']
         elif len(targets)>1:
             # A replacement can explicitly supersede several warnings; retain each.
             for iid in targets:

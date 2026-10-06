@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "rule": "severe-cap-weather-v1",
+  "weatherWarnings": {
+    "provider": "CAP 1.2",
+    "category": "weather",
+    "admittedSeverities": [
+      "severe"
+    ],
+    "providerLevels": [
+      "Severe",
+      "Extreme"
+    ]
+  },
+  "scope": "Routine weather forecasts are not monitor incidents. Non-CAP disaster and reviewed impact reports remain eligible. Complete previously accepted excluded records are retained separately for source evidence and lifecycle matching.",
+  "retainedPath": "docs/data/retained-weather",
+  "requestedAt": "2026-10-06T02:25:53.185158+00:00"
+}

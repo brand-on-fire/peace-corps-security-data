@@ -38,12 +38,13 @@ MAX_HISTORY_INDEX = 25_000_000
 KEYWORDS = {
     'earthquake': r'\b(earthquakes?|sismos?|terremotos?|séisme)\b',
     'flood': r'\b(flood(?:s|ed|ing)?|inundaci[oó]n(?:es)?|inondation)\b',
-    'weather': r'\b(cyclone|typhoon|hurricane|hurac[aá]n|drought|storm|wildfire)\b',
+    'weather': r'\b(cyclone|typhoon|hurricane|hurac[aá]n|drought|storm|wildfire|sequ[ií]as?|tormentas?)\b',
     'volcano': r'\b(volcan(?:o|ic)|volc[aá]n|eruption|erupci[oó]n)\b',
     'conflict': r'\b(armed conflict|clashes|airstrike|shelling|gunfire|bombing)\b',
     'unrest': r'\b(riot|curfew|unrest|couvre-feu|toque de queda)\b',
     'health': r'\b(cholera|chol[eé]ra|dengue|outbreak|epidemic|epidemia|medicine.{0,30}shortages?)\b',
     'transport': (r'\b(road.{0,25}(closed|blocked)|bridge.{0,25}collaps(?:e|ed|es|ing)?|landslide|derailment|'
+                  r'(?:accidentes?|siniestros?).{0,60}(?:tr[aá]nsito|viales?|transporte pesado)|'
                   r'deslizamientos?|derrumbes?|descarrilamientos?|d[eé]raillements?|'
                   r'(?:carreteras?|rutas?|v[ií]as?|puentes?|t[uú]neles?|aeropuertos?|vuelos?|trenes?)'
                   r'.{0,60}(?:cerrad[oa]s?|cierres?|bloquead[oa]s?|bloqueos?|colaps\w*|suspendid[oa]s?|cancelad[oa]s?)|'
@@ -493,6 +494,10 @@ def news_discovery(source, items, now, countries):
             continue
         text = item['title']+' '+item['description']
         categories = [key for key, pattern in KEYWORDS.items() if re.search(pattern, text, re.I)]
+        # Keep reviewed official color notices for review without inventing a hazard.
+        if (not categories and source.get('tier') == 'official'
+                and re.search(r'\balerta\s+(?:amarilla|roja|naranja|verde)\b', text, re.I)):
+            categories = ['other']
         if not categories:
             continue
         try:
@@ -551,18 +556,32 @@ def reviewed_news_incidents(source, items, reviews, now, countries, areas):
     return rows
 
 
+def routine_weather_forecast(row):
+    """Routine CAP forecasts are source observations, not monitor incidents."""
+    return (row.get('category') == 'weather' and row.get('severity') != 'severe'
+            and (row.get('sourceMetadata', {}).get('provider') == 'CAP 1.2'
+                 or row.get('id', '').startswith('cap-')))
+
+
+def public_incident(row):
+    return not routine_weather_forecast(row)
+
+
 def read_archive(data, countries):
     rows = {}
-    for code in countries:
-        root = load(data/f'history/{code}.json', [])
-        if isinstance(root, dict):
-            if root.get('format') != 'country-parts':
-                raise ValueError('Unknown archive format')
-            root = [row for name in root['parts'] for row in load(data/'history'/Path(name).name)]
-        for row in root:
-            if row['id'] in rows:
-                raise ValueError('Duplicate archive identity')
-            rows[row['id']] = row
+    # Excluded prior observations remain available for evidence and CAP lifecycle
+    # references, outside the application's incident index and country archives.
+    for directory in ('history', 'retained-weather'):
+        for code in countries:
+            root = load(data/directory/f'{code}.json', [])
+            if isinstance(root, dict):
+                if root.get('format') != 'country-parts':
+                    raise ValueError('Unknown archive format')
+                root = [row for name in root['parts'] for row in load(data/directory/Path(name).name)]
+            for row in root:
+                if row['id'] in rows:
+                    raise ValueError('Duplicate archive identity')
+                rows[row['id']] = row
     return rows
 
 
@@ -581,7 +600,7 @@ def public_snapshot_record(row):
 
 def current_snapshot_rows(records, countries):
     return [public_snapshot_record(row) for row in sorted(records.values(), key=lambda r:r['occurredAt'], reverse=True)
-            if not row['historical'] and row['countryCode'] in countries]
+            if not row['historical'] and row['countryCode'] in countries and public_incident(row)]
 
 
 def write_archive(data, records, countries, public_country_codes=None):
@@ -589,7 +608,7 @@ def write_archive(data, records, countries, public_country_codes=None):
     # the currently admitted roster in the public index and manifest.
     public_codes = set(countries if public_country_codes is None else public_country_codes)
     ordered = sorted(records.values(), key=lambda row:(row['occurredAt'],row['id']), reverse=True)
-    public_records = [row for row in ordered if row['countryCode'] in public_codes]
+    public_records = [row for row in ordered if row['countryCode'] in public_codes and public_incident(row)]
     index, manifest = [], dict(format='explicit-field-projection-with-complete-country-details',
                              recordCount=len(public_records), projectionFields=list(INDEX_FIELDS)+['reports','reportCount'],
                              omittedFromIndex=['summary','sourceMetadata','revisions','adminAssignment','location.geometry'], countries=[])
@@ -601,8 +620,7 @@ def write_archive(data, records, countries, public_country_codes=None):
         index.append(compact)
     if len(encode(index)) > MAX_HISTORY_INDEX:
         raise ValueError('Complete history overview exceeds 25MB; no partial index permitted')
-    for code in countries:
-        rows = [r for r in ordered if r['countryCode'] == code]
+    def write_country(directory, code, rows):
         groups, group, size = [], [], 3
         for row in rows:
             length = len(encode(row))
@@ -616,18 +634,31 @@ def write_archive(data, records, countries, public_country_codes=None):
         groups.append(group)
         parts = []
         if len(groups) == 1:
-            save(data/f'history/{code}.json', rows)
+            save(data/directory/f'{code}.json', rows)
         else:
             for number, group in enumerate(groups, 1):
                 name = f'{code}-{number:03d}.json'
-                save(data/'history'/name, group)
+                save(data/directory/name, group)
                 parts.append(name)
-            save(data/f'history/{code}.json', dict(format='country-parts', countryCode=code,
+            save(data/directory/f'{code}.json', dict(format='country-parts', countryCode=code,
                                                  recordCount=len(rows), parts=parts))
+        return parts
+    for code in countries:
+        rows = [r for r in ordered if r['countryCode'] == code and public_incident(r)]
+        parts = write_country('history', code, rows)
+        retained = [r for r in ordered if r['countryCode'] == code and not public_incident(r)]
+        if retained or (data/'retained-weather'/f'{code}.json').exists():
+            write_country('retained-weather', code, retained)
         if code in public_codes:
             manifest['countries'].append(dict(code=code, path=f'history/{code}.json', recordCount=len(rows), parts=parts))
     save(data/'history.json', index)
     save(data/'history-manifest.json', manifest)
+
+
+def apply_archive_age(row, now):
+    row['historical'] = dt.datetime.fromisoformat(row['occurredAt'].replace('Z', '+00:00')) < now-dt.timedelta(days=30)
+    if row['historical'] and row['state'] == 'reported':
+        row['state'] = 'expired'
 
 
 def run(root, now, fixtures=None):
@@ -689,7 +720,8 @@ def run(root, now, fixtures=None):
                         incoming = apply_lifecycle(messages, records, now_text)
                     else:
                         incoming = official_incidents(source, raw, now_text, countries, geo, iso3)
-                    accepted = len(incoming)
+                    accepted = sum(public_incident(row) for row in incoming)
+                    result['routineWeatherExcludedCount'] = len(incoming)-accepted
                     message = f'Complete official feed parsed; {accepted} records matched reviewed active-country boundaries/codes.'
                     if official_receipts is not None:
                         message += f' {len(official_receipts)} complete source responses validated.'
@@ -714,7 +746,13 @@ def run(root, now, fixtures=None):
                 # geographic assignment cannot leave a partially accepted response.
                 pending_records = {}
                 for row in incoming:
+                        # Compare the state that would actually be published.
+                        # Replaying an old reported event must not manufacture an
+                        # expired -> reported -> expired revision on every fetch.
+                        apply_archive_age(row, now)
                         old = records.get(row['id'])
+                        if old is None and routine_weather_forecast(row):
+                            continue
                         if old and dt.datetime.fromisoformat(row['updatedAt'].replace('Z', '+00:00')) < dt.datetime.fromisoformat(old['updatedAt'].replace('Z', '+00:00')):
                             # A delayed provider response must not replace newer facts.
                             # Adapters merge genuinely new evidence into the current
@@ -761,20 +799,19 @@ def run(root, now, fixtures=None):
     expire_warnings(records, now_text)
     expire_curfews(records, now_text)
     for row in records.values():
-        row['historical'] = dt.datetime.fromisoformat(row['occurredAt'].replace('Z','+00:00')) < now-dt.timedelta(days=30)
-        if row['historical'] and row['state'] == 'reported':
-            row['state'] = 'expired'
+        apply_archive_age(row, now)
     changes = list(dict.fromkeys(changes + [key for key,row in records.items() if row['state'] != prior_states[key]]))
     snapshot['generatedAt'] = now_text
     snapshot['mode'] = 'fixture' if fixtures else 'live'
     snapshot['schemaVersion'] = 1
-    snapshot['archiveTotal'] = snapshot['history']['recordCount'] = sum(row['countryCode'] in countries for row in records.values())
+    snapshot['archiveTotal'] = snapshot['history']['recordCount'] = sum(row['countryCode'] in countries and public_incident(row) for row in records.values())
     snapshot['incidents'] = current_snapshot_rows(records, countries)
     snapshot['history']['to'] = now_text
     snapshot['collector'] = dict(kind='public-standard-runner', requestedOfficialCadenceMinutes=15,
                                   requestedNewsCadenceMinutes=360, latestRunAt=now_text,
                                   activeReviewedCountries=len(countries), discoveryCount=len(discoveries),
-                                  newsPromotion='review-required', scheduleGuarantee=False)
+                                  newsPromotion='review-required', scheduleGuarantee=False,
+                                  incidentScope='severe-cap-weather-v1')
     coverage = {c['sourceId']:c for c in snapshot['coverage']}
     for sid, state in states.items():
         coverage[sid] = {k:state.get(k) for k in ('sourceId','lastAttemptAt','lastSuccessAt','status','message')}

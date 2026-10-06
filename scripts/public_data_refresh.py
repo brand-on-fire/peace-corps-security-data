@@ -75,7 +75,7 @@ def validate_candidate(root, baseline):
     if codes != expected_codes or {c['code'] for c in snapshot['countries']} != codes:
         raise ValueError('Candidate active-country scope mismatch')
     index = pipeline.load(data/'history.json')
-    expected = {key for key,row in records.items() if row['countryCode'] in codes}
+    expected = {key for key,row in records.items() if row['countryCode'] in codes and pipeline.public_incident(row)}
     if len(index) != len(expected) or {r['id'] for r in index} != expected:
         raise ValueError('Candidate archive index is incomplete or duplicated')
     if snapshot['archiveTotal'] != len(expected) or snapshot['history']['recordCount'] != len(expected):
@@ -84,7 +84,7 @@ def validate_candidate(root, baseline):
         raise ValueError('Candidate current incidents duplicated')
     for row in current:
         archived = records.get(row['id'])
-        if row['countryCode'] not in codes or row['historical'] or archived is None or pipeline.public_snapshot_record(archived) != row:
+        if row['countryCode'] not in codes or row['historical'] or not pipeline.public_incident(row) or archived is None or pipeline.public_snapshot_record(archived) != row:
             raise ValueError('Candidate current incident differs from complete archive')
     unsigned = dict(snapshot)
     publication = unsigned.pop('publication')

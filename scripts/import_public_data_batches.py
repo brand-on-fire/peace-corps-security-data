@@ -250,7 +250,7 @@ def prepare(root,batch_paths,now):
     for iid in set(changes):validate_record(records[iid],active,sources,areas,now)
     snapshot=pipeline.load(data/'snapshot.json');snapshot.pop('publication',None)
     snapshot.update(generatedAt=now_text,mode='live',schemaVersion=1,countries=list(active.values()),sources=list(sources.values()),
-                    incidents=project_current(records,active),archiveTotal=sum(r['countryCode'] in active for r in records.values()))
+                    incidents=project_current(records,active),archiveTotal=sum(r['countryCode'] in active and pipeline.public_incident(r) for r in records.values()))
     snapshot['history']['recordCount']=snapshot['archiveTotal'];snapshot['history']['to']=now_text
     snapshot['history']['notes']=list(dict.fromkeys(snapshot['history'].get('notes',[])+history_notes))
     current_coverage={c['sourceId']:c for c in snapshot['coverage']}
@@ -259,6 +259,7 @@ def prepare(root,batch_paths,now):
         if sid not in current_coverage:current_coverage[sid]=dict(sourceId=sid,lastAttemptAt=None,lastSuccessAt=None,status='pending',message='Source metadata imported; no successful scheduled retrieval is asserted by this import.')
     snapshot['coverage']=list(current_coverage.values())
     snapshot['collector']['discoveryCount']=len(discovered)
+    snapshot['collector']['incidentScope']='severe-cap-weather-v1'
     snapshot['history']['sources']=sorted(set(snapshot['history']['sources'])|{sid for row in records.values() for sid in row['sourceIds']})
     snapshot['publication']=dict(format='peace-corps-public-data-v1',generatedAt=now_text,revision=pipeline.publication_revision(snapshot),activeCountryCodes=sorted(active))
     if len(pipeline.encode(snapshot))>MAX_SNAPSHOT:raise ValueError('Projected snapshot exceeds10MB; full text may not be truncated')
