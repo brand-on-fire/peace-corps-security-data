@@ -26,6 +26,22 @@ def command(*args, env=None):
     return subprocess.run(args, env=env, check=True, capture_output=True, text=True).stdout.rstrip('\r\n')
 
 
+def classify_push_failure(stderr):
+    """Return an allowlisted diagnostic only; never return captured text."""
+    if not isinstance(stderr, str):
+        return 'unknown'
+    lines = stderr.splitlines()
+    stale = any(re.fullmatch(r'\s*!\s+\[rejected\]\s+.+\((?:non-fast-forward|fetch first)\)\s*', line) for line in lines)
+    denied = any(re.fullmatch(r'(?:remote: )?(?:ERROR: )?Permission to .+ denied to .+\.\s*', line)
+                 or re.fullmatch(r'(?:remote: |ERROR: )?Write access to repository not granted\.\s*', line)
+                 or re.fullmatch(r'fatal: Authentication failed for .+', line)
+                 or re.fullmatch(r'(?:git@[^:\s]+: )?Permission denied \(publickey\)\.\s*', line)
+                 for line in lines)
+    if stale == denied:
+        return 'unknown'
+    return 'non-fast-forward' if stale else 'permission'
+
+
 def audit(root, remote=True):
     files, total = [], 0
     for path in root.rglob('*'):
@@ -95,7 +111,14 @@ def publish(root):
     environment.update(GIT_CONFIG_COUNT='1', GIT_CONFIG_KEY_0='http.https://github.com/.extraheader',
                        GIT_CONFIG_VALUE_0='AUTHORIZATION: basic '+base64.b64encode(('x-access-token:'+token).encode()).decode())
     # Fixed GitHub origin from checkout, no force push and no recursive triggers.
-    command('git','push','origin','HEAD:'+os.environ['GITHUB_REF_NAME'], env=environment)
+    try:
+        command('git','push','origin','HEAD:'+os.environ['GITHUB_REF_NAME'], env=environment)
+    except subprocess.CalledProcessError as error:
+        kind = classify_push_failure(error.stderr)
+        detail = 'git-push-failed category='+kind+' exit='+str(error.returncode)
+        if os.environ.get('GITHUB_ACTIONS') == 'true':
+            print('::error title=Public data publication::'+detail)
+        raise RuntimeError(detail) from None
     print(json.dumps(dict(published=True, commit=command('git','rev-parse','HEAD'))))
 
 
