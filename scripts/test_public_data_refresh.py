@@ -28,6 +28,7 @@ class RefreshTests(unittest.TestCase):
         pipeline.save(self.root/'config/countries.json',[self.country])
         pipeline.save(self.root/'config/collection-policy.json',dict(sources=[]))
         self.row = dict(id='one',countryCode='GH',historical=False,occurredAt='2026-10-05T01:00:00Z',
+                        updatedAt='2026-10-05T01:00:00.685Z', firstSeenAt='2026-10-05T02:00:00Z',
                         reports=[dict(contentHash='original-evidence')])
         self.write_candidate(self.root, '2026-10-05T02:00:00Z')
         self.original = (self.data/'snapshot.json').read_bytes()
@@ -110,6 +111,38 @@ class RefreshTests(unittest.TestCase):
             row['revisions']=[dict(previousReports=self.row['reports'])]
             self.write_candidate(stage,pipeline.stamp(self.now),rows=[row])
             self.assertEqual(refresh.validate_candidate(stage,self.data)['incidents'],[row])
+
+    def test_subsecond_rollback_or_first_seen_change_cannot_publish(self):
+        for field,value in [('updatedAt','2026-10-05T01:00:00Z'),('firstSeenAt','2026-10-05T02:00:01Z')]:
+            with self.subTest(field=field):
+                def regressed(command, **kwargs):
+                    stage=Path(command[command.index('--root')+1])
+                    self.write_candidate(stage,pipeline.stamp(self.now),rows=[dict(self.row,**{field:value})],sources=[dict(sourceId='official',status='healthy')])
+                result=refresh.refresh(self.root,self.now,runner=regressed,environment={})
+                self.assertEqual(result['outcome'],'failed')
+                self.assertEqual((self.data/'snapshot.json').read_bytes(),self.original)
+
+    def test_prior_revision_history_cannot_be_lost(self):
+        self.row['revisions']=[dict(at='2026-10-05T02:00:00Z',note='Prior evidence',previousReports=[dict(contentHash='earliest')])]
+        self.write_candidate(self.root,'2026-10-05T02:00:00Z')
+        original=(self.data/'snapshot.json').read_bytes()
+        def lost(command, **kwargs):
+            stage=Path(command[command.index('--root')+1])
+            self.write_candidate(stage,pipeline.stamp(self.now),rows=[{k:v for k,v in self.row.items() if k!='revisions'}],sources=[dict(sourceId='official',status='healthy')])
+        result=refresh.refresh(self.root,self.now,runner=lost,environment={})
+        self.assertEqual(result['outcome'],'failed')
+        self.assertEqual((self.data/'snapshot.json').read_bytes(),original)
+
+    def test_publication_time_must_advance_when_content_changes(self):
+        for when in ['2026-10-05T01:59:59Z','2026-10-05T02:00:00Z']:
+            with self.subTest(when=when),tempfile.TemporaryDirectory() as temporary:
+                stage=Path(temporary)
+                import shutil
+                shutil.copytree(self.root/'config',stage/'config')
+                changed=dict(self.row,state='expired')
+                self.write_candidate(stage,when,rows=[changed])
+                with self.assertRaisesRegex(ValueError,'publication timestamp'):
+                    refresh.validate_candidate(stage,self.data)
 
     def test_failed_second_directory_rename_restores_original(self):
         with tempfile.TemporaryDirectory() as temporary:

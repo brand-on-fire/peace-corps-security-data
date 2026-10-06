@@ -24,6 +24,12 @@ def forbidden(*args):raise AssertionError('Unexpected network request')
 def collect(kind,obj,previous=None,records=None,fetch=forbidden):return m.collect_official(source(kind),policy(kind),json.dumps(obj).encode(),NOW,COUNTRIES,Geo(),previous or {},records or {},fetch)
 
 class OfficialAdapters(unittest.TestCase):
+ def test_usgs_preserves_provider_millisecond_dates(self):
+  feature=quake(when='2026-10-01T00:00:00.685Z');feature['properties']['updated']+=40
+  row=collect('usgs-week',document([feature],'usgs-week'))['incidents'][0]
+  self.assertEqual(row['occurredAt'],'2026-10-01T00:00:00.685Z')
+  self.assertEqual(row['updatedAt'],'2026-10-01T00:00:00.725Z')
+  self.assertEqual(row['reports'][0]['publishedAt'],row['updatedAt'])
  def test_small_quake_and_provider_id_preserved(self):
   x=collect('usgs-week',document([quake()],'usgs-week'))['incidents'][0];self.assertEqual(x['id'],'usgs-test1');self.assertEqual(x['sourceMetadata']['magnitude'],1);self.assertEqual(x['location']['precision'],'point')
  def test_usgs_count_mismatch_rejects_whole(self):

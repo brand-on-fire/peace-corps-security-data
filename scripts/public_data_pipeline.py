@@ -100,7 +100,9 @@ def date(value):
 def milliseconds(value):
     if not isinstance(value, (int, float)) or not math.isfinite(value):
         raise ValueError('Invalid provider timestamp')
-    return stamp(dt.datetime.fromtimestamp(value / 1000, UTC))
+    # USGS timestamps are epoch milliseconds; rounding them to seconds can
+    # make an unchanged provider record look older than the archived version.
+    return dt.datetime.fromtimestamp(value / 1000, UTC).isoformat(timespec='milliseconds').replace('+00:00', 'Z')
 
 
 def source_due(policy, previous, now):
@@ -640,12 +642,14 @@ def run(root, now, fixtures=None):
                 pending_records = {}
                 for row in incoming:
                         old = records.get(row['id'])
-                        if old and date(row['updatedAt']) < date(old['updatedAt']):
+                        if old and dt.datetime.fromisoformat(row['updatedAt'].replace('Z', '+00:00')) < dt.datetime.fromisoformat(old['updatedAt'].replace('Z', '+00:00')):
                             # A delayed provider response must not replace newer facts.
                             # Adapters merge genuinely new evidence into the current
                             # record before reaching this transaction.
                             continue
                         if (old and [(r['id'],r['contentHash']) for r in old['reports']] == [(r['id'],r['contentHash']) for r in row['reports']]
+                                and old['occurredAt'] == row['occurredAt']
+                                and old['updatedAt'] == row['updatedAt']
                                 and old['state'] == row['state']
                                 and old['location'] == row['location']
                                 and old.get('sourceMetadata') == row.get('sourceMetadata')):

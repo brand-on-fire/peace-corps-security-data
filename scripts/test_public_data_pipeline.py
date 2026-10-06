@@ -321,6 +321,31 @@ class PublicPipelineTests(unittest.TestCase):
         self.assertEqual(persisted,original)
         self.assertEqual(pipeline.load(self.root/'docs/data/collector-state.json')['usgs']['status'],'healthy')
 
+    def test_subsecond_stale_provider_update_is_not_rounded_before_comparison(self):
+        raw=pipeline.encode(dict(type='FeatureCollection',metadata=dict(count=1),features=[self.feature()]))
+        original=pipeline.official_incidents(self.source,raw,pipeline.stamp(self.now),
+            {'GH':self.country},self.geo,{})[0]
+        original['updatedAt']='2026-10-05T00:00:00.685Z'
+        incoming=json.loads(json.dumps(original));incoming['updatedAt']='2026-10-05T00:00:00Z'
+        incoming['reports'][0]['contentHash']='stale-subsecond-hash'
+        result,persisted=self._run_mock_official_update(self.source,'usgs-week',original,incoming)
+        self.assertEqual(result['changedIncidents'],[])
+        self.assertEqual(persisted,original)
+
+    def test_same_source_payload_can_restore_previously_rounded_provider_times(self):
+        feature=self.feature();feature['properties']['time']+=685;feature['properties']['updated']+=725
+        raw=pipeline.encode(dict(type='FeatureCollection',metadata=dict(count=1),features=[feature]))
+        incoming=pipeline.official_incidents(self.source,raw,pipeline.stamp(self.now),
+            {'GH':self.country},self.geo,{})[0]
+        original=json.loads(json.dumps(incoming))
+        original['occurredAt']=pipeline.date(original['occurredAt'])
+        original['updatedAt']=pipeline.date(original['updatedAt'])
+        result,persisted=self._run_mock_official_update(self.source,'usgs-week',original,incoming)
+        self.assertEqual(result['changedIncidents'],[original['id']])
+        self.assertEqual(persisted['updatedAt'],incoming['updatedAt'])
+        self.assertEqual(persisted['occurredAt'],incoming['occurredAt'])
+        self.assertEqual(persisted['revisions'][-1]['previousReports'],original['reports'])
+
     def test_redirect_handler_refuses_host_and_scheme_before_follow(self):
         handler=pipeline.ReviewedSourceRedirect('source.example')
         request=pipeline.urllib.request.Request('https://source.example/feed')

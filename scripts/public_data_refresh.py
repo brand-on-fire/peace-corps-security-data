@@ -43,6 +43,13 @@ def validate_candidate(root, baseline):
     publisher.audit(root, remote=False)
     data = root/'docs/data'
     snapshot = pipeline.load(data/'snapshot.json')
+    previous_snapshot = pipeline.load(baseline/'snapshot.json')
+    generated = dt.datetime.fromisoformat(snapshot['generatedAt'].replace('Z', '+00:00'))
+    previous_generated = dt.datetime.fromisoformat(previous_snapshot['generatedAt'].replace('Z', '+00:00'))
+    if generated < previous_generated:
+        raise ValueError('Candidate publication timestamp moved backwards')
+    if generated == previous_generated and snapshot.get('publication', {}).get('revision') != previous_snapshot.get('publication', {}).get('revision'):
+        raise ValueError('Candidate changed content at the same publication timestamp')
     countries = {c['code']:c for c in pipeline.load(root/'config/countries.json')}
     records = pipeline.read_archive(data, countries)
     prior = pipeline.read_archive(baseline, countries)
@@ -50,6 +57,13 @@ def validate_candidate(root, baseline):
         raise ValueError('Candidate removed archived records')
     for identity, old in prior.items():
         row = records[identity]
+        if row['firstSeenAt'] != old['firstSeenAt']:
+            raise ValueError('Candidate changed the original first-seen time')
+        if dt.datetime.fromisoformat(row['updatedAt'].replace('Z', '+00:00')) < dt.datetime.fromisoformat(old['updatedAt'].replace('Z', '+00:00')):
+            raise ValueError('Candidate rolled back an incident timestamp')
+        revisions = {pipeline.digest(r) for r in row.get('revisions', [])}
+        if any(pipeline.digest(r) not in revisions for r in old.get('revisions', [])):
+            raise ValueError('Candidate removed an original evidence revision')
         retained = row.get('reports', []) + [r for revision in row.get('revisions', []) for r in revision.get('previousReports', [])]
         hashes = {r['contentHash'] for r in retained}
         if any(r['contentHash'] not in hashes for r in old.get('reports', [])):
