@@ -44,6 +44,8 @@ KEYWORDS = {
     'unrest': r'\b(riot|curfew|unrest|couvre-feu|toque de queda)\b',
     'health': r'\b(cholera|chol[eé]ra|dengue|outbreak|epidemic|epidemia|medicine.{0,30}shortages?)\b',
     'transport': (r'\b(road.{0,25}(closed|blocked)|bridge.{0,25}collaps(?:e|ed|es|ing)?|landslide|derailment|'
+                  r'\b(?:road|highway|vehicles?|cars?|buses?|bus|lorr(?:y|ies)|trucks?|matatu)\b.{0,60}\b(?:crash(?:es|ed|ing)?|accidents?|collisions?)\b|'
+                  r'\b(?:crash(?:es|ed|ing)?|accidents?|collisions?)\b.{0,60}\b(?:road|highway|vehicles?|cars?|buses?|bus|lorr(?:y|ies)|trucks?|matatu)\b|'
                   r'(?:accidentes?|siniestros?).{0,60}(?:tr[aá]nsito|viales?|transporte pesado)|'
                   r'deslizamientos?|derrumbes?|descarrilamientos?|d[eé]raillements?|'
                   r'(?:carreteras?|rutas?|v[ií]as?|puentes?|t[uú]neles?|aeropuertos?|vuelos?|trenes?)'
@@ -57,6 +59,7 @@ KEYWORDS = {
     # Discovery candidates only. These terms never establish an incident, its
     # date/location, an ongoing threat, or independent corroboration.
     'crime': (r'\b(kidnap(?:s|ped|ping)?|abduct(?:ed|ing|ion|ions)?|shootings?|homicides?|'
+              r'phone[- ]snatch(?:ers?|ing)|snatch(?:ed|ing)\s+(?:a\s+)?phones?|'
               r'murder(?:s|ed)?|robber(?:y|ies)|thefts?|burglar(?:y|ies)|assault(?:s|ed)?|'
               r'secuestros?|asesinatos?|homicidios?|robos?|asaltos?|agresi[oó]n(?:es)?|'
               r'meurtres?|assassinats?|braquages?|cambriolages?|agressions?|enl[eè]vements?|'
@@ -815,6 +818,12 @@ def run(root, now, fixtures=None):
     coverage = {c['sourceId']:c for c in snapshot['coverage']}
     for sid, state in states.items():
         coverage[sid] = {k:state.get(k) for k in ('sourceId','lastAttemptAt','lastSuccessAt','status','message')}
+    admitted_sources = {policy['sourceId'] for policy in policies}
+    for sid in sources:
+        coverage.setdefault(sid, dict(sourceId=sid, lastAttemptAt=None, lastSuccessAt=None,
+            status='pending' if sid in admitted_sources else 'disabled',
+            message='No collector attempt recorded.' if sid in admitted_sources else
+                    'Reference only; no automatic collection policy is enabled.'))
     snapshot['coverage'] = list(coverage.values())
     snapshot['countries'] = list(countries.values())
     snapshot['sources'] = list(sources.values())
