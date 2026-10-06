@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--?xml-stylesheet href='capatom.xsl' type='text/xsl'?-->
+<!--
+  This atom/xml feed is an index to active advisories, watches and warnings
+  issued by the Meteorological Service of Jamaica. This index file
+  is not the complete Common Alerting Protocol (CAP) alert message. To obtain
+  the complete CAP alert, please follow the links for each entry in this index.
+  Not all information in the CAP message is contained in this index of active
+  alerts.
+-->
+
+<feed 
+  xmlns="http://www.w3.org/2005/Atom"
+  xmlns:cap="urn:oasis:names:tc:emergency:cap:1.2"
+  xmlns:ha="http://www.alerting.net/namespace/index_1.0">
+
+  <link href="http://alert.metservice.gov.jm/capfeed.php" rel="self"/>
+  <rights> Copyright, Meteorological Service of Jamaica. Licensed under CC BY 4.0 </rights>
+  <id>http://alert.metservice.gov.jm/capfeed.php</id>
+  <generator>Meteorological Service of Jamaica</generator>
+  <updated>2026-10-06T01:34:05+00:00</updated>
+  <author>
+     <name>Meteorological Service of Jamaica</name>
+  </author>
+  <title>Current Watches, Warnings and Advisories Issued by Meteorological Service of Jamaica</title>
+<entry>
+<id>http://alert.metservice.gov.jm/capfeed.php</id>
+<updated>2026-10-06T01:34:05+00:00</updated>
+<author>
+<name>Meteorological Service of Jamaica</name>
+</author>
+<title>There are no active watches, warnings or advisories</title>
+<link href='http://alert.metservice.gov.jm/capfeed.php'/>
+<summary>There are no active watches, warnings or advisories</summary>
+</entry>
+</feed>

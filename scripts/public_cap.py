@@ -62,6 +62,35 @@ def feed_links(raw):
     return unique
 
 
+def jamaica_atom_links(raw, policy):
+    """Recognize only the issuer's documented empty-feed placeholder.
+
+    The HTTP self-link is an identifier, never a URL to retrieve or upgrade.
+    Every actual warning still uses the existing reviewed-HTTPS-host checks.
+    Returns links plus a diagnostic when the empty template coexists with alerts.
+    """
+    if policy['url'] != 'https://alert.metservice.gov.jm/capfeed.php':
+        raise ValueError('Jamaica CAP format requires its reviewed Atom endpoint')
+    root = xml(raw)
+    if root.tag != '{http://www.w3.org/2005/Atom}feed':
+        raise ValueError('Jamaica CAP index is not Atom')
+    entries = root.findall('{http://www.w3.org/2005/Atom}entry')
+    empty = 'There are no active watches, warnings or advisories'
+    placeholders = [entry for entry in entries if text(entry, 'title') == empty]
+    if placeholders:
+        entry = placeholders[0]
+        links = entry.findall('{http://www.w3.org/2005/Atom}link')
+        self_urls = {policy['url'], 'http://alert.metservice.gov.jm/capfeed.php'}
+        if (len(placeholders) != 1 or text(entry, 'summary') != empty
+                or text(entry, 'id') not in self_urls or len(links) != 1
+                or links[0].get('href') not in self_urls):
+            raise ValueError('Jamaica empty-feed placeholder is malformed')
+        root.remove(entry)
+        remaining = feed_links(ET.tostring(root))
+        return remaining, bool(remaining)
+    return feed_links(raw), False
+
+
 def geometry(info):
     polygons, circles, descriptions = [], [], []
     for area in info.findall('{*}area'):
@@ -173,7 +202,8 @@ def parse_alert(source, raw, url, now, countries, areas):
 
 def collect_cap(source, policy, raw, now, countries, areas, fetcher, fixtures=None):
     """Fetch all linked bulletins or reject this source atomically. No partial feed."""
-    links = feed_links(raw)
+    links, inconsistent_empty = (jamaica_atom_links(raw, policy)
+        if policy.get('format') == 'jamaica-cap-atom' else (feed_links(raw), False))
     if links is None:
         return [v for v in [parse_alert(source,raw,policy['url'],now,countries,areas)] if v]
     messages, total = [], len(raw)
@@ -203,6 +233,11 @@ def collect_cap(source, policy, raw, now, countries, areas, fetcher, fixtures=No
                     raise ValueError('CAP complete source exceeds byte budget; deferred without publication')
                 parsed = parse_alert(source,content,url,now,countries,areas)
                 if parsed:
+                    if inconsistent_empty and parsed['record'] is not None:
+                        parsed['record']['sourceMetadata'].update(
+                            capIndexInconsistentNoActivePlaceholder=True,
+                            capIndexContentHash=hashlib.sha256(raw).hexdigest(),
+                            capIndexUrl=policy['url'])
                     messages.append(parsed)
     return messages
 

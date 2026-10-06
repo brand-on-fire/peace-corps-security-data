@@ -1056,6 +1056,61 @@
       "cadenceMinutes": 360,
       "validatedAt": "2026-10-06T01:06:56Z",
       "validationSha256": "81dddf2df7c06db65bc363a043cda95d6cd659670f2fb797ee19508a1e3a3424"
+    },
+    {
+      "sourceId": "news-jm-jamaica-observer",
+      "mode": "discovery",
+      "cadenceMinutes": 360,
+      "url": "https://www.jamaicaobserver.com/app/news/",
+      "validatedAt": "2026-10-06T01:19:05Z",
+      "validationSha256": "e3a1d4debed23a601c323fe57fba7e3bf86b88fbc5ea2154fd73bfc1de047231",
+      "independentGroup": "news-jm-jamaica-observer"
+    },
+    {
+      "sourceId": "news-jm-jamaica-observer-western",
+      "mode": "discovery",
+      "cadenceMinutes": 360,
+      "url": "https://www.jamaicaobserver.com/app/westernnews/",
+      "validatedAt": "2026-10-06T01:19:56Z",
+      "validationSha256": "57706f71a5321215fc1df530b4c092f4f2d50a0ae848e4013d154675693d21f8",
+      "independentGroup": "news-jm-jamaica-observer"
+    },
+    {
+      "sourceId": "news-jm-jamaica-observer-central",
+      "mode": "discovery",
+      "cadenceMinutes": 360,
+      "url": "https://www.jamaicaobserver.com/app/centralnews/",
+      "validatedAt": "2026-10-06T01:19:56Z",
+      "validationSha256": "b189d80a537e9557476375f0232681573d15d2e966f03d0a5cc7c5f11380b372",
+      "independentGroup": "news-jm-jamaica-observer"
+    },
+    {
+      "sourceId": "news-jm-nationwide-90fm",
+      "mode": "discovery",
+      "cadenceMinutes": 60,
+      "url": "https://nationwideradiojm.com/feed/",
+      "validatedAt": "2026-10-06T01:21:33Z",
+      "validationSha256": "c66e7accb5772c56ed337e8f16799c911bf1064cdb6ba7ae59dd0d9b22d0a9ac"
+    },
+    {
+      "sourceId": "gov-jm-jamaica-information-service",
+      "mode": "discovery",
+      "cadenceMinutes": 360,
+      "url": "https://jis.gov.jm/feed/",
+      "validatedAt": "2026-10-06T01:21:33Z",
+      "validationSha256": "87bd0c4d1b715618fe44ea7e0df22ec96b35b2f3af126a816baf615425b50221"
+    },
+    {
+      "sourceId": "cap-jm-smartalert",
+      "url": "https://alert.metservice.gov.jm/capfeed.php",
+      "mode": "official",
+      "format": "jamaica-cap-atom",
+      "cadenceMinutes": 15,
+      "validatedAt": "2026-10-06T01:34:05Z",
+      "validationSha256": "fd73adc269a0b4387c916572237fcee895ab978fedc8c1421b3a18ede2dce8c7",
+      "bulletinHosts": [
+        "alert.metservice.gov.jm"
+      ]
     }
   ],
   "policy": {

@@ -1,0 +1,29 @@
+{
+  "jm-smartalert-empty.atom": {
+    "url": "https://alert.metservice.gov.jm/capfeed.php",
+    "retrievedAt": "2026-10-06T01:34:05Z",
+    "status": 200,
+    "bytes": 689,
+    "sha256": "e1c9e77226bc49a5a07b149738e7f7de25bbd9524a9afb6d9e87d7e17546d48f",
+    "decodedBytes": 1552,
+    "decodedSha256": "fd73adc269a0b4387c916572237fcee895ab978fedc8c1421b3a18ede2dce8c7"
+  },
+  "jm-smartalert-wind.xml": {
+    "url": "https://alert.metservice.gov.jm/data//publishedCap/2026/10/20261004133826/20261004133826_0000_ALERT_2.49.0.0.388.0.JM.261004133826.KVj29nYbr350L6WIfeOq.xml",
+    "retrievedAt": "2026-10-06T01:22:16Z",
+    "status": 200,
+    "bytes": 2347,
+    "sha256": "d388f4655b47454c0905b63a195a31d3123c43962e08924eb01541a14c425d48",
+    "decodedBytes": 5541,
+    "decodedSha256": "9e67bc1202744949e43edbd26c22171a0f2c765a65e38e050a95051a0d0a85ef"
+  },
+  "jm-smartalert-thunderstorm.xml": {
+    "url": "https://alert.metservice.gov.jm/data//publishedCap/2026/10/20261004133826/20261004133826_0001_ALERT_2.49.0.0.388.0.JM.261004133826.8f6Fc7yWafOyxStFNyRM.xml",
+    "retrievedAt": "2026-10-06T01:22:17Z",
+    "status": 200,
+    "bytes": 8200,
+    "sha256": "0ebc228d2a34418c70f59e8be746757ca185efa34c7b0511a8bd69e389407200",
+    "decodedBytes": 24119,
+    "decodedSha256": "577ec860e1d833ac9c8461aa571815e685fca000c8f3d285f4c67a844519efd8"
+  }
+}

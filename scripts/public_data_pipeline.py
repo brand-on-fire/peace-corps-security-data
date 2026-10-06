@@ -414,7 +414,7 @@ def make_incident(source, iid, title, summary, country, category, occurred, upda
                 sourceIds=[source['id']], historical=False, aiStatus='not-requested', sourceMetadata=provider,
                 reports=[dict(id=iid+'-report', incidentId=iid, sourceId=source['id'], title=title, url=url,
                               language=source['language'], publishedAt=published or updated, retrievedAt=now,
-                              excerpt=summary, contentHash=digest(raw), independentGroup=source['id'])])
+                              excerpt=summary, contentHash=digest(raw), independentGroup=source.get('independentGroup', source['id']))])
 
 
 def official_incidents(source, raw, now, countries, geo, iso3):
@@ -665,6 +665,11 @@ def run(root, now, fixtures=None):
         previous = states.get(sid, {})
         source = sources[sid]
         try:
+            group = policy.get('independentGroup', sid)
+            if not isinstance(group, str) or group not in sources:
+                raise ValueError('Source independence group is not a reviewed registry identity')
+            # Collection policy is reviewed configuration, never publisher input.
+            source = dict(source, independentGroup=group)
             if policy['mode'] == 'discovery' and policy.get('format', 'rss-atom') not in DISCOVERY_FORMATS:
                 # Reject unknown formats even for an unchanged HTTP response.
                 raise ValueError('Discovery format has no reviewed adapter')
@@ -715,7 +720,7 @@ def run(root, now, fixtures=None):
                             # Adapters merge genuinely new evidence into the current
                             # record before reaching this transaction.
                             continue
-                        if (old and [(r['id'],r['contentHash']) for r in old['reports']] == [(r['id'],r['contentHash']) for r in row['reports']]
+                        if (old and [(r['id'],r['contentHash'],r.get('independentGroup')) for r in old['reports']] == [(r['id'],r['contentHash'],r.get('independentGroup')) for r in row['reports']]
                                 and old['occurredAt'] == row['occurredAt']
                                 and old['updatedAt'] == row['updatedAt']
                                 and old['state'] == row['state']
