@@ -177,6 +177,58 @@ def safe_url(url):
     return parts.scheme == 'https' and bool(parts.hostname) and not parts.username and not parts.password
 
 
+DISCOVERY_FORMATS = frozenset(('rss-atom', 'wordpress', 'google-news-sitemap'))
+
+
+def parse_news_sitemap(raw, allowed_hosts):
+    """Read complete publisher News metadata, without fetching article contents."""
+    sitemap = 'http://www.sitemaps.org/schemas/sitemap/0.9'
+    news_namespace = 'http://www.google.com/schemas/sitemap-news/0.9'
+    if b'<!DOCTYPE' in raw.upper() or b'<!ENTITY' in raw.upper():
+        raise ValueError('DTD and entity declarations are not allowed')
+    root = ET.fromstring(raw)
+    if root.tag != f'{{{sitemap}}}urlset':
+        raise ValueError('Not a News sitemap urlset')
+    rows, seen = [], set()
+    for item in root:
+        if item.tag != f'{{{sitemap}}}url':
+            raise ValueError('Unexpected sitemap item')
+        links = item.findall(f'{{{sitemap}}}loc')
+        news = item.findall(f'{{{news_namespace}}}news')
+        if len(links) != 1 or len(links[0]) or len(news) != 1:
+            raise ValueError('Incomplete or ambiguous News sitemap item')
+        url = (links[0].text or '').strip()
+        def field(name):
+            values = news[0].findall(f'{{{news_namespace}}}{name}')
+            if len(values) != 1 or len(values[0]) or not values[0].text or not values[0].text.strip():
+                raise ValueError('Missing or ambiguous News metadata: '+name)
+            return values[0].text.strip()
+        title, published = field('title'), field('publication_date')
+        parts = urllib.parse.urlsplit(url)
+        if (not safe_url(url) or parts.hostname not in allowed_hosts or parts.port not in (None, 443)
+                or any(character.isspace() or ord(character) < 32 for character in url)):
+            raise ValueError('Unexpected publisher URL')
+        if dt.datetime.fromisoformat(published.replace('Z', '+00:00')).tzinfo is None:
+            raise ValueError('Publication timestamp lacks timezone')
+        if url in seen:
+            raise ValueError('Duplicate publisher URL')
+        seen.add(url)
+        rows.append(dict(title=title, url=url, publishedAt=published, description=''))
+    return rows
+
+
+def parse_discovery_feed(raw, policy, source):
+    format_name = policy.get('format', 'rss-atom')
+    if format_name == 'rss-atom':
+        return parse_feed(raw)
+    if format_name == 'wordpress':
+        from local_news_archive import parse_wordpress
+        return parse_wordpress(raw, source)
+    if format_name == 'google-news-sitemap':
+        return parse_news_sitemap(raw, {urllib.parse.urlsplit(policy['url']).hostname})
+    raise ValueError('Discovery format has no reviewed adapter')
+
+
 class ReviewedSourceRedirect(urllib.request.HTTPRedirectHandler):
     def __init__(self, hostname):
         super().__init__()
@@ -581,7 +633,7 @@ def write_archive(data, records, countries, public_country_codes=None):
 def run(root, now, fixtures=None):
     from public_cap import collect_cap, apply_lifecycle, expire_warnings
     from public_official import ADAPTERS, prepare_official_policy, request_state, collect_official
-    from local_news_archive import parse_wordpress, jcf_curfew_incidents, expire_curfews
+    from local_news_archive import jcf_curfew_incidents, expire_curfews
     now_text = stamp(now)
     data = root/'docs/data'
     all_countries = {c['code']:c for c in load(root/'config/countries.json')}
@@ -613,6 +665,9 @@ def run(root, now, fixtures=None):
         previous = states.get(sid, {})
         source = sources[sid]
         try:
+            if policy['mode'] == 'discovery' and policy.get('format', 'rss-atom') not in DISCOVERY_FORMATS:
+                # Reject unknown formats even for an unchanged HTTP response.
+                raise ValueError('Discovery format has no reviewed adapter')
             if raw is not None:
                 if policy['mode'] == 'official':
                     pending_discoveries = []
@@ -638,10 +693,14 @@ def run(root, now, fixtures=None):
                         result['coverageGap'] = gap
                         message += f" Missing interval {gap['from']} through {gap['through']}: {gap['reason']}."
                 elif policy['mode'] == 'discovery':
-                    items = parse_wordpress(raw, source) if policy.get('format') == 'wordpress' else parse_feed(raw)
+                    items = parse_discovery_feed(raw, policy, source)
                     pending_discoveries = news_discovery(source, items, now_text, countries)
-                    incoming = reviewed_news_incidents(source, items, reviews, now_text, countries, areas)
-                    incoming.extend(jcf_curfew_incidents(source, items, now_text, countries, areas))
+                    # A News sitemap supplies headlines and publication dates, not
+                    # sufficient event evidence. Never promote it into incidents.
+                    incoming = []
+                    if policy.get('format') != 'google-news-sitemap':
+                        incoming = reviewed_news_incidents(source, items, reviews, now_text, countries, areas)
+                        incoming.extend(jcf_curfew_incidents(source, items, now_text, countries, areas))
                     accepted = len(incoming)
                     message = f'Complete feed parsed ({len(items)} items); {len(pending_discoveries)} keyword discoveries; {accepted} unchanged source representations match explicit incident approvals.'
                 else:

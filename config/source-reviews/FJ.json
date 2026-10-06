@@ -1,0 +1,1883 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-06T01:11:14Z",
+  "countryCode": "FJ",
+  "sources": [
+    {
+      "id": "news-fj-fiji-one",
+      "name": "Fiji One News",
+      "url": "https://fijionenews.com.fj/",
+      "feedUrl": "https://fijionenews.com.fj/feed/",
+      "countryCodes": [
+        "FJ"
+      ],
+      "kind": "rss",
+      "tier": "local-news",
+      "language": "en",
+      "cadenceMinutes": 360,
+      "enabled": true,
+      "access": "public-feed",
+      "notes": "Fiji Television Limited identifies itself as the operator of Fiji One and this news website; the February 2026 stock-exchange announcement corroborates the broadcaster and its public news role. National broadcaster and Pacific audience. No specific province-wide reporting beat is established by its national distribution or Suva headquarters. No published restrictive automation term was found in the reviewed pages. Attempted /privacy-policy/ returns 404. Public RSS is admitted only for attributed title/link/date discovery; all incident and geographic claims still require review.",
+      "verifiedAt": "2026-10-06T01:02:02Z"
+    },
+    {
+      "id": "gov-fj-fiji-meteorological-service",
+      "name": "Fiji Meteorological Service",
+      "url": "https://www.met.gov.fj/",
+      "countryCodes": [
+        "FJ"
+      ],
+      "kind": "rss",
+      "tier": "official",
+      "language": "en",
+      "cadenceMinutes": 15,
+      "enabled": true,
+      "access": "public-feed",
+      "verifiedAt": "2026-10-06T01:02:04Z",
+      "notes": "The government meteorological domain advertises this weather-alert RSS directly. NFA independently links the official meteorological domain. Weather-alert context for Fiji; exact affected areas must come from each issued warning, not a nationwide publisher assignment. The live RSS response is valid and empty. Its issuance/update/cancellation behavior and detection latency have not been replay-tested. Empty warnings are not a statement that all locations are safe.",
+      "socialHandles": [
+        {
+          "platform": "X",
+          "url": "https://twitter.com/FJMETservice",
+          "provenanceUrl": "https://www.met.gov.fj/"
+        },
+        {
+          "platform": "Facebook",
+          "url": "https://www.facebook.com/FijiMetService/",
+          "provenanceUrl": "https://www.met.gov.fj/"
+        },
+        {
+          "platform": "Instagram",
+          "url": "https://www.instagram.com/fiji_meteorological_service/",
+          "provenanceUrl": "https://www.met.gov.fj/"
+        },
+        {
+          "platform": "YouTube",
+          "url": "https://www.youtube.com/channel/UCf-5-1iGrEeb2nqMTIJrkOA",
+          "provenanceUrl": "https://www.met.gov.fj/"
+        }
+      ],
+      "feedUrl": "https://www.met.gov.fj/feed/warnings/"
+    },
+    {
+      "id": "gov-fj-government-news",
+      "name": "Fiji Government News",
+      "url": "https://www.fiji.gov.fj/",
+      "countryCodes": [
+        "FJ"
+      ],
+      "tier": "official",
+      "language": "en",
+      "kind": "rss",
+      "cadenceMinutes": 360,
+      "enabled": true,
+      "access": "public-feed",
+      "notes": "Official Fiji government portal with government announcements; NFA also links this government domain. Homepage explicitly advertises RSS. National government releases, not a comprehensive police, transport or village incident register. General announcements include non-incidents and international affairs. New records remain discovery candidates; no publication date is silently treated as an event date.",
+      "verifiedAt": "2026-10-06T01:05:44Z",
+      "feedUrl": "https://www.fiji.gov.fj/feed/"
+    },
+    {
+      "id": "gov-fj-national-fire-authority",
+      "name": "National Fire Authority of Fiji",
+      "url": "https://nfa.com.fj/",
+      "countryCodes": [
+        "FJ"
+      ],
+      "tier": "official",
+      "language": "en",
+      "kind": "rss",
+      "cadenceMinutes": 360,
+      "enabled": false,
+      "access": "public-feed",
+      "notes": "First-party statutory fire authority describes its establishment and national fire-services responsibility and publishes divisional emergency-communications pages. Explicit Northern, Western and combined Central/Eastern emergency-communications responsibilities; contacts do not establish current published incident coverage for each province. RSS parses but newest item is 11 June 2025, before the requested past-year baseline. Held as a stale official directory/feed; no current alert-delivery claim. Contact numbers were not operationally tested.",
+      "verifiedAt": "2026-10-06T01:05:43Z",
+      "feedUrl": "https://nfa.com.fj/news?format=feed&type=rss",
+      "termsUrl": "https://nfa.com.fj/privacy"
+    },
+    {
+      "id": "news-fj-the-fiji-times",
+      "name": "The Fiji Times",
+      "url": "https://www.fijitimes.com.fj/",
+      "countryCodes": [
+        "FJ"
+      ],
+      "kind": "directory",
+      "tier": "local-news",
+      "language": "en",
+      "cadenceMinutes": 360,
+      "enabled": false,
+      "access": "link-only",
+      "verifiedAt": "2026-10-06T01:02:02Z",
+      "notes": "Terms identify Fiji Times Limited as operator. The retrieved /about-us/ instead contains a generic authored post and casino material, so that page is excluded as publisher-identity evidence. National paper; no current province-specific beat is admitted in this review. Both attempted and advertised RSS URLs redirect to homepage HTML. Terms expressly prohibit automated scripting/software and restrict reuse for another publication/site. Held manual-only; no further automated collection.",
+      "termsUrl": "https://www.fijitimes.com.fj/terms/"
+    },
+    {
+      "id": "news-fj-fijivillage",
+      "name": "Fijivillage",
+      "url": "https://www.fijivillage.com/",
+      "countryCodes": [
+        "FJ"
+      ],
+      "kind": "directory",
+      "tier": "local-news",
+      "language": "en",
+      "cadenceMinutes": 360,
+      "enabled": false,
+      "access": "link-only",
+      "verifiedAt": "2026-10-06T01:02:04Z",
+      "notes": "Its terms state ownership and operation by Communications Fiji Limited; the company site separately identifies its Fijivillage news platform. National and community reporting; no explicit complete beat for every indexed province is established. Attempted /rss.xml returns 404. Terms permit personal/non-commercial research copying but require permission for other use and prohibit unauthorized caching/hypertext links. No publication/automated discovery admission is made; this is a source-review reference only.",
+      "termsUrl": "https://www.fijivillage.com/terms-of-use/"
+    },
+    {
+      "id": "news-fj-fiji-sun",
+      "name": "Fiji Sun",
+      "url": "https://fijisun.com.fj/pages/about-us",
+      "countryCodes": [
+        "FJ"
+      ],
+      "tier": "local-news",
+      "language": "en",
+      "kind": "directory",
+      "cadenceMinutes": 360,
+      "enabled": true,
+      "access": "public-feed",
+      "notes": "Sun (Fiji) News Limited is the operator identified in its terms. The publisher advertises this Google News sitemap in robots.txt. Collect attributed title, link and publication date only; no article contents, paywall or disallowed API access. All findings remain unverified discovery candidates; no automatic crime, event-time or geographic verification. Named newsroom hubs are partial remits and do not establish coverage of every province or locality.",
+      "verifiedAt": "2026-10-06T01:04:59Z",
+      "termsUrl": "https://fijisun.com.fj/pages/terms-and-conditions",
+      "feedUrl": "https://fijisun.com.fj/news-sitemap.xml"
+    },
+    {
+      "id": "gov-fj-fiji-police-force",
+      "name": "Fiji Police Force",
+      "url": "https://www.police.gov.fj/",
+      "countryCodes": [
+        "FJ"
+      ],
+      "tier": "official",
+      "language": "en",
+      "kind": "directory",
+      "cadenceMinutes": 360,
+      "enabled": false,
+      "access": "link-only",
+      "notes": "NFA links police.gov.fj as Fiji Police and lists police stations in its emergency directory. Native HTTPS/HTTP retrieval attempts timed out. National police channel; station contacts are not a verified public incident feed or exact province coverage. Homepage and robots are currently unavailable from the review environment. Feed access, reuse conditions, publication freshness and platform activity remain unverified. Catalog identity reviewed from the complete NFA homepage crosslink, retrieved 2026-10-06T01:05:43Z; this date does not verify police website delivery or live updates.",
+      "verifiedAt": "2026-10-06T01:05:43Z"
+    },
+    {
+      "id": "gov-fj-national-disaster-management-office",
+      "name": "Fiji National Disaster Management Office",
+      "url": "https://www.ndmo.gov.fj/",
+      "countryCodes": [
+        "FJ"
+      ],
+      "tier": "official",
+      "language": "en",
+      "kind": "directory",
+      "cadenceMinutes": 360,
+      "enabled": false,
+      "access": "link-only",
+      "notes": "NFA names NDMO in its emergency directory. Official-domain disaster-plan URL was discovered, but native homepage/robots/PDF requests timed out; the directory links a different older dismac.org domain. National disaster coordination reference only. Do not infer verified local update feeds from an agency title. Current domain delivery and document contents were not verified by complete native retrieval. Remains a disabled directory; no source-to-province monitoring claim."
+    }
+  ],
+  "policies": [
+    {
+      "sourceId": "news-fj-fiji-one",
+      "mode": "discovery",
+      "cadenceMinutes": 360,
+      "url": "https://fijionenews.com.fj/feed/",
+      "validatedAt": "2026-10-06T00:24:03Z",
+      "validationSha256": "856ba0bac527bbeda1e5beef0756875a1a474d558b4b8df65cc6f958cde04e50"
+    },
+    {
+      "sourceId": "gov-fj-fiji-meteorological-service",
+      "mode": "discovery",
+      "cadenceMinutes": 15,
+      "url": "https://www.met.gov.fj/feed/warnings/",
+      "validatedAt": "2026-10-06T01:03:44Z",
+      "validationSha256": "9ec5e8df78c00d9591e0988c5e84f6dc93cac210e2a8edd74bf643c063987551"
+    },
+    {
+      "sourceId": "gov-fj-government-news",
+      "mode": "discovery",
+      "cadenceMinutes": 360,
+      "url": "https://www.fiji.gov.fj/feed/",
+      "validatedAt": "2026-10-06T01:06:55Z",
+      "validationSha256": "01dcf9dc92cf32bf046acf3ec42b65b5cab07d8973980fe2c5730a975cca5e0b"
+    },
+    {
+      "sourceId": "news-fj-fiji-sun",
+      "url": "https://fijisun.com.fj/news-sitemap.xml",
+      "mode": "discovery",
+      "format": "google-news-sitemap",
+      "cadenceMinutes": 360,
+      "validatedAt": "2026-10-06T01:06:56Z",
+      "validationSha256": "81dddf2df7c06db65bc363a043cda95d6cd659670f2fb797ee19508a1e3a3424"
+    }
+  ],
+  "reviews": [
+    {
+      "sourceId": "news-fj-fiji-one",
+      "reviewedAt": "2026-10-06T01:11:14Z",
+      "admittedUse": "Attributed title/link/date discovery only",
+      "fullArticleRepublication": false,
+      "automaticIncidentPromotion": false,
+      "accessEvidence": [
+        {
+          "name": "one-home",
+          "url": "https://fijionenews.com.fj/",
+          "finalUrl": "https://fijionenews.com.fj/",
+          "status": 200,
+          "retrievedAt": "2026-10-06T01:02:02Z",
+          "bytes": 98940,
+          "sha256": "9dca98e89fee65747a9b8c1944d0e9e5e93c05246bb75371fe249bb1c7bdcecc"
+        },
+        {
+          "name": "fj-feed",
+          "url": "https://fijionenews.com.fj/feed/",
+          "finalUrl": "https://fijionenews.com.fj/feed/",
+          "status": 200,
+          "retrievedAt": "2026-10-06T00:24:03Z",
+          "bytes": 36535,
+          "sha256": "856ba0bac527bbeda1e5beef0756875a1a474d558b4b8df65cc6f958cde04e50",
+          "strictXML": true,
+          "collectorParser": true,
+          "itemCount": 10,
+          "decodedBytes": 36535,
+          "decodedSha256": "856ba0bac527bbeda1e5beef0756875a1a474d558b4b8df65cc6f958cde04e50",
+          "publicationDates": [
+            "Mon, 05 Oct 2026 22:23:44 +0000",
+            "Mon, 05 Oct 2026 22:11:44 +0000",
+            "Mon, 05 Oct 2026 21:49:13 +0000",
+            "Mon, 05 Oct 2026 20:28:56 +0000",
+            "Mon, 05 Oct 2026 10:56:07 +0000",
+            "Mon, 05 Oct 2026 10:53:15 +0000",
+            "Mon, 05 Oct 2026 10:34:56 +0000",
+            "Mon, 05 Oct 2026 06:44:04 +0000",
+            "Mon, 05 Oct 2026 06:26:15 +0000",
+            "Mon, 05 Oct 2026 05:13:16 +0000"
+          ]
+        },
+        {
+          "name": "one-robots",
+          "url": "https://fijionenews.com.fj/robots.txt",
+          "finalUrl": "https://fijionenews.com.fj/robots.txt",
+          "status": 200,
+          "retrievedAt": "2026-10-06T01:01:28Z",
+          "bytes": 66,
+          "sha256": "39b63453cb4c3d8b411cb57294ec5ea71c9039cb343db25942f432a51bfd82fc",
+          "allowsFeed": true,
+          "crawlDelaySeconds": null
+        }
+      ],
+      "publisherProvenance": {
+        "statement": "Fiji Television Limited identifies itself as the operator of Fiji One and this news website; the February 2026 stock-exchange announcement corroborates the broadcaster and its public news role.",
+        "evidenceUrls": [
+          "https://fijionenews.com.fj/about-us/",
+          "https://announcements.spx.com.fj/ftp/news/2722026103233FTV.PDF"
+        ]
+      },
+      "independenceNote": "Separate publisher identities do not establish independent accounts of an event; government-release syndication counts as one source account.",
+      "contentTerms": "No full-text republication or paywall access. Feed/robots accessibility does not waive publisher restrictions.",
+      "termsEvidence": null,
+      "termsLimitation": "No published restrictive automation term was found in the reviewed pages. Attempted /privacy-policy/ returns 404. Public RSS is admitted only for attributed title/link/date discovery; all incident and geographic claims still require review.",
+      "continuousCoverageVerified": false
+    },
+    {
+      "sourceId": "gov-fj-fiji-meteorological-service",
+      "reviewedAt": "2026-10-06T01:11:14Z",
+      "admittedUse": "Attributed title/link/date discovery only",
+      "fullArticleRepublication": false,
+      "automaticIncidentPromotion": false,
+      "accessEvidence": [
+        {
+          "name": "met-home",
+          "url": "https://www.met.gov.fj/",
+          "finalUrl": "https://www.met.gov.fj/",
+          "status": 200,
+          "retrievedAt": "2026-10-06T01:02:04Z",
+          "bytes": 181629,
+          "sha256": "88453ec928b1a9c931751f9f407e8fb79d933702bfb1eeee34f9940a978babd2"
+        },
+        {
+          "name": "met-feed",
+          "url": "https://www.met.gov.fj/feed/warnings/",
+          "finalUrl": "https://www.met.gov.fj/feed/warnings/",
+          "status": 200,
+          "retrievedAt": "2026-10-06T01:03:44Z",
+          "bytes": 489,
+          "sha256": "9ec5e8df78c00d9591e0988c5e84f6dc93cac210e2a8edd74bf643c063987551",
+          "strictXML": true,
+          "collectorParser": true,
+          "itemCount": 0,
+          "decodedBytes": 489,
+          "decodedSha256": "9ec5e8df78c00d9591e0988c5e84f6dc93cac210e2a8edd74bf643c063987551",
+          "publicationDates": []
+        },
+        {
+          "name": "met-robots",
+          "url": "https://www.met.gov.fj/robots.txt",
+          "finalUrl": "https://www.met.gov.fj/robots.txt",
+          "status": 200,
+          "retrievedAt": "2026-10-06T01:01:28Z",
+          "bytes": 41,
+          "sha256": "92690d42887a925eadfcb382b052618d6e80844bbb38ebbd41cd691bde15b168",
+          "allowsFeed": true,
+          "crawlDelaySeconds": null
+        }
+      ],
+      "publisherProvenance": {
+        "statement": "The government meteorological domain advertises this weather-alert RSS directly. NFA independently links the official meteorological domain.",
+        "evidenceUrls": [
+          "https://www.met.gov.fj/",
+          "https://www.met.gov.fj/warnings/",
+          "https://nfa.com.fj/"
+        ]
+      },
+      "independenceNote": "Separate publisher identities do not establish independent accounts of an event; government-release syndication counts as one source account.",
+      "contentTerms": "No full-text republication or paywall access. Feed/robots accessibility does not waive publisher restrictions.",
+      "termsEvidence": null,
+      "termsLimitation": "The live RSS response is valid and empty. Its issuance/update/cancellation behavior and detection latency have not been replay-tested. Empty warnings are not a statement that all locations are safe.",
+      "continuousCoverageVerified": false
+    },
+    {
+      "sourceId": "gov-fj-government-news",
+      "reviewedAt": "2026-10-06T01:11:14Z",
+      "admittedUse": "Attributed title/link/date discovery only",
+      "fullArticleRepublication": false,
+      "automaticIncidentPromotion": false,
+      "accessEvidence": [
+        {
+          "name": "gov-home",
+          "url": "https://www.fiji.gov.fj/",
+          "finalUrl": "https://www.fiji.gov.fj/",
+          "status": 200,
+          "retrievedAt": "2026-10-06T01:05:44Z",
+          "bytes": 322775,
+          "sha256": "7fe25eca7e9bf9db0aa406d2638df143a6cc9f6735eb53a82366f18f69211e65"
+        },
+        {
+          "name": "gov-feed",
+          "url": "https://www.fiji.gov.fj/feed/",
+          "finalUrl": "https://www.fiji.gov.fj/feed/",
+          "status": 200,
+          "retrievedAt": "2026-10-06T01:06:55Z",
+          "bytes": 104282,
+          "sha256": "01dcf9dc92cf32bf046acf3ec42b65b5cab07d8973980fe2c5730a975cca5e0b",
+          "strictXML": true,
+          "collectorParser": true,
+          "itemCount": 10,
+          "decodedBytes": 104282,
+          "decodedSha256": "01dcf9dc92cf32bf046acf3ec42b65b5cab07d8973980fe2c5730a975cca5e0b",
+          "publicationDates": [
+            "Mon, 05 Oct 2026 05:25:19 +0000",
+            "Sun, 04 Oct 2026 09:39:33 +0000",
+            "Fri, 25 Sep 2026 06:00:00 +0000",
+            "Fri, 25 Sep 2026 03:41:00 +0000",
+            "Thu, 24 Sep 2026 00:53:00 +0000",
+            "Wed, 23 Sep 2026 03:30:00 +0000",
+            "Wed, 23 Sep 2026 02:02:56 +0000",
+            "Wed, 23 Sep 2026 00:36:00 +0000",
+            "Sun, 20 Sep 2026 08:19:00 +0000",
+            "Thu, 17 Sep 2026 08:19:07 +0000"
+          ]
+        },
+        {
+          "name": "gov-robots",
+          "url": "https://www.fiji.gov.fj/robots.txt",
+          "finalUrl": "https://www.fiji.gov.fj/robots.txt",
+          "status": 200,
+          "retrievedAt": "2026-10-06T01:06:55Z",
+          "bytes": 116,
+          "sha256": "7ebbaaa6f96736d93467778f522170ad903e941f8a040be90109dbfdc8f66237",
+          "allowsFeed": true,
+          "crawlDelaySeconds": null
+        }
+      ],
+      "publisherProvenance": {
+        "statement": "Official Fiji government portal with government announcements; NFA also links this government domain. Homepage explicitly advertises RSS.",
+        "evidenceUrls": [
+          "https://www.fiji.gov.fj/",
+          "https://nfa.com.fj/"
+        ]
+      },
+      "independenceNote": "Separate publisher identities do not establish independent accounts of an event; government-release syndication counts as one source account.",
+      "contentTerms": "No full-text republication or paywall access. Feed/robots accessibility does not waive publisher restrictions.",
+      "termsEvidence": null,
+      "termsLimitation": "General announcements include non-incidents and international affairs. New records remain discovery candidates; no publication date is silently treated as an event date.",
+      "continuousCoverageVerified": false
+    },
+    {
+      "sourceId": "gov-fj-national-fire-authority",
+      "reviewedAt": "2026-10-06T01:11:14Z",
+      "admittedUse": "Directory/source review only; automated collection not admitted in current RSS collector",
+      "fullArticleRepublication": false,
+      "automaticIncidentPromotion": false,
+      "accessEvidence": [
+        {
+          "name": "nfa-home",
+          "url": "https://nfa.com.fj/",
+          "finalUrl": "https://nfa.com.fj/",
+          "status": 200,
+          "retrievedAt": "2026-10-06T01:05:43Z",
+          "bytes": 398288,
+          "sha256": "aa0ea4c603c45ec219bfb540caa58724574d124a1c07da672016e42dbd04544c"
+        },
+        {
+          "name": "nfa-feed",
+          "url": "https://nfa.com.fj/news?format=feed&type=rss",
+          "finalUrl": "https://nfa.com.fj/news?format=feed&type=rss",
+          "status": 200,
+          "retrievedAt": "2026-10-06T01:06:55Z",
+          "bytes": 44595,
+          "sha256": "cfe4ec65fa8c3b8127084675b91ab82951bfecce321ec6a5a651a704fdf8d10b",
+          "strictXML": true,
+          "collectorParser": true,
+          "itemCount": 10,
+          "decodedBytes": 44595,
+          "decodedSha256": "cfe4ec65fa8c3b8127084675b91ab82951bfecce321ec6a5a651a704fdf8d10b",
+          "publicationDates": [
+            "Wed, 11 Jun 2025 10:24:52 +1200",
+            "Thu, 29 May 2025 12:22:32 +1200",
+            "Mon, 05 May 2025 18:51:23 +1200",
+            "Sat, 03 May 2025 22:14:39 +1200",
+            "Tue, 22 Apr 2025 09:10:11 +1200",
+            "Tue, 08 Apr 2025 14:19:32 +1200",
+            "Tue, 25 Feb 2025 09:06:21 +1200",
+            "Mon, 06 Jan 2025 08:26:20 +1200",
+            "Thu, 02 Jan 2025 09:13:41 +1200",
+            "Fri, 22 Nov 2024 14:16:20 +1200"
+          ]
+        },
+        {
+          "name": "nfa-robots",
+          "url": "https://nfa.com.fj/robots.txt",
+          "finalUrl": "https://nfa.com.fj/robots.txt",
+          "status": 200,
+          "retrievedAt": "2026-10-06T01:05:43Z",
+          "bytes": 842,
+          "sha256": "22aa0adeed7730e6a83520a4013a3500ccb280a2f55c57b5a59183ffd05d611b",
+          "allowsFeed": true,
+          "crawlDelaySeconds": null
+        }
+      ],
+      "publisherProvenance": {
+        "statement": "First-party statutory fire authority describes its establishment and national fire-services responsibility and publishes divisional emergency-communications pages.",
+        "evidenceUrls": [
+          "https://nfa.com.fj/",
+          "https://nfa.com.fj/operations/emergency-communications/northern-division",
+          "https://nfa.com.fj/operations/emergency-communications/western-division",
+          "https://nfa.com.fj/operations/emergency-communications/central-eastern-division"
+        ]
+      },
+      "independenceNote": "Separate publisher identities do not establish independent accounts of an event; government-release syndication counts as one source account.",
+      "contentTerms": "No full-text republication or paywall access. Feed/robots accessibility does not waive publisher restrictions.",
+      "termsEvidence": {
+        "name": "nfa-privacy",
+        "url": "https://nfa.com.fj/privacy",
+        "finalUrl": "https://nfa.com.fj/privacy",
+        "status": 200,
+        "retrievedAt": "2026-10-06T01:06:55Z",
+        "bytes": 25811,
+        "sha256": "e0f08f09d6c7ed863c0895ca692e843cdb075239580332d9c4f5dc359d528f90"
+      },
+      "termsLimitation": "RSS parses but newest item is 11 June 2025, before the requested past-year baseline. Held as a stale official directory/feed; no current alert-delivery claim. Contact numbers were not operationally tested.",
+      "continuousCoverageVerified": false
+    },
+    {
+      "sourceId": "news-fj-the-fiji-times",
+      "reviewedAt": "2026-10-06T01:11:14Z",
+      "admittedUse": "Directory/source review only; automated collection not admitted in current RSS collector",
+      "fullArticleRepublication": false,
+      "automaticIncidentPromotion": false,
+      "accessEvidence": [
+        {
+          "name": "times-home",
+          "url": "https://www.fijitimes.com.fj/",
+          "finalUrl": "https://www.fijitimes.com.fj/",
+          "status": 200,
+          "retrievedAt": "2026-10-06T01:02:02Z",
+          "bytes": 128684,
+          "sha256": "8b3120e80f1ed4ed9cfd8380179b0dcd80f1ae742e5a9388313b736f41d42ec4"
+        },
+        {
+          "name": "times-feed",
+          "url": "https://www.fijitimes.com.fj/feed/",
+          "finalUrl": "https://www.fijitimes.com.fj/",
+          "status": 200,
+          "retrievedAt": "2026-10-06T01:02:03Z",
+          "bytes": 128684,
+          "sha256": "8b3120e80f1ed4ed9cfd8380179b0dcd80f1ae742e5a9388313b736f41d42ec4",
+          "strictXML": false,
+          "collectorParser": false,
+          "parseError": "not well-formed (invalid token): line 11, column 5"
+        },
+        {
+          "name": "times-robots",
+          "url": "https://www.fijitimes.com.fj/robots.txt",
+          "finalUrl": "https://www.fijitimes.com.fj/robots.txt",
+          "status": 200,
+          "retrievedAt": "2026-10-06T01:01:28Z",
+          "bytes": 189,
+          "sha256": "fbbccd58b7c60ae82fe090f8c93b87bf29d95991350e62ffa8455ce25d0fb960",
+          "allowsFeed": true,
+          "crawlDelaySeconds": null
+        }
+      ],
+      "publisherProvenance": {
+        "statement": "Terms identify Fiji Times Limited as operator. The retrieved /about-us/ instead contains a generic authored post and casino material, so that page is excluded as publisher-identity evidence.",
+        "evidenceUrls": [
+          "https://www.fijitimes.com.fj/terms/",
+          "https://www.fijitimes.com.fj/contact-us/"
+        ]
+      },
+      "independenceNote": "Separate publisher identities do not establish independent accounts of an event; government-release syndication counts as one source account.",
+      "contentTerms": "No full-text republication or paywall access. Feed/robots accessibility does not waive publisher restrictions.",
+      "termsEvidence": {
+        "name": "times-terms",
+        "url": "https://www.fijitimes.com.fj/terms/",
+        "finalUrl": "https://www.fijitimes.com.fj/terms/",
+        "status": 200,
+        "retrievedAt": "2026-10-06T01:03:44Z",
+        "bytes": 83228,
+        "sha256": "e3b022254533a408509c2f0f0a7165090e06ca4d57bcfe475b3aaae517942443"
+      },
+      "termsLimitation": "Both attempted and advertised RSS URLs redirect to homepage HTML. Terms expressly prohibit automated scripting/software and restrict reuse for another publication/site. Held manual-only; no further automated collection.",
+      "continuousCoverageVerified": false
+    },
+    {
+      "sourceId": "news-fj-fijivillage",
+      "reviewedAt": "2026-10-06T01:11:14Z",
+      "admittedUse": "Directory/source review only; automated collection not admitted in current RSS collector",
+      "fullArticleRepublication": false,
+      "automaticIncidentPromotion": false,
+      "accessEvidence": [
+        {
+          "name": "village-home",
+          "url": "https://www.fijivillage.com/",
+          "finalUrl": "https://www.fijivillage.com/",
+          "status": 200,
+          "retrievedAt": "2026-10-06T01:02:04Z",
+          "bytes": 168152,
+          "sha256": "dfef0e5277bafdcde802f34f63302a03177b3b257302d72a1572df466272bdf2"
+        },
+        {
+          "name": "village-rss",
+          "url": "https://www.fijivillage.com/rss.xml",
+          "retrievedAt": "2026-10-06T01:03:44Z",
+          "error": "HTTP Error 404: Not Found",
+          "strictXML": false,
+          "collectorParser": false
+        },
+        {
+          "name": "village-robots",
+          "url": "https://www.fijivillage.com/robots.txt",
+          "finalUrl": "https://www.fijivillage.com/robots.txt",
+          "status": 200,
+          "retrievedAt": "2026-10-06T01:01:28Z",
+          "bytes": 507,
+          "sha256": "683af07e22e31efcffdbbb37f447cdcf2a86ad587cdf1a39e1aee8a6f16e2ee7",
+          "allowsFeed": true,
+          "crawlDelaySeconds": null
+        }
+      ],
+      "publisherProvenance": {
+        "statement": "Its terms state ownership and operation by Communications Fiji Limited; the company site separately identifies its Fijivillage news platform.",
+        "evidenceUrls": [
+          "https://www.fijivillage.com/terms-of-use/",
+          "https://cfl.com.fj/fijivillage/"
+        ]
+      },
+      "independenceNote": "Separate publisher identities do not establish independent accounts of an event; government-release syndication counts as one source account.",
+      "contentTerms": "No full-text republication or paywall access. Feed/robots accessibility does not waive publisher restrictions.",
+      "termsEvidence": {
+        "name": "village-terms",
+        "url": "https://www.fijivillage.com/terms-of-use/",
+        "finalUrl": "https://www.fijivillage.com/terms-of-use/",
+        "status": 200,
+        "retrievedAt": "2026-10-06T01:03:44Z",
+        "bytes": 99943,
+        "sha256": "e428e8fcda5c5eaeeb2fd5562556078844a4925c43cc15b30159858ed4cb6889"
+      },
+      "termsLimitation": "Attempted /rss.xml returns 404. Terms permit personal/non-commercial research copying but require permission for other use and prohibit unauthorized caching/hypertext links. No publication/automated discovery admission is made; this is a source-review reference only.",
+      "continuousCoverageVerified": false
+    },
+    {
+      "sourceId": "news-fj-fiji-sun",
+      "reviewedAt": "2026-10-06T01:11:14Z",
+      "admittedUse": "Attributed title/link/publication-date discovery from the advertised Google News sitemap only",
+      "fullArticleRepublication": false,
+      "automaticIncidentPromotion": false,
+      "accessEvidence": [
+        {
+          "name": "sun-about",
+          "url": "https://fijisun.com.fj/pages/about-us",
+          "finalUrl": "https://fijisun.com.fj/pages/about-us",
+          "status": 200,
+          "retrievedAt": "2026-10-06T01:04:59Z",
+          "bytes": 294202,
+          "sha256": "4f783431732c1c92fb10f2a30bfe6a78e9dfd684c04bb833439651546faf7bcf"
+        },
+        {
+          "name": "sun-feed",
+          "url": "https://fijisun.com.fj/feed/",
+          "retrievedAt": "2026-10-06T01:04:59Z",
+          "error": "HTTP Error 404: Not Found",
+          "strictXML": false,
+          "collectorParser": false
+        },
+        {
+          "name": "sun-robots",
+          "url": "https://fijisun.com.fj/robots.txt",
+          "finalUrl": "https://fijisun.com.fj/robots.txt",
+          "status": 200,
+          "retrievedAt": "2026-10-06T01:04:59Z",
+          "bytes": 204,
+          "sha256": "4286a6a45ef80b4550baeadbbcd7f93e7ae2cfeb9afcd72d552535044ca5548b",
+          "allowsFeed": true,
+          "crawlDelaySeconds": null
+        },
+        {
+          "url": "https://fijisun.com.fj/news-sitemap.xml",
+          "validatedAt": "2026-10-06T01:06:56Z",
+          "validationSha256": "81dddf2df7c06db65bc363a043cda95d6cd659670f2fb797ee19508a1e3a3424",
+          "entryCount": 53,
+          "format": "google-news-sitemap"
+        }
+      ],
+      "publisherProvenance": {
+        "statement": "Current terms identify Sun (Fiji) News Limited; the about/locations pages describe its newsroom and Suva, Nadi, Lautoka and Labasa hubs.",
+        "evidenceUrls": [
+          "https://fijisun.com.fj/pages/about-us",
+          "https://fijisun.com.fj/pages/our-locations",
+          "https://fijisun.com.fj/pages/terms-and-conditions"
+        ]
+      },
+      "independenceNote": "Separate publisher identities do not establish independent accounts of an event; government-release syndication counts as one source account.",
+      "contentTerms": "No full-text republication or paywall access. Feed/robots accessibility does not waive publisher restrictions.",
+      "termsEvidence": {
+        "name": "sun-terms",
+        "url": "https://fijisun.com.fj/pages/terms-and-conditions",
+        "finalUrl": "https://fijisun.com.fj/pages/terms-and-conditions",
+        "status": 200,
+        "retrievedAt": "2026-10-06T01:04:59Z",
+        "bytes": 265634,
+        "sha256": "a4a0b904b651dbfde4adddb56b7a8ecd1a6886da40ff4dfc07d742dffd963a42"
+      },
+      "termsLimitation": "No full-text republication, paid articles, protected trademarks or disallowed /api/ access. Accessible metadata does not establish exhaustive or continuous local coverage.",
+      "continuousCoverageVerified": false
+    },
+    {
+      "sourceId": "gov-fj-fiji-police-force",
+      "reviewedAt": "2026-10-06T01:11:14Z",
+      "admittedUse": "Directory/source review only; automated collection not admitted in current RSS collector",
+      "fullArticleRepublication": false,
+      "automaticIncidentPromotion": false,
+      "accessEvidence": [
+        {
+          "name": "police-home",
+          "url": "https://www.police.gov.fj/",
+          "retrievedAt": "2026-10-06T01:03:46Z",
+          "error": "<urlopen error timed out>"
+        },
+        {
+          "name": "police-robots",
+          "url": "https://www.police.gov.fj/robots.txt",
+          "retrievedAt": "2026-10-06T01:01:28Z",
+          "error": "<urlopen error timed out>"
+        }
+      ],
+      "publisherProvenance": {
+        "statement": "NFA links police.gov.fj as Fiji Police and lists police stations in its emergency directory. Native HTTPS/HTTP retrieval attempts timed out.",
+        "evidenceUrls": [
+          "https://nfa.com.fj/",
+          "https://nfa.com.fj/operations/emergency-communications/northern-division",
+          "https://nfa.com.fj/operations/emergency-communications/western-division",
+          "https://nfa.com.fj/operations/emergency-communications/central-eastern-division"
+        ]
+      },
+      "independenceNote": "Separate publisher identities do not establish independent accounts of an event; government-release syndication counts as one source account.",
+      "contentTerms": "No full-text republication or paywall access. Feed/robots accessibility does not waive publisher restrictions.",
+      "termsEvidence": null,
+      "termsLimitation": "Homepage and robots are currently unavailable from the review environment. Feed access, reuse conditions, publication freshness and platform activity remain unverified.",
+      "continuousCoverageVerified": false
+    },
+    {
+      "sourceId": "gov-fj-national-disaster-management-office",
+      "reviewedAt": "2026-10-06T01:11:14Z",
+      "admittedUse": "Directory/source review only; automated collection not admitted in current RSS collector",
+      "fullArticleRepublication": false,
+      "automaticIncidentPromotion": false,
+      "accessEvidence": [
+        {
+          "name": "ndmo-home",
+          "url": "https://www.ndmo.gov.fj/",
+          "retrievedAt": "2026-10-06T01:03:46Z",
+          "error": "<urlopen error timed out>"
+        },
+        {
+          "name": "ndmo-robots",
+          "url": "https://www.ndmo.gov.fj/robots.txt",
+          "retrievedAt": "2026-10-06T01:01:28Z",
+          "error": "<urlopen error timed out>"
+        }
+      ],
+      "publisherProvenance": {
+        "statement": "NFA names NDMO in its emergency directory. Official-domain disaster-plan URL was discovered, but native homepage/robots/PDF requests timed out; the directory links a different older dismac.org domain.",
+        "evidenceUrls": [
+          "https://nfa.com.fj/operations/emergency-communications/central-eastern-division"
+        ]
+      },
+      "independenceNote": "Separate publisher identities do not establish independent accounts of an event; government-release syndication counts as one source account.",
+      "contentTerms": "No full-text republication or paywall access. Feed/robots accessibility does not waive publisher restrictions.",
+      "termsEvidence": null,
+      "termsLimitation": "Current domain delivery and document contents were not verified by complete native retrieval. Remains a disabled directory; no source-to-province monitoring claim.",
+      "continuousCoverageVerified": false
+    }
+  ],
+  "relationships": [
+    {
+      "areaId": "gb:53030831B91072554514863",
+      "countryCode": "FJ",
+      "level": "ADM1",
+      "name": "Northern",
+      "sourceId": "gov-fj-national-fire-authority",
+      "evidenceUrls": [
+        "https://nfa.com.fj/operations/emergency-communications/northern-division"
+      ],
+      "basis": "official-explicit-divisional-emergency-directory",
+      "qualification": "Standing named divisional emergency communications; the news feed is stale and current local incident publication has not been verified.",
+      "verification": "declared-remit",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:53030831B91072554514863",
+      "countryCode": "FJ",
+      "level": "ADM1",
+      "name": "Northern",
+      "sourceId": "news-fj-fiji-sun",
+      "evidenceUrls": [
+        "https://fijisun.com.fj/pages/about-us",
+        "https://fijisun.com.fj/pages/our-locations",
+        "https://nfa.com.fj/operations/emergency-communications/northern-division"
+      ],
+      "basis": "named-newsroom-hubs-in-division",
+      "qualification": "Labasa (Northern) or Nadi/Lautoka (Western) newsroom hubs, with geographic context corroborated by the official emergency directory. Partial local newsroom remit only; not complete divisional reporting.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:53030831B61477600220974",
+      "countryCode": "FJ",
+      "level": "ADM1",
+      "name": "Eastern",
+      "sourceId": "gov-fj-national-fire-authority",
+      "evidenceUrls": [
+        "https://nfa.com.fj/operations/emergency-communications/central-eastern-division"
+      ],
+      "basis": "official-explicit-divisional-emergency-directory",
+      "qualification": "Standing named divisional emergency communications; the news feed is stale and current local incident publication has not been verified.",
+      "verification": "declared-remit",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:53030831B39644845067980",
+      "countryCode": "FJ",
+      "level": "ADM1",
+      "name": "Central",
+      "sourceId": "gov-fj-national-fire-authority",
+      "evidenceUrls": [
+        "https://nfa.com.fj/operations/emergency-communications/central-eastern-division"
+      ],
+      "basis": "official-explicit-divisional-emergency-directory",
+      "qualification": "Standing named divisional emergency communications; the news feed is stale and current local incident publication has not been verified.",
+      "verification": "declared-remit",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:53030831B88292306460023",
+      "countryCode": "FJ",
+      "level": "ADM1",
+      "name": "Western",
+      "sourceId": "gov-fj-national-fire-authority",
+      "evidenceUrls": [
+        "https://nfa.com.fj/operations/emergency-communications/western-division"
+      ],
+      "basis": "official-explicit-divisional-emergency-directory",
+      "qualification": "Standing named divisional emergency communications; the news feed is stale and current local incident publication has not been verified.",
+      "verification": "declared-remit",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:53030831B88292306460023",
+      "countryCode": "FJ",
+      "level": "ADM1",
+      "name": "Western",
+      "sourceId": "news-fj-fiji-sun",
+      "evidenceUrls": [
+        "https://fijisun.com.fj/pages/about-us",
+        "https://fijisun.com.fj/pages/our-locations",
+        "https://nfa.com.fj/operations/emergency-communications/western-division"
+      ],
+      "basis": "named-newsroom-hubs-in-division",
+      "qualification": "Labasa (Northern) or Nadi/Lautoka (Western) newsroom hubs, with geographic context corroborated by the official emergency directory. Partial local newsroom remit only; not complete divisional reporting.",
+      "verification": "declared-beat",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:53030831B88292306460023",
+      "countryCode": "FJ",
+      "level": "ADM1",
+      "name": "Western",
+      "sourceId": "news-fj-fiji-one",
+      "evidenceUrls": [
+        "https://fijionenews.com.fj/two-killed-in-nadi-road-accident/",
+        "https://nfa.com.fj/operations/emergency-communications/western-division"
+      ],
+      "basis": "single-local-news-report",
+      "qualification": "One reviewed Nadi transport report. Does not prove a standing beat or coverage of all Western Division.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:14151628B59272471160482",
+      "countryCode": "FJ",
+      "level": "ADM2",
+      "name": "Bua",
+      "sourceId": "gov-fj-national-fire-authority",
+      "evidenceUrls": [
+        "https://nfa.com.fj/operations/emergency-communications/northern-division"
+      ],
+      "basis": "named-provincial-contact",
+      "qualification": "Directory explicitly names Bua/Macuata/Cakaudrove officers. A contact is not proof of a province-wide alert stream or published incident coverage.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:14151628B95966095088914",
+      "countryCode": "FJ",
+      "level": "ADM2",
+      "name": "Cakaudrove",
+      "sourceId": "gov-fj-national-fire-authority",
+      "evidenceUrls": [
+        "https://nfa.com.fj/operations/emergency-communications/northern-division"
+      ],
+      "basis": "named-provincial-contact",
+      "qualification": "Directory explicitly names Bua/Macuata/Cakaudrove officers. A contact is not proof of a province-wide alert stream or published incident coverage.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:14151628B42533076410957",
+      "countryCode": "FJ",
+      "level": "ADM2",
+      "name": "Macuata",
+      "sourceId": "gov-fj-national-fire-authority",
+      "evidenceUrls": [
+        "https://nfa.com.fj/operations/emergency-communications/northern-division"
+      ],
+      "basis": "named-provincial-contact",
+      "qualification": "Directory explicitly names Bua/Macuata/Cakaudrove officers. A contact is not proof of a province-wide alert stream or published incident coverage.",
+      "verification": "candidate-only",
+      "continuousCoverageVerified": false
+    }
+  ],
+  "areas": [
+    {
+      "areaId": "gb:53030831B91072554514863",
+      "countryCode": "FJ",
+      "level": "ADM1",
+      "name": "Northern",
+      "parentId": "country:FJ",
+      "administrativeType": "Divisions",
+      "standingOfficialSourceIds": [
+        "gov-fj-national-fire-authority"
+      ],
+      "standingNewsSourceIds": [
+        "news-fj-fiji-sun"
+      ],
+      "limitedEvidenceSourceIds": [],
+      "countryContextSourceIds": [
+        "news-fj-fiji-one",
+        "gov-fj-government-news",
+        "gov-fj-fiji-meteorological-service"
+      ],
+      "gaps": [
+        "No continuous incident-detection completeness has been validated.",
+        "Two independent reporting beats for this exact indexed area remain unverified.",
+        "National RSS accessibility does not establish local source coverage."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:53030831B61477600220974",
+      "countryCode": "FJ",
+      "level": "ADM1",
+      "name": "Eastern",
+      "parentId": "country:FJ",
+      "administrativeType": "Divisions",
+      "standingOfficialSourceIds": [
+        "gov-fj-national-fire-authority"
+      ],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "countryContextSourceIds": [
+        "news-fj-fiji-one",
+        "gov-fj-government-news",
+        "gov-fj-fiji-meteorological-service"
+      ],
+      "gaps": [
+        "No continuous incident-detection completeness has been validated.",
+        "Two independent reporting beats for this exact indexed area remain unverified.",
+        "National RSS accessibility does not establish local source coverage."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:53030831B39644845067980",
+      "countryCode": "FJ",
+      "level": "ADM1",
+      "name": "Central",
+      "parentId": "country:FJ",
+      "administrativeType": "Divisions",
+      "standingOfficialSourceIds": [
+        "gov-fj-national-fire-authority"
+      ],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "countryContextSourceIds": [
+        "news-fj-fiji-one",
+        "gov-fj-government-news",
+        "gov-fj-fiji-meteorological-service"
+      ],
+      "gaps": [
+        "No continuous incident-detection completeness has been validated.",
+        "Two independent reporting beats for this exact indexed area remain unverified.",
+        "National RSS accessibility does not establish local source coverage."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:53030831B88292306460023",
+      "countryCode": "FJ",
+      "level": "ADM1",
+      "name": "Western",
+      "parentId": "country:FJ",
+      "administrativeType": "Divisions",
+      "standingOfficialSourceIds": [
+        "gov-fj-national-fire-authority"
+      ],
+      "standingNewsSourceIds": [
+        "news-fj-fiji-sun"
+      ],
+      "limitedEvidenceSourceIds": [
+        "news-fj-fiji-one"
+      ],
+      "countryContextSourceIds": [
+        "news-fj-fiji-one",
+        "gov-fj-government-news",
+        "gov-fj-fiji-meteorological-service"
+      ],
+      "gaps": [
+        "No continuous incident-detection completeness has been validated.",
+        "Two independent reporting beats for this exact indexed area remain unverified.",
+        "National RSS accessibility does not establish local source coverage."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:14151628B98370545668292",
+      "countryCode": "FJ",
+      "level": "ADM2",
+      "name": "Ba",
+      "parentId": "gb:53030831B88292306460023",
+      "administrativeType": "Provinces",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "countryContextSourceIds": [
+        "news-fj-fiji-one",
+        "gov-fj-government-news",
+        "gov-fj-fiji-meteorological-service"
+      ],
+      "gaps": [
+        "No continuous incident-detection completeness has been validated.",
+        "Two independent reporting beats for this exact indexed area remain unverified.",
+        "National RSS accessibility does not establish local source coverage.",
+        "Province-specific public alert and news coverage has not been established."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:14151628B28251361437248",
+      "countryCode": "FJ",
+      "level": "ADM2",
+      "name": "Namosi",
+      "parentId": "gb:53030831B39644845067980",
+      "administrativeType": "Provinces",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "countryContextSourceIds": [
+        "news-fj-fiji-one",
+        "gov-fj-government-news",
+        "gov-fj-fiji-meteorological-service"
+      ],
+      "gaps": [
+        "No continuous incident-detection completeness has been validated.",
+        "Two independent reporting beats for this exact indexed area remain unverified.",
+        "National RSS accessibility does not establish local source coverage.",
+        "Province-specific public alert and news coverage has not been established."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:14151628B53541640625043",
+      "countryCode": "FJ",
+      "level": "ADM2",
+      "name": "Ra",
+      "parentId": "gb:53030831B88292306460023",
+      "administrativeType": "Provinces",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "countryContextSourceIds": [
+        "news-fj-fiji-one",
+        "gov-fj-government-news",
+        "gov-fj-fiji-meteorological-service"
+      ],
+      "gaps": [
+        "No continuous incident-detection completeness has been validated.",
+        "Two independent reporting beats for this exact indexed area remain unverified.",
+        "National RSS accessibility does not establish local source coverage.",
+        "Province-specific public alert and news coverage has not been established."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:14151628B39642918357252",
+      "countryCode": "FJ",
+      "level": "ADM2",
+      "name": "Rewa",
+      "parentId": null,
+      "administrativeType": "Provinces",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "countryContextSourceIds": [
+        "news-fj-fiji-one",
+        "gov-fj-government-news",
+        "gov-fj-fiji-meteorological-service"
+      ],
+      "gaps": [
+        "No continuous incident-detection completeness has been validated.",
+        "Two independent reporting beats for this exact indexed area remain unverified.",
+        "National RSS accessibility does not establish local source coverage.",
+        "Province-specific public alert and news coverage has not been established.",
+        "Existing administrative parent is unresolved; preserved without inferred reassignment."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:14151628B68154180840071",
+      "countryCode": "FJ",
+      "level": "ADM2",
+      "name": "Serua",
+      "parentId": "gb:53030831B39644845067980",
+      "administrativeType": "Provinces",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "countryContextSourceIds": [
+        "news-fj-fiji-one",
+        "gov-fj-government-news",
+        "gov-fj-fiji-meteorological-service"
+      ],
+      "gaps": [
+        "No continuous incident-detection completeness has been validated.",
+        "Two independent reporting beats for this exact indexed area remain unverified.",
+        "National RSS accessibility does not establish local source coverage.",
+        "Province-specific public alert and news coverage has not been established."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:14151628B48978228339800",
+      "countryCode": "FJ",
+      "level": "ADM2",
+      "name": "Tailevu",
+      "parentId": "gb:53030831B39644845067980",
+      "administrativeType": "Provinces",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "countryContextSourceIds": [
+        "news-fj-fiji-one",
+        "gov-fj-government-news",
+        "gov-fj-fiji-meteorological-service"
+      ],
+      "gaps": [
+        "No continuous incident-detection completeness has been validated.",
+        "Two independent reporting beats for this exact indexed area remain unverified.",
+        "National RSS accessibility does not establish local source coverage.",
+        "Province-specific public alert and news coverage has not been established."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:14151628B71764118664060",
+      "countryCode": "FJ",
+      "level": "ADM2",
+      "name": "Rotuma",
+      "parentId": null,
+      "administrativeType": "Provinces",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "countryContextSourceIds": [
+        "news-fj-fiji-one",
+        "gov-fj-government-news",
+        "gov-fj-fiji-meteorological-service"
+      ],
+      "gaps": [
+        "No continuous incident-detection completeness has been validated.",
+        "Two independent reporting beats for this exact indexed area remain unverified.",
+        "National RSS accessibility does not establish local source coverage.",
+        "Province-specific public alert and news coverage has not been established.",
+        "Existing administrative parent is unresolved; preserved without inferred reassignment.",
+        "Provider indexes Rotuma in the ADM2 province layer; no claim is made that its governance is identical to a mainland province."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:14151628B59272471160482",
+      "countryCode": "FJ",
+      "level": "ADM2",
+      "name": "Bua",
+      "parentId": "gb:53030831B91072554514863",
+      "administrativeType": "Provinces",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [
+        "gov-fj-national-fire-authority"
+      ],
+      "countryContextSourceIds": [
+        "news-fj-fiji-one",
+        "gov-fj-government-news",
+        "gov-fj-fiji-meteorological-service"
+      ],
+      "gaps": [
+        "No continuous incident-detection completeness has been validated.",
+        "Two independent reporting beats for this exact indexed area remain unverified.",
+        "National RSS accessibility does not establish local source coverage.",
+        "Province-specific public alert and news coverage has not been established."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:14151628B95966095088914",
+      "countryCode": "FJ",
+      "level": "ADM2",
+      "name": "Cakaudrove",
+      "parentId": "gb:53030831B91072554514863",
+      "administrativeType": "Provinces",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [
+        "gov-fj-national-fire-authority"
+      ],
+      "countryContextSourceIds": [
+        "news-fj-fiji-one",
+        "gov-fj-government-news",
+        "gov-fj-fiji-meteorological-service"
+      ],
+      "gaps": [
+        "No continuous incident-detection completeness has been validated.",
+        "Two independent reporting beats for this exact indexed area remain unverified.",
+        "National RSS accessibility does not establish local source coverage.",
+        "Province-specific public alert and news coverage has not been established."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:14151628B61046117406534",
+      "countryCode": "FJ",
+      "level": "ADM2",
+      "name": "Kadavu",
+      "parentId": "gb:53030831B61477600220974",
+      "administrativeType": "Provinces",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "countryContextSourceIds": [
+        "news-fj-fiji-one",
+        "gov-fj-government-news",
+        "gov-fj-fiji-meteorological-service"
+      ],
+      "gaps": [
+        "No continuous incident-detection completeness has been validated.",
+        "Two independent reporting beats for this exact indexed area remain unverified.",
+        "National RSS accessibility does not establish local source coverage.",
+        "Province-specific public alert and news coverage has not been established."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:14151628B80423492752803",
+      "countryCode": "FJ",
+      "level": "ADM2",
+      "name": "Lau",
+      "parentId": null,
+      "administrativeType": "Provinces",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "countryContextSourceIds": [
+        "news-fj-fiji-one",
+        "gov-fj-government-news",
+        "gov-fj-fiji-meteorological-service"
+      ],
+      "gaps": [
+        "No continuous incident-detection completeness has been validated.",
+        "Two independent reporting beats for this exact indexed area remain unverified.",
+        "National RSS accessibility does not establish local source coverage.",
+        "Province-specific public alert and news coverage has not been established.",
+        "Existing administrative parent is unresolved; preserved without inferred reassignment."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:14151628B20319301670654",
+      "countryCode": "FJ",
+      "level": "ADM2",
+      "name": "Lomaiviti",
+      "parentId": null,
+      "administrativeType": "Provinces",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "countryContextSourceIds": [
+        "news-fj-fiji-one",
+        "gov-fj-government-news",
+        "gov-fj-fiji-meteorological-service"
+      ],
+      "gaps": [
+        "No continuous incident-detection completeness has been validated.",
+        "Two independent reporting beats for this exact indexed area remain unverified.",
+        "National RSS accessibility does not establish local source coverage.",
+        "Province-specific public alert and news coverage has not been established.",
+        "Existing administrative parent is unresolved; preserved without inferred reassignment."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:14151628B42533076410957",
+      "countryCode": "FJ",
+      "level": "ADM2",
+      "name": "Macuata",
+      "parentId": "gb:53030831B91072554514863",
+      "administrativeType": "Provinces",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [
+        "gov-fj-national-fire-authority"
+      ],
+      "countryContextSourceIds": [
+        "news-fj-fiji-one",
+        "gov-fj-government-news",
+        "gov-fj-fiji-meteorological-service"
+      ],
+      "gaps": [
+        "No continuous incident-detection completeness has been validated.",
+        "Two independent reporting beats for this exact indexed area remain unverified.",
+        "National RSS accessibility does not establish local source coverage.",
+        "Province-specific public alert and news coverage has not been established."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:14151628B53702400461405",
+      "countryCode": "FJ",
+      "level": "ADM2",
+      "name": "Nadroga-Navosa",
+      "parentId": "gb:53030831B88292306460023",
+      "administrativeType": "Provinces",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "countryContextSourceIds": [
+        "news-fj-fiji-one",
+        "gov-fj-government-news",
+        "gov-fj-fiji-meteorological-service"
+      ],
+      "gaps": [
+        "No continuous incident-detection completeness has been validated.",
+        "Two independent reporting beats for this exact indexed area remain unverified.",
+        "National RSS accessibility does not establish local source coverage.",
+        "Province-specific public alert and news coverage has not been established."
+      ],
+      "continuousCoverageVerified": false
+    },
+    {
+      "areaId": "gb:14151628B8492423103487",
+      "countryCode": "FJ",
+      "level": "ADM2",
+      "name": "Naitasiri",
+      "parentId": "gb:53030831B39644845067980",
+      "administrativeType": "Provinces",
+      "standingOfficialSourceIds": [],
+      "standingNewsSourceIds": [],
+      "limitedEvidenceSourceIds": [],
+      "countryContextSourceIds": [
+        "news-fj-fiji-one",
+        "gov-fj-government-news",
+        "gov-fj-fiji-meteorological-service"
+      ],
+      "gaps": [
+        "No continuous incident-detection completeness has been validated.",
+        "Two independent reporting beats for this exact indexed area remain unverified.",
+        "National RSS accessibility does not establish local source coverage.",
+        "Province-specific public alert and news coverage has not been established."
+      ],
+      "continuousCoverageVerified": false
+    }
+  ],
+  "additionalFormatAdmissions": [
+    {
+      "sourceId": "news-fj-fiji-sun",
+      "url": "https://fijisun.com.fj/news-sitemap.xml",
+      "mode": "discovery",
+      "format": "google-news-sitemap",
+      "cadenceMinutes": 360,
+      "validatedAt": "2026-10-06T01:06:56Z",
+      "validationSha256": "81dddf2df7c06db65bc363a043cda95d6cd659670f2fb797ee19508a1e3a3424",
+      "entryCount": 53,
+      "metadataFields": [
+        "title",
+        "url",
+        "publishedAt"
+      ],
+      "admittedAfterAdapterIntegration": true,
+      "adapterPath": "scripts/public_data_pipeline.py:parse_news_sitemap",
+      "scope": "Title/link/date only; no article fetch or incident promotion.",
+      "robotsEvidenceUrl": "https://fijisun.com.fj/robots.txt",
+      "termsEvidenceUrl": "https://fijisun.com.fj/pages/terms-and-conditions",
+      "adapterIntegrated": true
+    }
+  ],
+  "geometryChanges": false,
+  "officialLiveSourcesVerified": 0,
+  "continuousCoverageVerified": false,
+  "scope": "Every current indexed Fiji area has a source review row and explicit gaps; three RSS metadata policies are ready. No shared registry, collector or map was changed.",
+  "geographyExceptions": {
+    "unresolvedParentIds": [
+      "gb:14151628B39642918357252",
+      "gb:14151628B71764118664060",
+      "gb:14151628B80423492752803",
+      "gb:14151628B20319301670654"
+    ],
+    "proposedIdCorrections": [],
+    "note": "Preserve all current IDs, names and unresolved parent relationships. Rotuma is a provider ADM2 label, not a new assertion about its legal administrative status."
+  },
+  "sourceIndependence": {
+    "separatelyDeclaredOperators": {
+      "news-fj-fiji-one": "Fiji Television Limited",
+      "news-fj-fijivillage": "Communications Fiji Limited",
+      "news-fj-fiji-sun": "Sun (Fiji) News Limited"
+    },
+    "qualification": "First-party declarations establish separate named publishing operators. Ultimate beneficial-owner overlap and event-level independence were not exhaustively audited. Fijivillage is not admitted for automated/public redistribution."
+  },
+  "evidence": {
+    "nfa-western": {
+      "name": "nfa-western",
+      "url": "https://nfa.com.fj/operations/emergency-communications/western-division",
+      "finalUrl": "https://nfa.com.fj/operations/emergency-communications/western-division",
+      "status": 200,
+      "retrievedAt": "2026-10-06T01:05:43Z",
+      "bytes": 36698,
+      "sha256": "ad4a5a9bda0c07a81f149355140a64e6142a8f9d3ee3d5265781758f1efa0cd3",
+      "acceptedTextBytes": 2947,
+      "acceptedTextSha256": "18a16f15b9fba2611d04ccd5631ba2ce94126cc7646042f01566ef46381da79e"
+    },
+    "village-rss": {
+      "name": "village-rss",
+      "url": "https://www.fijivillage.com/rss.xml",
+      "retrievedAt": "2026-10-06T01:03:44Z",
+      "error": "HTTP Error 404: Not Found"
+    },
+    "nfa-home": {
+      "name": "nfa-home",
+      "url": "https://nfa.com.fj/",
+      "finalUrl": "https://nfa.com.fj/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T01:05:43Z",
+      "bytes": 398288,
+      "sha256": "aa0ea4c603c45ec219bfb540caa58724574d124a1c07da672016e42dbd04544c",
+      "acceptedTextBytes": 17252,
+      "acceptedTextSha256": "ac4cfd16b852dee70edc17e2361b63059dfff2165836bbaa9368a3e2620cfb12"
+    },
+    "nfa-northern": {
+      "name": "nfa-northern",
+      "url": "https://nfa.com.fj/operations/emergency-communications/northern-division",
+      "finalUrl": "https://nfa.com.fj/operations/emergency-communications/northern-division",
+      "status": 200,
+      "retrievedAt": "2026-10-06T01:05:43Z",
+      "bytes": 34697,
+      "sha256": "de5c3991563bc7628c8ac302e58cac73385b823e23f1e87faddcb02c1cfb8d9f",
+      "acceptedTextBytes": 2668,
+      "acceptedTextSha256": "07dba1d5206c17b65dba5e1a19758439fdff289fe2ef1db843025367a383904c"
+    },
+    "gov-robots": {
+      "name": "gov-robots",
+      "url": "https://www.fiji.gov.fj/robots.txt",
+      "finalUrl": "https://www.fiji.gov.fj/robots.txt",
+      "status": 200,
+      "retrievedAt": "2026-10-06T01:06:55Z",
+      "bytes": 116,
+      "sha256": "7ebbaaa6f96736d93467778f522170ad903e941f8a040be90109dbfdc8f66237"
+    },
+    "village-robots": {
+      "name": "village-robots",
+      "url": "https://www.fijivillage.com/robots.txt",
+      "finalUrl": "https://www.fijivillage.com/robots.txt",
+      "status": 200,
+      "retrievedAt": "2026-10-06T01:01:28Z",
+      "bytes": 507,
+      "sha256": "683af07e22e31efcffdbbb37f447cdcf2a86ad587cdf1a39e1aee8a6f16e2ee7"
+    },
+    "one-about": {
+      "name": "one-about",
+      "url": "https://fijionenews.com.fj/about-us/",
+      "finalUrl": "https://fijionenews.com.fj/about-us/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T01:02:02Z",
+      "bytes": 68136,
+      "sha256": "99efdba49d6a3d89f39e03d6bddc138fc15686e28cef7072a4690f61fee268b2",
+      "acceptedTextBytes": 5168,
+      "acceptedTextSha256": "ed496f5563a7c4a4597678ad9f26509ff8c3f832a63424da22b796f18f732703"
+    },
+    "sun-locations": {
+      "name": "sun-locations",
+      "url": "https://fijisun.com.fj/pages/our-locations",
+      "finalUrl": "https://fijisun.com.fj/pages/our-locations",
+      "status": 200,
+      "retrievedAt": "2026-10-06T01:04:59Z",
+      "bytes": 254608,
+      "sha256": "cccb16d98d57b97f99fc166737b7a5ccb9974ffa8f434b62c3fdff984cf0c7d1",
+      "acceptedTextBytes": 605,
+      "acceptedTextSha256": "ede01004eba2d7e917e86f86d672d46211ad4bc2cdb89f853954d842f69b06c1"
+    },
+    "times-feed": {
+      "name": "times-feed",
+      "url": "https://www.fijitimes.com.fj/feed/",
+      "finalUrl": "https://www.fijitimes.com.fj/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T01:02:03Z",
+      "bytes": 128684,
+      "sha256": "8b3120e80f1ed4ed9cfd8380179b0dcd80f1ae742e5a9388313b736f41d42ec4"
+    },
+    "village-terms": {
+      "name": "village-terms",
+      "url": "https://www.fijivillage.com/terms-of-use/",
+      "finalUrl": "https://www.fijivillage.com/terms-of-use/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T01:03:44Z",
+      "bytes": 99943,
+      "sha256": "e428e8fcda5c5eaeeb2fd5562556078844a4925c43cc15b30159858ed4cb6889",
+      "acceptedTextBytes": 9457,
+      "acceptedTextSha256": "324c0e0a68d556ade49a55e1255131af823d79f15ae29ae7432077b4d48fa8fa"
+    },
+    "met-home": {
+      "name": "met-home",
+      "url": "https://www.met.gov.fj/",
+      "finalUrl": "https://www.met.gov.fj/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T01:02:04Z",
+      "bytes": 181629,
+      "sha256": "88453ec928b1a9c931751f9f407e8fb79d933702bfb1eeee34f9940a978babd2",
+      "acceptedTextBytes": 764,
+      "acceptedTextSha256": "2d0c6d6dd2be0b63fe5c9263b97ead689b11e0c42ad8b686dc5a9ee6d068d0f2"
+    },
+    "village-contact": {
+      "name": "village-contact",
+      "url": "https://www.fijivillage.com/contact-us/",
+      "finalUrl": "https://www.fijivillage.com/contact-us/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T01:03:44Z",
+      "bytes": 92215,
+      "sha256": "c348f019157cee5765a084d69d31ea6ad4e9b1085986d268fb9e0b4a889150b9",
+      "acceptedTextBytes": 877,
+      "acceptedTextSha256": "48b3bc8d47f201683c3e50302e94892d6b853ffdbd5eeb246af5bcba4b5cbd77"
+    },
+    "met-service": {
+      "name": "met-service",
+      "url": "https://www.met.gov.fj/about-fms/",
+      "retrievedAt": "2026-10-06T01:04:59Z",
+      "error": "HTTP Error 404: Not Found"
+    },
+    "one-robots": {
+      "name": "one-robots",
+      "url": "https://fijionenews.com.fj/robots.txt",
+      "finalUrl": "https://fijionenews.com.fj/robots.txt",
+      "status": 200,
+      "retrievedAt": "2026-10-06T01:01:28Z",
+      "bytes": 66,
+      "sha256": "39b63453cb4c3d8b411cb57294ec5ea71c9039cb343db25942f432a51bfd82fc"
+    },
+    "met-about": {
+      "name": "met-about",
+      "url": "https://www.met.gov.fj/about-us/",
+      "retrievedAt": "2026-10-06T01:03:45Z",
+      "error": "HTTP Error 404: Not Found"
+    },
+    "met-feed": {
+      "name": "met-feed",
+      "url": "https://www.met.gov.fj/feed/warnings/",
+      "finalUrl": "https://www.met.gov.fj/feed/warnings/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T01:03:44Z",
+      "bytes": 489,
+      "sha256": "9ec5e8df78c00d9591e0988c5e84f6dc93cac210e2a8edd74bf643c063987551"
+    },
+    "ndmo-home": {
+      "name": "ndmo-home",
+      "url": "https://www.ndmo.gov.fj/",
+      "retrievedAt": "2026-10-06T01:03:46Z",
+      "error": "<urlopen error timed out>"
+    },
+    "fhl-investments": {
+      "name": "fhl-investments",
+      "url": "https://fijianholdings.com.fj/investments/",
+      "finalUrl": "https://fijianholdings.com.fj/investments/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T01:02:04Z",
+      "bytes": 17278,
+      "sha256": "9198951792c15e25a22be89ce066667570de03c9c0985792ad1a0d1cc26e74f8",
+      "acceptedTextBytes": 38,
+      "acceptedTextSha256": "21554e52957315584d3fbf6eccc5a4ef48d6faf05bfc7f6e74be2043dad11f31"
+    },
+    "nfa-privacy": {
+      "name": "nfa-privacy",
+      "url": "https://nfa.com.fj/privacy",
+      "finalUrl": "https://nfa.com.fj/privacy",
+      "status": 200,
+      "retrievedAt": "2026-10-06T01:06:55Z",
+      "bytes": 25811,
+      "sha256": "e0f08f09d6c7ed863c0895ca692e843cdb075239580332d9c4f5dc359d528f90",
+      "acceptedTextBytes": 2393,
+      "acceptedTextSha256": "7e2c947b11c08258d236ec44cb911ab3b33c764887ae787d4f489727168d66fd"
+    },
+    "times-home": {
+      "name": "times-home",
+      "url": "https://www.fijitimes.com.fj/",
+      "finalUrl": "https://www.fijitimes.com.fj/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T01:02:02Z",
+      "bytes": 128684,
+      "sha256": "8b3120e80f1ed4ed9cfd8380179b0dcd80f1ae742e5a9388313b736f41d42ec4",
+      "acceptedTextBytes": 2502,
+      "acceptedTextSha256": "92a291a5722468be8f2ba27d6000f3c2a36b175dd3b7b0d499ac8392b5a5f1c7"
+    },
+    "nfa-feed": {
+      "name": "nfa-feed",
+      "url": "https://nfa.com.fj/news?format=feed&type=rss",
+      "finalUrl": "https://nfa.com.fj/news?format=feed&type=rss",
+      "status": 200,
+      "retrievedAt": "2026-10-06T01:06:55Z",
+      "bytes": 44595,
+      "sha256": "cfe4ec65fa8c3b8127084675b91ab82951bfecce321ec6a5a651a704fdf8d10b"
+    },
+    "village-home": {
+      "name": "village-home",
+      "url": "https://www.fijivillage.com/",
+      "finalUrl": "https://www.fijivillage.com/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T01:02:04Z",
+      "bytes": 168152,
+      "sha256": "dfef0e5277bafdcde802f34f63302a03177b3b257302d72a1572df466272bdf2",
+      "acceptedTextBytes": 9539,
+      "acceptedTextSha256": "eb0e34980c51976308cfcad400e625e6617b059cce34afd2a4baec4123b2c196"
+    },
+    "police-robots": {
+      "name": "police-robots",
+      "url": "https://www.police.gov.fj/robots.txt",
+      "retrievedAt": "2026-10-06T01:01:28Z",
+      "error": "<urlopen error timed out>"
+    },
+    "times-terms": {
+      "name": "times-terms",
+      "url": "https://www.fijitimes.com.fj/terms/",
+      "finalUrl": "https://www.fijitimes.com.fj/terms/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T01:03:44Z",
+      "bytes": 83228,
+      "sha256": "e3b022254533a408509c2f0f0a7165090e06ca4d57bcfe475b3aaae517942443",
+      "acceptedTextBytes": 7835,
+      "acceptedTextSha256": "ece222a32f6790241281219ec62611cf90112bc971e3fb2728a89bd3aec0f19d"
+    },
+    "sun-feed": {
+      "name": "sun-feed",
+      "url": "https://fijisun.com.fj/feed/",
+      "retrievedAt": "2026-10-06T01:04:59Z",
+      "error": "HTTP Error 404: Not Found"
+    },
+    "sun-terms": {
+      "name": "sun-terms",
+      "url": "https://fijisun.com.fj/pages/terms-and-conditions",
+      "finalUrl": "https://fijisun.com.fj/pages/terms-and-conditions",
+      "status": 200,
+      "retrievedAt": "2026-10-06T01:04:59Z",
+      "bytes": 265634,
+      "sha256": "a4a0b904b651dbfde4adddb56b7a8ecd1a6886da40ff4dfc07d742dffd963a42",
+      "acceptedTextBytes": 3477,
+      "acceptedTextSha256": "b9a1718f68608f250edd0da66ba38c8550a67899b2ffba5fe2e286cace57738c"
+    },
+    "nfa-robots": {
+      "name": "nfa-robots",
+      "url": "https://nfa.com.fj/robots.txt",
+      "finalUrl": "https://nfa.com.fj/robots.txt",
+      "status": 200,
+      "retrievedAt": "2026-10-06T01:05:43Z",
+      "bytes": 842,
+      "sha256": "22aa0adeed7730e6a83520a4013a3500ccb280a2f55c57b5a59183ffd05d611b"
+    },
+    "sun-news-sitemap": {
+      "name": "sun-news-sitemap",
+      "url": "https://fijisun.com.fj/news-sitemap.xml",
+      "finalUrl": "https://fijisun.com.fj/news-sitemap.xml",
+      "status": 200,
+      "retrievedAt": "2026-10-06T01:06:56Z",
+      "bytes": 22432,
+      "sha256": "81dddf2df7c06db65bc363a043cda95d6cd659670f2fb797ee19508a1e3a3424"
+    },
+    "met-warnings": {
+      "name": "met-warnings",
+      "url": "https://www.met.gov.fj/warnings/",
+      "finalUrl": "https://www.met.gov.fj/warnings/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T01:03:46Z",
+      "bytes": 96115,
+      "sha256": "76c1e0fcbee84d4c2d0d6c7fc4fcecccb144f75f0a8d748b138aea13abbf3da8",
+      "acceptedTextBytes": 169,
+      "acceptedTextSha256": "11395f4f9e7f4dcf2ca7d755410d35c23136fa2f91b5e2a46245e16d920c4ba4"
+    },
+    "police-http": {
+      "name": "police-http",
+      "url": "http://www.police.gov.fj/",
+      "retrievedAt": "2026-10-06T01:05:00Z",
+      "error": "<urlopen error timed out>"
+    },
+    "met-robots": {
+      "name": "met-robots",
+      "url": "https://www.met.gov.fj/robots.txt",
+      "finalUrl": "https://www.met.gov.fj/robots.txt",
+      "status": 200,
+      "retrievedAt": "2026-10-06T01:01:28Z",
+      "bytes": 41,
+      "sha256": "92690d42887a925eadfcb382b052618d6e80844bbb38ebbd41cd691bde15b168"
+    },
+    "times-about": {
+      "name": "times-about",
+      "url": "https://www.fijitimes.com.fj/about-us/",
+      "finalUrl": "https://www.fijitimes.com.fj/about-us-7791/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T01:02:02Z",
+      "bytes": 95438,
+      "sha256": "2183ff5abd863f3d3fa8d71038e435ad256c369921886230d2254d7fc9278fac",
+      "acceptedTextBytes": 1078,
+      "acceptedTextSha256": "7cab221368986a08b74309d8ff8c65d140a5b4ba55ee18a9c9e27c7ef474d608"
+    },
+    "sun-about": {
+      "name": "sun-about",
+      "url": "https://fijisun.com.fj/pages/about-us",
+      "finalUrl": "https://fijisun.com.fj/pages/about-us",
+      "status": 200,
+      "retrievedAt": "2026-10-06T01:04:59Z",
+      "bytes": 294202,
+      "sha256": "4f783431732c1c92fb10f2a30bfe6a78e9dfd684c04bb833439651546faf7bcf",
+      "acceptedTextBytes": 2226,
+      "acceptedTextSha256": "11ecc443352aca065e10ff7281703fdb1992626c76ab86b7e07c81529b434ca2"
+    },
+    "police-home": {
+      "name": "police-home",
+      "url": "https://www.police.gov.fj/",
+      "retrievedAt": "2026-10-06T01:03:46Z",
+      "error": "<urlopen error timed out>"
+    },
+    "one-home": {
+      "name": "one-home",
+      "url": "https://fijionenews.com.fj/",
+      "finalUrl": "https://fijionenews.com.fj/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T01:02:02Z",
+      "bytes": 98940,
+      "sha256": "9dca98e89fee65747a9b8c1944d0e9e5e93c05246bb75371fe249bb1c7bdcecc",
+      "acceptedTextBytes": 1942,
+      "acceptedTextSha256": "741c161d700c7564ee8b0f37c463eeb942ff2c0708b132dcb36044659e636f88"
+    },
+    "ndmo-http": {
+      "name": "ndmo-http",
+      "url": "http://www.ndmo.gov.fj/",
+      "retrievedAt": "2026-10-06T01:05:00Z",
+      "error": "<urlopen error timed out>"
+    },
+    "gov-home": {
+      "name": "gov-home",
+      "url": "https://www.fiji.gov.fj/",
+      "finalUrl": "https://www.fiji.gov.fj/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T01:05:44Z",
+      "bytes": 322775,
+      "sha256": "7fe25eca7e9bf9db0aa406d2638df143a6cc9f6735eb53a82366f18f69211e65",
+      "acceptedTextBytes": 1242,
+      "acceptedTextSha256": "201af2cafc8b23aaf71e8346678f514ad3257bd01fcbfde6223cb75f1d5a1ec5"
+    },
+    "nfa-central": {
+      "name": "nfa-central",
+      "url": "https://nfa.com.fj/operations/emergency-communications/central-eastern-division",
+      "finalUrl": "https://nfa.com.fj/operations/emergency-communications/central-eastern-division",
+      "status": 200,
+      "retrievedAt": "2026-10-06T01:05:44Z",
+      "bytes": 35990,
+      "sha256": "5e010ddd187aff65c4ad68ff3c62855ede845e3f3094089bec87994bd2330d1d",
+      "acceptedTextBytes": 3172,
+      "acceptedTextSha256": "242152dcb707b1573d67b492e2d80381c1609cc44ee4034396ee08c77183c860"
+    },
+    "sun-robots": {
+      "name": "sun-robots",
+      "url": "https://fijisun.com.fj/robots.txt",
+      "finalUrl": "https://fijisun.com.fj/robots.txt",
+      "status": 200,
+      "retrievedAt": "2026-10-06T01:04:59Z",
+      "bytes": 204,
+      "sha256": "4286a6a45ef80b4550baeadbbcd7f93e7ae2cfeb9afcd72d552535044ca5548b"
+    },
+    "times-contact": {
+      "name": "times-contact",
+      "url": "https://www.fijitimes.com.fj/contact-us/",
+      "finalUrl": "https://www.fijitimes.com.fj/contact-us/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T01:02:03Z",
+      "bytes": 99979,
+      "sha256": "a6bc9bf102648a267b2495d3ed5a358017592379d98fd8ef1411a07d5339d84c"
+    },
+    "ndmo-plan": {
+      "name": "ndmo-plan",
+      "url": "https://www.ndmo.gov.fj/wp-content/uploads/2022/06/Fiji_National_Disaster_Management_Plan.pdf",
+      "retrievedAt": "2026-10-06T01:03:47Z",
+      "error": "<urlopen error timed out>"
+    },
+    "times-privacy": {
+      "name": "times-privacy",
+      "url": "https://www.fijitimes.com.fj/privacy-policy/",
+      "finalUrl": "https://www.fijitimes.com.fj/privacy-policy/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T01:02:03Z",
+      "bytes": 80479,
+      "sha256": "6d3cf7763511b0543909f5bfaeb73c7072b1202cc8f05644b205a39d50878e3c"
+    },
+    "times-robots": {
+      "name": "times-robots",
+      "url": "https://www.fijitimes.com.fj/robots.txt",
+      "finalUrl": "https://www.fijitimes.com.fj/robots.txt",
+      "status": 200,
+      "retrievedAt": "2026-10-06T01:01:28Z",
+      "bytes": 189,
+      "sha256": "fbbccd58b7c60ae82fe090f8c93b87bf29d95991350e62ffa8455ce25d0fb960"
+    },
+    "ftv-announcement": {
+      "name": "ftv-announcement",
+      "url": "https://announcements.spx.com.fj/ftp/news/2722026103233FTV.PDF",
+      "finalUrl": "https://announcements.spx.com.fj/ftp/news/2722026103233FTV.PDF",
+      "status": 200,
+      "retrievedAt": "2026-10-06T01:05:00Z",
+      "bytes": 1204859,
+      "sha256": "2d3c12d1c5fc852ce238ce85085a8fc26704d87148db56e186f18305b3812e3a",
+      "acceptedTextBytes": 10680,
+      "acceptedTextSha256": "48a2dedcace725a945809d377b75c4ae265bba0435d9f1b6429cfba31b25997f"
+    },
+    "one-feed": {
+      "name": "fj-feed",
+      "url": "https://fijionenews.com.fj/feed/",
+      "finalUrl": "https://fijionenews.com.fj/feed/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T00:24:03Z",
+      "bytes": 36535,
+      "sha256": "856ba0bac527bbeda1e5beef0756875a1a474d558b4b8df65cc6f958cde04e50"
+    },
+    "times-rss-advertised": {
+      "name": "times-rss-advertised",
+      "url": "https://www.fijitimes.com/feed/",
+      "finalUrl": "https://www.fijitimes.com.fj/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T01:03:44Z",
+      "bytes": 128684,
+      "sha256": "8b3120e80f1ed4ed9cfd8380179b0dcd80f1ae742e5a9388313b736f41d42ec4"
+    },
+    "gov-feed": {
+      "name": "gov-feed",
+      "url": "https://www.fiji.gov.fj/feed/",
+      "finalUrl": "https://www.fiji.gov.fj/feed/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T01:06:55Z",
+      "bytes": 104282,
+      "sha256": "01dcf9dc92cf32bf046acf3ec42b65b5cab07d8973980fe2c5730a975cca5e0b"
+    },
+    "fhl-robots": {
+      "name": "fhl-robots",
+      "url": "https://fijianholdings.com.fj/robots.txt",
+      "finalUrl": "https://fijianholdings.com.fj/robots.txt",
+      "status": 200,
+      "retrievedAt": "2026-10-06T01:01:28Z",
+      "bytes": 74,
+      "sha256": "c5627fbebb716ba56ba8889fd3ceec7eb2ae9b2aae402988aa9ec8c1d0038a27"
+    },
+    "one-nadi": {
+      "name": "fj-nadi",
+      "url": "https://fijionenews.com.fj/two-killed-in-nadi-road-accident/",
+      "finalUrl": "https://fijionenews.com.fj/two-killed-in-nadi-road-accident/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T00:24:00Z",
+      "bytes": 105367,
+      "sha256": "ffe9978f37e2c6c3ae1f0f11ebde70a5ccb7b670e3eef8cd8bba690c330b7a28"
+    },
+    "cfl-village": {
+      "name": "cfl-village",
+      "url": "https://cfl.com.fj/fijivillage/",
+      "finalUrl": "https://cfl.com.fj/fijivillage/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T01:03:44Z",
+      "bytes": 146400,
+      "sha256": "357e5f58a116db35a6558e15f3f9f05e51ee33ffdb9c3ed2e11ddb463a3022ac",
+      "acceptedTextBytes": 828,
+      "acceptedTextSha256": "3408f05b583ed8ad5a79a4e7ccf3ba32226ce22ff4e1b0f13cbd8aed56ca3b12"
+    },
+    "ndmo-robots": {
+      "name": "ndmo-robots",
+      "url": "https://www.ndmo.gov.fj/robots.txt",
+      "retrievedAt": "2026-10-06T01:01:28Z",
+      "error": "<urlopen error timed out>"
+    },
+    "one-privacy": {
+      "name": "one-privacy",
+      "url": "https://fijionenews.com.fj/privacy-policy/",
+      "retrievedAt": "2026-10-06T01:02:02Z",
+      "error": "HTTP Error 404: Not Found"
+    },
+    "one-contact": {
+      "name": "one-contact",
+      "url": "https://fijionenews.com.fj/contact-us/",
+      "finalUrl": "https://fijionenews.com.fj/contact-us/",
+      "status": 200,
+      "retrievedAt": "2026-10-06T01:03:46Z",
+      "bytes": 55081,
+      "sha256": "99f7b1e163b29befc39f0fd2bf69baf9067b2cb09d5f90d18350672766528343",
+      "acceptedTextBytes": 366,
+      "acceptedTextSha256": "5ab1e5a9aa6341c4b8812ec75600e22033031c930b7c6648054d916ebd103a85"
+    }
+  },
+  "registryAdmission": {
+    "withheldSourceIds": [
+      "gov-fj-national-disaster-management-office"
+    ],
+    "reason": "Current ndmo.gov.fj domain identity remains unverified; full review and coverage gaps retained."
+  }
+}

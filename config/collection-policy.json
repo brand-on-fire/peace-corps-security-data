@@ -1023,6 +1023,39 @@
       "url": "https://www.pressoffice.gov.bz/feed/",
       "validatedAt": "2026-10-06T00:43:48Z",
       "validationSha256": "221eb5ebf6b0035006420473f045e5551ad75644e0729dac62dd6322dadc3b73"
+    },
+    {
+      "sourceId": "news-fj-fiji-one",
+      "mode": "discovery",
+      "cadenceMinutes": 360,
+      "url": "https://fijionenews.com.fj/feed/",
+      "validatedAt": "2026-10-06T00:24:03Z",
+      "validationSha256": "856ba0bac527bbeda1e5beef0756875a1a474d558b4b8df65cc6f958cde04e50"
+    },
+    {
+      "sourceId": "gov-fj-fiji-meteorological-service",
+      "mode": "discovery",
+      "cadenceMinutes": 15,
+      "url": "https://www.met.gov.fj/feed/warnings/",
+      "validatedAt": "2026-10-06T01:03:44Z",
+      "validationSha256": "9ec5e8df78c00d9591e0988c5e84f6dc93cac210e2a8edd74bf643c063987551"
+    },
+    {
+      "sourceId": "gov-fj-government-news",
+      "mode": "discovery",
+      "cadenceMinutes": 360,
+      "url": "https://www.fiji.gov.fj/feed/",
+      "validatedAt": "2026-10-06T01:06:55Z",
+      "validationSha256": "01dcf9dc92cf32bf046acf3ec42b65b5cab07d8973980fe2c5730a975cca5e0b"
+    },
+    {
+      "sourceId": "news-fj-fiji-sun",
+      "url": "https://fijisun.com.fj/news-sitemap.xml",
+      "mode": "discovery",
+      "format": "google-news-sitemap",
+      "cadenceMinutes": 360,
+      "validatedAt": "2026-10-06T01:06:56Z",
+      "validationSha256": "81dddf2df7c06db65bc363a043cda95d6cd659670f2fb797ee19508a1e3a3424"
     }
   ],
   "policy": {
