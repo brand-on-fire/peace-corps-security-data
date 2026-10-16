@@ -6250,17 +6250,18 @@
     "id": "news-sv-diario-el-mundo",
     "name": "Diario El Mundo",
     "url": "https://diario.elmundo.sv/",
-    "tier": "local-news",
+    "feedUrl": "https://diario.elmundo.sv/nacionales",
     "countryCodes": [
       "SV"
     ],
     "kind": "directory",
+    "tier": "local-news",
     "language": "es",
-    "cadenceMinutes": 360,
-    "enabled": false,
-    "access": "link-only",
-    "verifiedAt": "2026-10-06T01:48:25Z",
-    "notes": "First-party history identifies Editora El Mundo and Grupo Mundo Multimedia; current homepage has crime and road reporting. Tested /rss/ and /sitemap.xml return HTTP200 soft404 HTML, not accepted machine feeds. No verified feed policy proposed. Related El Migueleño/El Santaneco product names are not exact department or district remits. Guessed group page also soft404 and is not identity proof."
+    "cadenceMinutes": 30,
+    "enabled": true,
+    "access": "public-page",
+    "verifiedAt": "2026-10-16T01:04:00Z",
+    "notes": "First-party publisher identity reviewed; anonymous national archive and complete article bodies verified. Public crawler rules allow these paths; search path is excluded. Retain factual metadata, original headlines, links and deterministic English summaries only, not full articles. Reviewed quoted-police narrative patterns cover fatal attack, armed robbery, assault/fight and armed threats in seven district/municipality pairs. Original Spanish evidence and police attribution are preserved; no independent corroboration or direct social-account verification is claimed. Unknown event dates remain explicitly publication-anchored. No reviewed administrative crosswalk, exhaustive crime coverage or one-year baseline exists. Different police posts for the same event may still duplicate."
   },
   {
     "id": "news-sv-elsalvador-com",
@@ -6735,5 +6736,23 @@
     "verifiedAt": "2026-10-15T23:51:31Z",
     "termsUrl": "https://www.cdc.gov/other/agencymaterials.html",
     "notes": "Source: CDC. Original source material is available free. Use does not imply endorsement by CDC, HHS or the United States Government. Complete public RSS and serialized complete notice details. Automatic intake uses five reviewed disease/country factual-statement profiles: Zika–Indonesia, hepatitis A–Costa Rica, yellow fever–Colombia, chikungunya–Costa Rica, and Rocky Mountain spotted fever–Mexico. New profiles, global/multi-country notices and changed unsupported statements require review. Geography comes only from the affirmative factual statement. CDC level is not incident severity. Earliest publication remains the date anchor, not outbreak onset. Revisions, disappearance and withdrawn/unsupported details retain evidence history; expiration is not resolution. Detail requests wait at least 20 seconds. No routine advice, images, models or paid services. Active notices retain original publication dates; notices older than 30 days remain in history and may be absent from the current overview pending a current-advisory design."
+  },
+  {
+    "id": "gov-fj-fra-media",
+    "name": "Fiji Roads Authority — public notices",
+    "url": "https://www.fijiroads.org/",
+    "feedUrl": "https://www.fijiroads.org/index.php/wp-json/wp/v2/posts?categories=26&orderby=modified&order=desc&per_page=20&page=1",
+    "countryCodes": [
+      "FJ"
+    ],
+    "kind": "rss",
+    "tier": "official",
+    "language": "en",
+    "cadenceMinutes": 60,
+    "enabled": true,
+    "access": "public-feed",
+    "verifiedAt": "2026-10-16T00:10:29Z",
+    "termsUrl": "https://www.fijiroads.org/index.php/privacy-policy/",
+    "notes": "Official category-26 public JSON provides complete notice text for local analysis. Only original factual metadata and source links may be published. Reviewed rules recognize dated full bridge/road closures, including planned bridge repairs, emergency bridge work, structural deterioration and broken culverts; other notices require review. No verified asset-to-administrative crosswalk exists. Category, publisher-delay, image/PDF and silent-reopening coverage gaps remain. Expiry of an announced interval does not confirm reopening."
   }
 ]

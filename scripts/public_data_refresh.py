@@ -22,6 +22,24 @@ REPOSITORY = 'brand-on-fire/peace-corps-security-data'
 DEADLINE_SECONDS = 480
 
 
+def validated_partial(row, policies):
+    """Only the reviewed article collector may commit a partial validated cycle.
+
+    A failed initial listing or canonical record gate never creates this marker.
+    The source remains unavailable and its full-success clock stays unchanged.
+    """
+    marker=row.get('validatedPartial')
+    if not isinstance(marker,dict) or row.get('status')!='unavailable':return False
+    sid='news-sv-diario-el-mundo'
+    if (row.get('sourceId')!=sid or marker.get('sourceId')!=sid
+            or marker.get('adapter')!='sv-elmundo' or marker.get('listingValidated') is not True):return False
+    if not any(p.get('sourceId')==sid and p.get('adapter')=='sv-elmundo' and p.get('mode')=='official'
+               and p.get('url')=='https://diario.elmundo.sv/nacionales' for p in policies):return False
+    numbers=[marker.get(k) for k in ('checkedArticles','failedArticles','queuedArticles')]
+    return (all(type(n) is int and n>=0 for n in numbers) and numbers[0]<=16
+        and numbers[1]<=240 and numbers[2]<=240 and numbers[1]+numbers[2]>0)
+
+
 def provenance(environment, now):
     if environment.get('GITHUB_ACTIONS') != 'true':
         return dict(event='local', startedAt=now)
@@ -183,7 +201,9 @@ def refresh(root, now=None, fixtures=None, runner=subprocess.run, environment=No
             healthy = sum(s.get('status')=='healthy' for s in audit['sources'])
             failed = len(audit['sources'])-healthy
             status['sourceCounts'] = dict(attempted=len(audit['sources']), healthy=healthy, failed=failed)
-            if audit['sources'] and not healthy:
+            policies = pipeline.load(stage/'config/collection-policy.json')['sources']
+            partial = any(validated_partial(s,policies) for s in audit['sources'])
+            if audit['sources'] and not healthy and not partial:
                 status['outcome'] = 'failed'
                 status['errors'] = ['All due sources failed; the last validated publication was retained.']
             else:

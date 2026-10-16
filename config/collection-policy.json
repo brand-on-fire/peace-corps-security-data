@@ -1245,6 +1245,22 @@
       "adapter": "cdc-notices",
       "cadenceMinutes": 360,
       "url": "https://wwwnc.cdc.gov/travel/rss/notices.xml"
+    },
+    {
+      "sourceId": "gov-fj-fra-media",
+      "adapter": "fj-fra",
+      "mode": "official",
+      "cadenceMinutes": 60,
+      "historyFrom": "2025-10-16T00:00:00Z",
+      "url": "https://www.fijiroads.org/index.php/wp-json/wp/v2/posts?categories=26&orderby=modified&order=desc&per_page=20&page=1"
+    },
+    {
+      "sourceId": "news-sv-diario-el-mundo",
+      "adapter": "sv-elmundo",
+      "mode": "official",
+      "cadenceMinutes": 30,
+      "historyFrom": "2025-10-16T00:00:00Z",
+      "url": "https://diario.elmundo.sv/nacionales"
     }
   ],
   "policy": {

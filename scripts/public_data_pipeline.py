@@ -767,6 +767,10 @@ def run(root, now, fixtures=None):
     from public_official import ADAPTERS, prepare_official_policy, request_state, collect_official
     from public_security_official import (ADAPTERS as SECURITY_ADAPTERS,
         prepare_security_policy, collect_security_official)
+    from public_transport import (ADAPTERS as TRANSPORT_ADAPTERS,
+        prepare_transport_policy, collect_transport)
+    from public_news_elmundo_fetch import (ADAPTERS as ELMUNDO_ADAPTERS,
+        prepare_elmundo_policy, collect_elmundo_source)
     from local_news_archive import jcf_curfew_incidents, expire_curfews
     from public_news_runtime import automatic_news, news_window
     now_text = stamp(now)
@@ -795,7 +799,11 @@ def run(root, now, fixtures=None):
     due = [prepare_official_policy(p, states.get(p['sourceId'], {}), now_text)
            if p.get('adapter') in ADAPTERS else
            prepare_security_policy(p, states.get(p['sourceId'], {}), now_text)
-           if p.get('adapter') in SECURITY_ADAPTERS else p for p in due]
+           if p.get('adapter') in SECURITY_ADAPTERS else
+           prepare_transport_policy(p, states.get(p['sourceId'], {}), now_text)
+           if p.get('adapter') in TRANSPORT_ADAPTERS else
+           prepare_elmundo_policy(p, states.get(p['sourceId'], {}), now_text)
+           if p.get('adapter') in ELMUNDO_ADAPTERS else p for p in due]
     changes, source_results = [], []
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
         responses = list(pool.map(lambda p:fetch(p, request_state(p, states.get(p['sourceId'], {})), now_text, fixtures), due))
@@ -803,6 +811,8 @@ def run(root, now, fixtures=None):
         sid = policy['sourceId']
         previous = states.get(sid, {})
         source = sources[sid]
+        transport_state = {}
+        article_health = None
         try:
             group = policy.get('independentGroup', sid)
             if not isinstance(group, str) or group not in sources:
@@ -818,16 +828,31 @@ def run(root, now, fixtures=None):
                 if policy['mode'] == 'official':
                     pending_discoveries = []
                     official_receipts = None
-                    if policy.get('adapter') in ADAPTERS | SECURITY_ADAPTERS:
-                        collected = (collect_security_official(source, policy, raw, now_text, countries, geo,
+                    if policy.get('adapter') in ADAPTERS | SECURITY_ADAPTERS | TRANSPORT_ADAPTERS | ELMUNDO_ADAPTERS:
+                        collected = (collect_elmundo_source(source, policy, raw, now_text, countries,
+                            previous, records, fetch, fixtures,
+                            history_from=max(snapshot['history']['from'], policy.get('historyFrom', snapshot['history']['from'])),reviews=reviews)
+                            if policy.get('adapter') in ELMUNDO_ADAPTERS else
+                            collect_transport(source, policy, raw, now_text, countries,
+                            previous, records, fetch, fixtures,
+                            history_from=max(snapshot['history']['from'], policy.get('historyFrom', snapshot['history']['from'])))
+                            if policy.get('adapter') in TRANSPORT_ADAPTERS else
+                            collect_security_official(source, policy, raw, now_text, countries, geo,
                             previous, records, fetch, fixtures, areas=areas, history_from=snapshot['history']['from'])
                             if policy.get('adapter') in SECURITY_ADAPTERS else
                             collect_official(source, policy, raw, now_text, countries, geo,
                             previous, records, fetch, fixtures, initial_http_status=result.get('httpStatus', 200)))
                         incoming = collected['incidents']
                         pending_discoveries = collected['discoveries']
-                        result.update(collected['state'])
+                        if policy.get('adapter') in TRANSPORT_ADAPTERS | ELMUNDO_ADAPTERS:
+                            # A failed record/size gate must not advance a baseline
+                            # page or exact-ID cursor in an otherwise healthy run.
+                            transport_state = collected['state']
+                        else:
+                            result.update(collected['state'])
                         official_receipts = result['evidenceReceipts'] = collected['evidence']
+                        if policy.get('adapter') in ELMUNDO_ADAPTERS:
+                            article_health = dict(status=collected['sourceStatus'],message=collected['message'])
                     elif source['kind'] == 'cap':
                         messages = collect_cap(source, policy, raw, now_text, countries, areas, fetch, fixtures)
                         incoming = apply_lifecycle(messages, records, now_text)
@@ -921,13 +946,26 @@ def run(root, now, fixtures=None):
                         elif old and 'revisions' in old:
                             row['revisions'] = old['revisions']
                 records.update(pending_records)
+                result.update(transport_state)
                 changes.extend(pending_records)
                 discoveries.update({r['id']:r for r in pending_discoveries})
                 result.update(status='healthy', lastSuccessAt=now_text, acceptedCount=accepted, message=message)
+                if article_health:
+                    result.update(article_health)
+                    if article_health['status'] != 'healthy':
+                        result['lastSuccessAt'] = previous.get('lastSuccessAt')
+                        # Constructed only after a complete listing, independently
+                        # validated articles, and all canonical record gates.
+                        result['validatedPartial'] = dict(adapter='sv-elmundo',sourceId=sid,
+                            listingValidated=True,checkedArticles=len(pending_discoveries),
+                            failedArticles=len(transport_state['elmundoQuarantine']),
+                            queuedArticles=len(transport_state['elmundoPending']))
         except Exception as error:
             result.update(status='unavailable', lastSuccessAt=previous.get('lastSuccessAt'),
                           message='Source response rejected; prior archive retained: '+str(error))
         states[sid] = dict(previous, **result)
+        if 'validatedPartial' not in result:
+            states[sid].pop('validatedPartial',None)
         if result.get('status') != 'healthy':
             # A failed payload's ETag must not suppress a necessary full retry.
             states[sid]['etag'], states[sid]['lastModified'] = previous.get('etag'), previous.get('lastModified')
