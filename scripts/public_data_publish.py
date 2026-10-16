@@ -62,13 +62,21 @@ def audit(root, remote=True):
             raise ValueError('Public file exceeds 25MB; no partial publication permitted: '+str(rel))
         scanned = raw
         if path.suffix == '.gz':
-            if rel.parent != Path('config/map-areas') or not re.fullmatch(r'[A-Z]{2}-ADM[12]\.geojson\.gz', path.name):
+            boundary = rel.parent == Path('config/map-areas') and re.fullmatch(r'[A-Z]{2}-ADM[12]\.geojson\.gz', path.name)
+            retained = rel.parent == Path('docs/data/retained-weather') and re.fullmatch(r'[A-Z]{2}(?:-[0-9]{3})?\.json\.gz', path.name)
+            if not boundary and not retained:
                 raise ValueError('Unapproved compressed public file: '+str(rel))
-            with gzip.open(path, 'rb') as stream:
-                scanned = stream.read(25_000_001)
-            if len(scanned) > 25_000_000:
-                raise ValueError('Complete decompressed boundary exceeds 25MB: '+str(rel))
-            json.loads(scanned)
+            if retained:
+                from public_archive_storage import decode_gzip
+                scanned = decode_gzip(raw)
+                if path.with_suffix('').exists():
+                    raise ValueError('Ambiguous duplicate archive representations: '+str(rel))
+            else:
+                with gzip.open(path, 'rb') as stream:
+                    scanned = stream.read(25_000_001)
+                if len(scanned) > 25_000_000:
+                    raise ValueError('Complete decompressed boundary exceeds 25MB: '+str(rel))
+                json.loads(scanned)
         # The scanner itself contains patterns, not credential values.
         if rel != Path('scripts/public_data_publish.py') and any(re.search(p, value) for value in (raw, scanned) for p in PATTERNS):
             raise ValueError('Public-content scan failed: '+str(rel))
@@ -77,6 +85,8 @@ def audit(root, remote=True):
     if total > MAX_TREE_BYTES:
         raise ValueError('500MB public-tree ceiling reached; stop rather than delete data or buy storage')
     policy = json.loads((root/'config/collection-policy.json').read_bytes())
+    from public_archive_storage import compression_enabled
+    compression_enabled(policy)
     for source in policy['sources']:
         if source['mode'] not in ('official','discovery') or source['cadenceMinutes'] < 15:
             raise ValueError('Collection policy is outside reviewed scope')

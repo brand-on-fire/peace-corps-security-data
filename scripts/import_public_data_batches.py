@@ -250,6 +250,7 @@ def prepare(root,batch_paths,now):
     snapshot.update(generatedAt=now_text,mode='live',schemaVersion=1,countries=list(active.values()),sources=list(sources.values()),
                     incidents=project_current(records,active),archiveTotal=sum(r['countryCode'] in active and pipeline.public_incident(r) for r in records.values()))
     snapshot['history']['recordCount']=snapshot['archiveTotal'];snapshot['history']['to']=now_text
+    snapshot['advisoryRecords']=pipeline.advisory_snapshot_rows(records,active,snapshot['history']['from'],now_text)
     snapshot['history']['notes']=list(dict.fromkeys(snapshot['history'].get('notes',[])+history_notes))
     current_coverage={c['sourceId']:c for c in snapshot['coverage']}
     for entry in coverage:current_coverage[entry['sourceId']]=entry
@@ -269,13 +270,15 @@ def prepare(root,batch_paths,now):
     return records,all_countries,active,sources,snapshot,list(discovered.values()),audit
 
 def run(root,batch_paths,now,apply=False):
+    from public_archive_storage import compression_enabled
+    compress_retained=compression_enabled(pipeline.load(root/'config/collection-policy.json', {}))
     records,countries,active,sources,snapshot,discoveries,audit=prepare(root,batch_paths,now)
     if not apply:return dict(audit,applied=False)
     # Stage and validate every complete output before replacing the local data tree.
     temp=Path(tempfile.mkdtemp(prefix='public-batch-import-'));staged=temp/'data'
     shutil.copytree(root/'docs/data',staged)
     try:
-        pipeline.write_archive(staged,records,countries,active,snapshot['publication'])
+        pipeline.write_archive(staged,records,countries,active,snapshot['publication'],compress_retained=compress_retained)
         pipeline.save(staged/'snapshot.json',snapshot);pipeline.save(staged/'discovery.json',discoveries)
         pipeline.save(staged/'publication.json',dict(schemaVersion=1,generatedAt=snapshot['generatedAt'],revision=snapshot['publication']['revision']))
         pipeline.save(staged/'batch-import-status.json',audit)

@@ -838,16 +838,18 @@ def public_incident(row):
 
 
 def read_archive(data, countries):
+    from public_archive_storage import load as load_retained
     rows = {}
     # Excluded prior observations remain available for evidence and CAP lifecycle
     # references, outside the application's incident index and country archives.
     for directory in ('history', 'retained-weather'):
+        loader = load_retained if directory == 'retained-weather' else load
         for code in countries:
-            root = load(data/directory/f'{code}.json', [])
+            root = loader(data/directory/f'{code}.json', [])
             if isinstance(root, dict):
                 if root.get('format') != 'country-parts':
                     raise ValueError('Unknown archive format')
-                root = [row for name in root['parts'] for row in load(data/directory/Path(name).name)]
+                root = [row for name in root['parts'] for row in loader(data/directory/Path(name).name)]
             for row in root:
                 if row['id'] in rows:
                     raise ValueError('Duplicate archive identity')
@@ -934,7 +936,10 @@ def advisory_snapshot_rows(records, countries, history_from, history_to):
     return sorted(rows, key=lambda row:(row['occurredAt'],row['id']), reverse=True)
 
 
-def write_archive(data, records, countries, public_country_codes=None, publication=None):
+def write_archive(data, records, countries, public_country_codes=None, publication=None, *, compress_retained=False):
+    from public_archive_storage import save as save_retained, compress_legacy_files
+    if type(compress_retained) is not bool:
+        raise ValueError('Retained archive compression requires an explicit boolean')
     # Retain complete previously collected country files, while exposing only
     # the currently admitted roster in the public index and manifest.
     public_codes = set(countries if public_country_codes is None else public_country_codes)
@@ -952,6 +957,12 @@ def write_archive(data, records, countries, public_country_codes=None, publicati
     if len(encode(index)) > MAX_HISTORY_INDEX:
         raise ValueError('Complete history overview exceeds 25MB; no partial index permitted')
     def write_country(directory, code, rows):
+        def store(name, value):
+            path = data/directory/name
+            if directory == 'retained-weather':
+                save_retained(path, encode(value), compressed=compress_retained)
+            else:
+                save(path, value)
         groups, group, size = [], [], 3
         for row in rows:
             length = len(encode(row))
@@ -965,20 +976,21 @@ def write_archive(data, records, countries, public_country_codes=None, publicati
         groups.append(group)
         parts = []
         if len(groups) == 1:
-            save(data/directory/f'{code}.json', rows)
+            store(f'{code}.json', rows)
         else:
             if len(groups) > 999:
                 raise ValueError('Country archive exceeds the bounded 999-part index')
             part_index = []
             for number, group in enumerate(groups, 1):
                 name = f'{code}-{number:03d}.json'
-                save(data/directory/name, group)
+                store(name, group)
                 parts.append(name)
-                raw = (data/directory/name).read_bytes()
-                part_index.append(dict(path=name, recordCount=len(group), bytes=len(raw),
-                                       sha256=hashlib.sha256(raw).hexdigest(), ids=[row['id'] for row in group]))
-            save(data/directory/f'{code}.json', dict(format='country-parts', countryCode=code,
-                                                 recordCount=len(rows), parts=parts))
+                if directory == 'history':
+                    raw = (data/directory/name).read_bytes()
+                    part_index.append(dict(path=name, recordCount=len(group), bytes=len(raw),
+                                           sha256=hashlib.sha256(raw).hexdigest(), ids=[row['id'] for row in group]))
+            store(f'{code}.json', dict(format='country-parts', countryCode=code,
+                                     recordCount=len(rows), parts=parts))
             if directory == 'history' and publication is not None:
                 ids = [identity for part in part_index for identity in part['ids']]
                 if len(set(ids)) != len(rows) or ids != [row['id'] for row in rows]:
@@ -993,12 +1005,14 @@ def write_archive(data, records, countries, public_country_codes=None, publicati
         rows = [r for r in ordered if r['countryCode'] == code and public_incident(r)]
         parts = write_country('history', code, rows)
         retained = [r for r in ordered if r['countryCode'] == code and not public_incident(r)]
-        if retained or (data/'retained-weather'/f'{code}.json').exists():
+        if retained or any((data/'retained-weather'/f'{code}{suffix}').exists() for suffix in ('.json','.json.gz')):
             write_country('retained-weather', code, retained)
         if code in public_codes:
             manifest['countries'].append(dict(code=code, path=f'history/{code}.json', recordCount=len(rows), parts=parts))
     save(data/'history.json', index)
     save(data/'history-manifest.json', manifest)
+    if compress_retained:
+        compress_legacy_files(data/'retained-weather')
 
 
 def apply_archive_age(row, now):
@@ -1121,12 +1135,15 @@ def run(root, now, fixtures=None, diagnostics=None):
         request_state as caribe_request_state)
     from local_news_archive import expire_curfews
     from public_news_runtime import automatic_news, news_window
+    from public_archive_storage import compression_enabled
     now_text = stamp(now)
     data = root/'docs/data'
     all_countries = {c['code']:c for c in load(root/'config/countries.json')}
     countries = {k:c for k,c in all_countries.items() if c['status']=='active' and c['reviewDue'] >= now.date().isoformat()}
     sources = {s['id']:s for s in load(root/'config/sources.json')}
-    policies = load(root/'config/collection-policy.json')['sources']
+    configuration = load(root/'config/collection-policy.json')
+    policies = configuration['sources']
+    compress_retained = compression_enabled(configuration)
     states = load(data/'collector-state.json', {})
     snapshot = load(data/'snapshot.json')
     baseline_coverage = {c['sourceId']:c for c in snapshot['coverage']}
@@ -1429,7 +1446,8 @@ def run(root, now, fixtures=None, diagnostics=None):
         raise ValueError('Complete current overview exceeds 10MB; no partial snapshot permitted')
     diagnostics.end('canonical-revision', canonical_started)
     with diagnostics.stage('archive-write'):
-        write_archive(data, records, all_countries, countries, snapshot['publication'])
+        write_archive(data, records, all_countries, countries, snapshot['publication'],
+                      compress_retained=compress_retained)
     write_started = diagnostics.start()
     save(data/'snapshot.json', snapshot)
     # A tiny change hint lets readers poll without downloading the full map data.

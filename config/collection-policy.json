@@ -1289,6 +1289,7 @@
     "fullNewsBodyPublication": false,
     "arbitraryNewsIncidentPromotion": false,
     "sourceError": "preserve-last-good",
-    "countryAdmission": "active-and-review-not-expired"
+    "countryAdmission": "active-and-review-not-expired",
+    "retainedWeatherStorage": "gzip-v1"
   }
 }

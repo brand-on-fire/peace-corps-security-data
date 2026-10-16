@@ -6,6 +6,7 @@ import json
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'scripts'))
 import import_public_data_batches as importer
@@ -33,6 +34,21 @@ class ImportTests(unittest.TestCase):
         second=self.run_batch({'incidents':[self.row]})
         self.assertEqual(first['newIncidents'],1);self.assertEqual(second['newIncidents'],0)
         self.assertEqual(second['changedIncidents'],0);self.assertEqual(before,self.records())
+    def test_import_respects_compressed_retained_evidence_policy(self):
+        routine=copy.deepcopy(self.row);routine.update(category='weather',severity='moderate')
+        routine['sourceMetadata'].update(provider='CAP 1.2',providerSeverity='Moderate')
+        self.assertFalse(p.public_incident(routine))
+        p.save(self.root/'config/collection-policy.json',{'sources':[],'policy':{'retainedWeatherStorage':'gzip-v1'}})
+        self.run_batch({'incidents':[routine]});before=self.records()
+        path=self.root/'docs/data/retained-weather/JM.json.gz';packed=path.read_bytes()
+        self.assertFalse(path.with_suffix('').exists())
+        self.now+=dt.timedelta(minutes=1);self.run_batch({'incidents':[]})
+        self.assertEqual(self.records(),before);self.assertEqual(path.read_bytes(),packed)
+    def test_unknown_storage_policy_refuses_import_without_mutation(self):
+        original=(self.root/'docs/data/snapshot.json').read_bytes()
+        p.save(self.root/'config/collection-policy.json',{'sources':[],'policy':{'retainedWeatherStorage':'unreviewed'}})
+        with self.assertRaisesRegex(ValueError,'Unknown retained-weather storage policy'):self.run_batch({'incidents':[self.row]})
+        self.assertEqual((self.root/'docs/data/snapshot.json').read_bytes(),original)
     def test_exact_provider_identity_consolidates_not_title(self):
         self.run_batch({'incidents':[self.row]});new=copy.deepcopy(self.row);new['id']='alias';new['reports'][0].update(id='alias-report',incidentId='alias',url='https://example.org/update')
         audit=self.run_batch({'incidents':[new]});self.assertEqual(audit['aliases'],{'alias':'one'});self.assertEqual(len(self.records()),1)
@@ -97,5 +113,57 @@ class ImportTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'boundary provenance missing'):self.run_batch({'incidents':[row]})
         row['adminAssignment']['levels']['ADM2'].update(layerId='test-layer',boundaryYearRepresented='2020',geometryResolution='provider_simplified')
         self.run_batch({'incidents':[row]})
+
+    def prepare_old_notice(self):
+        import test_public_advisories as fixtures
+        self.now=fixtures.NOW
+        self.country=fixtures.COUNTRIES['ID']
+        self.source=fixtures.SOURCE
+        self.row=fixtures.notice()
+        p.save(self.root/'config/countries.json',[self.country])
+        p.save(self.root/'config/sources.json',[self.source])
+        snapshot=p.load(self.root/'docs/data/snapshot.json')
+        snapshot.update(countries=[self.country],sources=[self.source])
+        p.save(self.root/'docs/data/snapshot.json',snapshot)
+        self.run_batch({'incidents':[self.row]})
+
+    def test_reviewed_corrections_rebuild_advisories_and_preserve_return_lifecycle(self):
+        self.prepare_old_notice()
+        old=self.row;identity=old['id'];all_hashes={report['contentHash'] for report in old['reports']}
+        for state,evidence,active,listed in [('expired','unverified',False,True),
+                ('expired','unverified',False,False),('reported','official',True,True)]:
+            self.now+=dt.timedelta(minutes=1)
+            report=copy.deepcopy(old['reports'][0])
+            report.update(contentHash=p.digest(['complete correction',p.stamp(self.now)]),
+                          excerpt='Complete corrected source representation',retrievedAt=p.stamp(self.now))
+            all_hashes.add(report['contentHash'])
+            correction=dict(incidentId=identity,reason='Reviewed complete notice correction',
+                patch=dict(state=state,evidenceStatus=evidence,sourceMetadata=dict(
+                    providerActiveNotice=active,providerListed=listed)),appendReports=[report])
+            self.run_batch({'corrections':[correction]})
+            snapshot=p.load(self.root/'docs/data/snapshot.json')
+            archived=p.read_archive(self.root/'docs/data',{'ID':self.country})
+            row=archived[identity]
+            self.assertEqual((row['occurredAt'],row['firstSeenAt']),(old['occurredAt'],old['firstSeenAt']))
+            self.assertTrue(row['historical'])
+            self.assertEqual((row['state'],row['evidenceStatus']),(state,evidence))
+            self.assertEqual(snapshot['advisoryRecords'],p.advisory_snapshot_rows(
+                archived,{'ID':self.country},snapshot['history']['from'],snapshot['history']['to']))
+            retained=row['reports']+[r for revision in row.get('revisions',[]) for r in revision.get('previousReports',[])]
+            self.assertTrue(all_hashes.issubset({r['contentHash'] for r in retained}))
+            self.assertEqual(snapshot['incidents'],[])
+            self.assertEqual((snapshot['archiveTotal'],snapshot['history']['recordCount']),(1,1))
+
+    def test_advisory_size_uses_existing_snapshot_limit_without_truncation(self):
+        self.prepare_old_notice()
+        before=(self.root/'docs/data/snapshot.json').read_bytes()
+        archived=p.read_archive(self.root/'docs/data',{'ID':self.country})
+        correction=dict(incidentId=self.row['id'],reason='Complete source text',
+                        patch={'summary':'Complete advisory evidence. '*1000})
+        with patch.object(importer,'MAX_SNAPSHOT',len(before)+1000):
+            with self.assertRaisesRegex(ValueError,'snapshot exceeds'):
+                self.run_batch({'corrections':[correction]})
+        self.assertEqual((self.root/'docs/data/snapshot.json').read_bytes(),before)
+        self.assertEqual(p.read_archive(self.root/'docs/data',{'ID':self.country}),archived)
 
 if __name__=='__main__':unittest.main()
