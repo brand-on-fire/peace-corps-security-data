@@ -218,8 +218,7 @@ def prepare(root,batch_paths,now):
     for batch in batches:
         for incoming in batch.get('incidents',[]):
             row=copy.deepcopy(incoming);explicit=row.pop('mergeInto',None)
-            row['historical']=timestamp(row['occurredAt'])<now-dt.timedelta(days=30)
-            if row['historical'] and row['state']=='reported':row['state']='expired'
+            pipeline.apply_archive_age(row,now)
             validate_record(row,active,sources,areas,now)
             matches=set().union(*(equivalence.get(k,set()) for k in event_keys(row))) if event_keys(row) else set()
             if explicit:matches.add(explicit)
@@ -244,8 +243,7 @@ def prepare(root,batch_paths,now):
             history_notes.append(note)
         for entry in batch.get('discoveries',[]):discovered[entry['id']]=entry
     for row in records.values():
-        row['historical']=timestamp(row['occurredAt'])<now-dt.timedelta(days=30)
-        if row['historical'] and row['state']=='reported':row['state']='expired'
+        pipeline.apply_archive_age(row,now)
     # Validate all newly changed records, preserving inactive archive rows internally.
     for iid in set(changes):validate_record(records[iid],active,sources,areas,now)
     snapshot=pipeline.load(data/'snapshot.json');snapshot.pop('publication',None)
@@ -259,7 +257,8 @@ def prepare(root,batch_paths,now):
         if sid not in current_coverage:current_coverage[sid]=dict(sourceId=sid,lastAttemptAt=None,lastSuccessAt=None,status='pending',message='Source metadata imported; no successful scheduled retrieval is asserted by this import.')
     snapshot['coverage']=list(current_coverage.values())
     snapshot['collector']['discoveryCount']=len(discovered)
-    snapshot['collector']['incidentScope']='severe-cap-weather-v1'
+    snapshot['collector']['incidentScope']=pipeline.WEATHER_SCOPE
+    snapshot['collector']['weatherExclusions']=pipeline.weather_exclusion_index(records,active,snapshot['history']['from'])
     snapshot['history']['sources']=sorted(set(snapshot['history']['sources'])|{sid for row in records.values() for sid in row['sourceIds']})
     snapshot['publication']=dict(format='peace-corps-public-data-v1',generatedAt=now_text,revision=pipeline.publication_revision(snapshot),activeCountryCodes=sorted(active))
     if len(pipeline.encode(snapshot))>MAX_SNAPSHOT:raise ValueError('Projected snapshot exceeds10MB; full text may not be truncated')
@@ -276,8 +275,9 @@ def run(root,batch_paths,now,apply=False):
     temp=Path(tempfile.mkdtemp(prefix='public-batch-import-'));staged=temp/'data'
     shutil.copytree(root/'docs/data',staged)
     try:
-        pipeline.write_archive(staged,records,countries,active)
+        pipeline.write_archive(staged,records,countries,active,snapshot['publication'])
         pipeline.save(staged/'snapshot.json',snapshot);pipeline.save(staged/'discovery.json',discoveries)
+        pipeline.save(staged/'publication.json',dict(schemaVersion=1,generatedAt=snapshot['generatedAt'],revision=snapshot['publication']['revision']))
         pipeline.save(staged/'batch-import-status.json',audit)
         reread=pipeline.read_archive(staged,countries)
         if reread!=records:raise ValueError('Complete archive roundtrip changed accepted records')

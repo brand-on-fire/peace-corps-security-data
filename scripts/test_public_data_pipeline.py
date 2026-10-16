@@ -126,6 +126,15 @@ class PublicPipelineTests(unittest.TestCase):
         self.assertEqual(pipeline.read_archive(data,{'GH':self.country})['warning'],row)
         self.assertNotIn('geometry',pipeline.load(data/'history.json')[0]['location'])
 
+    def test_overview_omits_only_cap_xml_details_preserved_in_archive(self):
+        report = dict(excerpt='Complete warning text',sourceMetadata=dict(infoBlocks=['full XML'],other='retained'))
+        row = dict(reports=[report],revisions=[dict(previousReports=[report])])
+        overview = pipeline.public_snapshot_record(row)
+        for projected in [overview['reports'][0],overview['revisions'][0]['previousReports'][0]]:
+            self.assertEqual(projected['excerpt'],report['excerpt'])
+            self.assertEqual(projected['sourceMetadata'],dict(other='retained',fullDetailInCountryArchive=True))
+        self.assertEqual(row['reports'][0]['sourceMetadata']['infoBlocks'],['full XML'])
+
     def test_foreign_trial_and_advice_news_remain_discovery(self):
         source=dict(id='gh-news',language='en',countryCodes=['GH'])
         items=[dict(title='Ghana newspaper: Nepal earthquake trial advice',url='https://example.org/a',
@@ -210,6 +219,8 @@ class PublicPipelineTests(unittest.TestCase):
         self.assertEqual([c['code'] for c in pipeline.load(data/'history-manifest.json')['countries']],['AL'])
         self.assertEqual(snapshot['archiveTotal'],1)
         self.assertEqual(snapshot['history']['recordCount'],1)
+        self.assertEqual(pipeline.load(data/'publication.json'),dict(schemaVersion=1,
+                         generatedAt=snapshot['generatedAt'],revision=snapshot['publication']['revision']))
         self.assertEqual(result['archiveCount'],2)
         self.assertEqual(result['publicArchiveCount'],1)
         self.assertEqual(pipeline.read_archive(data,countries)[original['id']],original)
@@ -263,6 +274,75 @@ class PublicPipelineTests(unittest.TestCase):
         self.assertEqual(repeated['requested'],0)
         missed=pipeline.run(self.root,now+dt.timedelta(days=1),self.root/'missing-fixtures')
         self.assertEqual(missed['requested'],1)
+
+    def test_oversized_incident_rejects_whole_source_batch_but_publishes_other_source(self):
+        from unittest.mock import patch
+        oversized_source=dict(self.source,id='oversized-source')
+        healthy_source=dict(self.source,id='healthy-source')
+        original=pipeline.make_incident(oversized_source,'prior-record','Original event','Original summary',
+            self.country,'earthquake','2026-10-04T00:00:00Z','2026-10-04T12:00:00Z',
+            '2026-10-04T13:00:00Z',{'precision':'country'},'https://example.invalid/prior',
+            {},'Complete original evidence')
+        incoming_update=json.loads(json.dumps(original))
+        incoming_update.update(updatedAt=pipeline.stamp(self.now),summary='Uncommitted changed summary')
+        incoming_update['reports'][0]['contentHash']='changed-source-content'
+        oversized=pipeline.make_incident(oversized_source,'oversized-new-record','New event','Complete summary',
+            self.country,'earthquake',pipeline.stamp(self.now),pipeline.stamp(self.now),
+            pipeline.stamp(self.now),{'precision':'country'},'https://example.invalid/large',
+            {},'Complete oversized evidence')
+        full_excerpt='Entire source representation. 日本語. '*1000+'END OF COMPLETE EVIDENCE'
+        oversized['reports'][0]['excerpt']=full_excerpt
+        healthy=pipeline.make_incident(healthy_source,'healthy-new-record','Healthy event','Healthy summary',
+            self.country,'earthquake',pipeline.stamp(self.now),pipeline.stamp(self.now),
+            pipeline.stamp(self.now),{'precision':'country'},'https://example.invalid/healthy',
+            {},'Complete healthy evidence')
+        data=self.root/'docs/data'
+        pipeline.write_archive(data,{original['id']:original},{'GH':self.country})
+        pipeline.save(data/'snapshot.json',dict(coverage=[],history={'from':'2021-10-05T00:00:00Z'}))
+        pipeline.save(self.root/'config/countries.json',[self.country])
+        pipeline.save(self.root/'config/sources.json',[oversized_source,healthy_source])
+        pipeline.save(self.root/'config/country-iso3.json',{})
+        policies=[dict(sourceId=source['id'],mode='official',cadenceMinutes=15,
+                       url='https://example.invalid/'+source['id'])
+                  for source in (oversized_source,healthy_source)]
+        pipeline.save(self.root/'config/collection-policy.json',dict(sources=policies))
+        previous=dict(sourceId=oversized_source['id'],lastAttemptAt='2026-10-04T23:30:00Z',
+                      lastSuccessAt='2026-10-04T23:30:00Z',etag='prior-valid-etag',status='healthy')
+        pipeline.save(data/'collector-state.json',{oversized_source['id']:previous})
+        def fetched(policy, prior, now, fixtures):
+            return (dict(sourceId=policy['sourceId'],lastAttemptAt=now,httpStatus=200,
+                         etag='new-response-etag'),b'Complete synthetic source response')
+        def parsed(source, *args):
+            return ([incoming_update,oversized] if source['id']==oversized_source['id'] else [healthy])
+        limit=8192
+        self.assertLess(len(pipeline.encode(incoming_update))+len(pipeline.encode(original))+3,limit)
+        self.assertGreater(len(pipeline.encode(oversized))+3,limit)
+        with patch.object(pipeline,'PART_LIMIT',limit), \
+             patch.object(pipeline,'fetch',side_effect=fetched), \
+             patch.object(pipeline,'official_incidents',side_effect=parsed):
+            result=pipeline.run(self.root,self.now)
+        persisted=pipeline.read_archive(data,{'GH':self.country})
+        self.assertEqual(set(persisted),{original['id'],healthy['id']})
+        self.assertEqual(persisted[original['id']],original)
+        self.assertEqual(persisted[healthy['id']],healthy)
+        self.assertEqual(oversized['reports'][0]['excerpt'],full_excerpt)
+        self.assertEqual(result['changedIncidents'],[healthy['id']])
+        state=pipeline.load(data/'collector-state.json')
+        failed=state[oversized_source['id']]
+        self.assertEqual(failed['status'],'unavailable')
+        self.assertEqual(failed['lastSuccessAt'],previous['lastSuccessAt'])
+        self.assertEqual(failed['etag'],previous['etag'])
+        self.assertEqual(failed['lastAttemptAt'],pipeline.stamp(self.now))
+        self.assertIn('Complete incident exceeds',failed['message'])
+        self.assertIn('without truncation: '+oversized['id'],failed['message'])
+        self.assertEqual(state[healthy_source['id']]['status'],'healthy')
+        self.assertEqual(state[healthy_source['id']]['lastSuccessAt'],pipeline.stamp(self.now))
+        snapshot=pipeline.load(data/'snapshot.json')
+        self.assertEqual({row['id'] for row in snapshot['incidents']},{original['id'],healthy['id']})
+        coverage=next(row for row in snapshot['coverage'] if row['sourceId']==oversized_source['id'])
+        self.assertEqual(coverage['status'],'unavailable')
+        self.assertEqual(coverage['lastSuccessAt'],previous['lastSuccessAt'])
+        self.assertEqual(coverage['message'],failed['message'])
 
     def _run_mock_official_update(self, source, adapter, original, incoming):
         from unittest.mock import patch

@@ -6,6 +6,7 @@ It is never printed, written to git config, or saved to a credential file.
 """
 import argparse
 import base64
+import gzip
 import json
 import os
 import re
@@ -59,8 +60,17 @@ def audit(root, remote=True):
         raw = path.read_bytes()
         if len(raw) > 25_000_000:
             raise ValueError('Public file exceeds 25MB; no partial publication permitted: '+str(rel))
+        scanned = raw
+        if path.suffix == '.gz':
+            if rel.parent != Path('config/map-areas') or not re.fullmatch(r'[A-Z]{2}-ADM[12]\.geojson\.gz', path.name):
+                raise ValueError('Unapproved compressed public file: '+str(rel))
+            with gzip.open(path, 'rb') as stream:
+                scanned = stream.read(25_000_001)
+            if len(scanned) > 25_000_000:
+                raise ValueError('Complete decompressed boundary exceeds 25MB: '+str(rel))
+            json.loads(scanned)
         # The scanner itself contains patterns, not credential values.
-        if rel != Path('scripts/public_data_publish.py') and any(re.search(p, raw) for p in PATTERNS):
+        if rel != Path('scripts/public_data_publish.py') and any(re.search(p, value) for value in (raw, scanned) for p in PATTERNS):
             raise ValueError('Public-content scan failed: '+str(rel))
         total += len(raw)
         files.append(str(rel))

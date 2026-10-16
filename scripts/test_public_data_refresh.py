@@ -40,7 +40,7 @@ class RefreshTests(unittest.TestCase):
         rows = [self.row] if rows is None else rows
         data = root/'docs/data'
         pipeline.write_archive(data,{r['id']:r for r in rows},{'GH':self.country})
-        snapshot = dict(generatedAt=when,countries=[self.country],incidents=rows,archiveTotal=len(rows),history=dict(recordCount=len(rows)))
+        snapshot = dict(generatedAt=when,countries=[self.country],incidents=rows,archiveTotal=len(rows),history={'recordCount':len(rows),'from':'2025-10-05T00:00:00Z'})
         snapshot['publication'] = dict(activeCountryCodes=['GH'],revision=pipeline.publication_revision(snapshot))
         pipeline.save(data/'snapshot.json',snapshot)
         pipeline.save(data/'refresh-status.json',dict(generatedAt=when,sources=sources or [],requested=len(sources or [])))
@@ -165,6 +165,113 @@ class RefreshTests(unittest.TestCase):
         self.assertEqual(result['run']['event'],'workflow_dispatch')
         with self.assertRaisesRegex(ValueError,'repository'):
             refresh.provenance(dict(common,GITHUB_REPOSITORY='other/private'),pipeline.stamp(self.now))
+
+    def test_failed_promotion_does_not_claim_candidate_was_published(self):
+        with patch.object(refresh, 'promote', side_effect=OSError('simulated storage failure')):
+            result = refresh.refresh(self.root,self.now,runner=self.fake_runner,environment={})
+        self.assertEqual(result['outcome'], 'failed')
+        self.assertEqual(result['publicationGeneratedAt'], '2026-10-05T02:00:00Z')
+        self.assertIsNone(result['lastSuccessfulCollectionAt'])
+        self.assertEqual((self.data/'snapshot.json').read_bytes(), self.original)
+
+    def test_health_counts_retained_source_outage_not_attempted_this_run(self):
+        pipeline.save(self.root/'config/collection-policy.json', dict(sources=[dict(sourceId='old-news', mode='discovery', cadenceMinutes=360)]))
+        def run(command, **kwargs):
+            stage = Path(command[command.index('--root')+1])
+            self.write_candidate(stage,pipeline.stamp(self.now),sources=[dict(sourceId='official',status='healthy')])
+            snapshot=pipeline.load(stage/'docs/data/snapshot.json')
+            snapshot['coverage']=[dict(sourceId='old-news',status='unavailable',lastSuccessAt='2026-10-04T00:00:00Z',lastAttemptAt='2026-10-05T04:00:00Z')]
+            publication=snapshot.pop('publication')
+            publication['revision']=pipeline.publication_revision(snapshot)
+            snapshot['publication']=publication
+            pipeline.save(stage/'docs/data/snapshot.json',snapshot)
+        result=refresh.refresh(self.root,self.now,runner=run,environment={})
+        self.assertEqual(result['sourceCounts']['failed'],0)
+        self.assertEqual(result['outcome'],'degraded')
+        self.assertEqual(result['sourceHealth']['counts']['overdue'],1)
+        self.assertEqual(result['sourceHealth']['counts']['unavailable'],1)
+
+    def test_window_provenance_distinguishes_trigger_and_actual_collector_code(self):
+        env=dict(GITHUB_ACTIONS='true',GITHUB_REPOSITORY=refresh.REPOSITORY,GITHUB_RUN_ID='123',
+                 GITHUB_RUN_ATTEMPT='1',GITHUB_SHA='a'*40,GITHUB_EVENT_NAME='schedule',
+                 COLLECTOR_CODE_SHA='b'*40,COLLECTOR_CYCLE='2')
+        result=refresh.provenance(env,pipeline.stamp(self.now))
+        self.assertEqual(result['headSha'],'a'*40)
+        self.assertEqual(result['collectorHeadSha'],'b'*40)
+        self.assertEqual(result['cycle'],2)
+        for bad in [dict(COLLECTOR_CYCLE='0'),dict(COLLECTOR_CYCLE='21'),dict(COLLECTOR_CODE_SHA='invalid')]:
+            with self.assertRaisesRegex(ValueError,'window provenance'):
+                refresh.provenance(dict(env,**bad),pipeline.stamp(self.now))
+
+    def test_child_generation_after_wrapper_start_is_not_a_clock_error(self):
+        child_at=self.now+dt.timedelta(seconds=45)
+        finished=self.now+dt.timedelta(seconds=100)
+        pipeline.save(self.root/'config/collection-policy.json',dict(sources=[dict(sourceId='official',mode='official',cadenceMinutes=15)]))
+        def later_child(command, **kwargs):
+            stage=Path(command[command.index('--root')+1])
+            self.write_candidate(stage,pipeline.stamp(child_at),sources=[dict(sourceId='official',status='healthy',
+                lastAttemptAt=pipeline.stamp(child_at),lastSuccessAt=pipeline.stamp(child_at))])
+        result=refresh.refresh(self.root,self.now,runner=later_child,environment={},clock=lambda:finished)
+        self.assertEqual(result['outcome'],'complete')
+        self.assertEqual(result['generatedAt'],pipeline.stamp(child_at))
+        self.assertEqual(result['completedAt'],pipeline.stamp(finished))
+        self.assertEqual(result['sourceHealth']['counts']['clockErrors'],0)
+        self.assertEqual(result['sourceHealth']['sources'][0]['successfulCheckAgeSeconds'],55)
+        self.assertEqual(result['collectionTiming']['windowEnd'],pipeline.stamp(finished))
+
+    def test_replay_without_clock_uses_later_child_as_evaluation_lower_bound(self):
+        child_at=self.now+dt.timedelta(seconds=45)
+        def later_child(command, **kwargs):
+            stage=Path(command[command.index('--root')+1])
+            self.write_candidate(stage,pipeline.stamp(child_at),sources=[dict(sourceId='official',status='healthy')])
+        result=refresh.refresh(self.root,self.now,runner=later_child,environment={})
+        self.assertEqual(result['outcome'],'complete')
+        self.assertEqual(result['sourceHealth']['evaluatedAt'],pipeline.stamp(child_at))
+
+    def test_failed_collection_dates_diagnostic_at_completion_and_retains_publication(self):
+        finished=self.now+dt.timedelta(seconds=480)
+        def timeout(command, **kwargs):
+            raise subprocess.TimeoutExpired(command,480)
+        result=refresh.refresh(self.root,self.now,runner=timeout,environment={},clock=lambda:finished)
+        self.assertEqual(result['outcome'],'failed')
+        self.assertEqual(result['run']['startedAt'],pipeline.stamp(self.now))
+        self.assertEqual(result['generatedAt'],pipeline.stamp(finished))
+        self.assertEqual(result['publicationGeneratedAt'],'2026-10-05T02:00:00Z')
+        self.assertEqual(result['collectionTiming']['observations'][-1]['at'],pipeline.stamp(finished))
+        self.assertEqual((self.data/'snapshot.json').read_bytes(),self.original)
+
+    def test_all_sources_failure_with_later_child_retains_usable_diagnostics(self):
+        child_at=self.now+dt.timedelta(seconds=45)
+        finished=self.now+dt.timedelta(seconds=90)
+        def unavailable(command, **kwargs):
+            stage=Path(command[command.index('--root')+1])
+            self.write_candidate(stage,pipeline.stamp(child_at),sources=[dict(sourceId='official',status='unavailable',lastAttemptAt=pipeline.stamp(child_at))])
+        result=refresh.refresh(self.root,self.now,runner=unavailable,environment={},clock=lambda:finished)
+        self.assertEqual(result['outcome'],'failed')
+        self.assertEqual(result['generatedAt'],pipeline.stamp(finished))
+        self.assertEqual(result['publicationGeneratedAt'],'2026-10-05T02:00:00Z')
+        self.assertIn('collectionTiming',result)
+        self.assertEqual(len(result['errors']),1)
+
+    def test_real_offline_child_generates_after_wrapper_start(self):
+        import shutil
+        self.write_candidate(self.root,'2026-10-05T02:00:00Z',rows=[])
+        snapshot=pipeline.load(self.data/'snapshot.json');snapshot['coverage']=[]
+        pipeline.save(self.data/'snapshot.json',snapshot)
+        for name,value in [('sources.json',[]),('country-iso3.json',{}),('admin-places.json',[]),('geo/index.json',[])]:
+            pipeline.save(self.root/'config'/name,value)
+        (self.root/'scripts').mkdir()
+        for script in SCRIPTS.glob('*.py'):
+            shutil.copy2(script,self.root/'scripts'/script.name)
+        fixtures=self.root/'fixtures';fixtures.mkdir()
+        started=dt.datetime.now(dt.timezone.utc)-dt.timedelta(seconds=60)
+        result=refresh.refresh(self.root,started,fixtures=fixtures,environment={'PATH':os.environ['PATH'],'PYTHONDONTWRITEBYTECODE':'1'},
+                               clock=lambda:dt.datetime.now(dt.timezone.utc))
+        self.assertEqual(result['outcome'],'complete',result['errors'])
+        self.assertGreater(result['generatedAt'],pipeline.stamp(started))
+        self.assertGreaterEqual(result['completedAt'],result['generatedAt'])
+        self.assertEqual(result['sourceHealth']['counts']['clockErrors'],0)
+        self.assertIn('collectionTiming',result)
 
 
 if __name__=='__main__':

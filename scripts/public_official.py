@@ -39,6 +39,10 @@ def prepare_official_policy(policy,previous,now):
  return p
 
 def request_state(policy,previous):
+ # Their child responses can change while the listing stays byte-identical.
+ # Re-fetch the complete listing on each due check to reconcile those children.
+ if policy.get('adapter') in {'np-bipad','cdc-notices'}:
+  return {k:v for k,v in previous.items() if k not in ('etag','lastModified')}
  return previous if previous.get('url')==policy['url'] else {k:v for k,v in previous.items() if k not in ('etag','lastModified')}
 
 class Requests:
@@ -124,7 +128,9 @@ def who_rows(source,articles,now,receipt,records,article_receipts=None,event_ali
   if not isinstance(aid,str) or not re.fullmatch(r'[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}',aid) or not isinstance(title,str) or not title.strip():raise ValueError('WHO article identity/title missing')
   if pub>now or modified>now:continue
   path=article.get('ItemDefaultUrl','')
-  if not re.fullmatch(r'/[A-Za-z0-9-]+',path):raise ValueError('WHO article URL path invalid')
+  # WHO uses suffixes such as /2022-DON398_1 for revised article URLs.
+  # Admit one literal slug only; encoded separators, traversal and URLs remain invalid.
+  if not isinstance(path,str) or not re.fullmatch(r'/[A-Za-z0-9_-]+',path):raise ValueError('WHO article URL path invalid')
   address='https://www.who.int/emergencies/disease-outbreak-news/item'+path;codes=title_countries(title,country_map);ev=article.get('EmergencyEvent') or {};ev_id=ev.get('Id');core={k:v for k,v in article.items() if k!='EmergencyEvent'}
   # Preserve reviewed source representations verbatim; expanded relation metadata
   # does not itself supersede their factual summaries or explicit resolved state.

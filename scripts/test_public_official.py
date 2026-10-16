@@ -24,6 +24,14 @@ def forbidden(*args):raise AssertionError('Unexpected network request')
 def collect(kind,obj,previous=None,records=None,fetch=forbidden):return m.collect_official(source(kind),policy(kind),json.dumps(obj).encode(),NOW,COUNTRIES,Geo(),previous or {},records or {},fetch)
 
 class OfficialAdapters(unittest.TestCase):
+ def test_child_reconciliation_runs_even_when_listing_validators_are_unchanged(self):
+  for adapter in ('np-bipad','cdc-notices'):
+   previous={'url':'https://example.org/list','etag':'same-list','lastModified':'unchanged','lastSuccessAt':NOW}
+   actual=m.request_state({'adapter':adapter,'url':previous['url']},previous)
+   self.assertNotIn('etag',actual)
+   self.assertNotIn('lastModified',actual)
+   self.assertEqual(actual['lastSuccessAt'],NOW)
+   self.assertEqual(previous['etag'],'same-list')
  def test_usgs_preserves_provider_millisecond_dates(self):
   feature=quake(when='2026-10-01T00:00:00.685Z');feature['properties']['updated']+=40
   row=collect('usgs-week',document([feature],'usgs-week'))['incidents'][0]
@@ -76,6 +84,15 @@ class OfficialAdapters(unittest.TestCase):
  def test_who_new_report_has_unknown_risk_and_report_date(self):
   r=collect('who-don',document([who()],'who-don'))['incidents'][0]
   self.assertEqual(r['location'],{'precision':'country'});self.assertEqual(r['severity'],'unknown');self.assertEqual(r['state'],'reported');self.assertEqual(r['occurredAt'],who()['PublicationDateAndTime']);self.assertEqual(r['sourceMetadata']['eventTimeBasis'],'report_publication_not_onset')
+ def test_who_publisher_underscore_slug_remains_on_fixed_official_host(self):
+  a=who();a['ItemDefaultUrl']='/2022-DON398_1'
+  row=collect('who-don',document([a],'who-don'))['incidents'][0]
+  self.assertEqual(row['reports'][0]['url'],'https://www.who.int/emergencies/disease-outbreak-news/item/2022-DON398_1')
+ def test_who_unsafe_slug_rejects_complete_batch(self):
+  for path in ('//evil.test/a','https://evil.test/a','/../a','/a/b','/a%2fb','/a?host=evil','/a#fragment','/a\\b',None):
+   with self.subTest(path=path),self.assertRaisesRegex(ValueError,'URL path invalid'):
+    a=who(2,pub='2026-10-02T00:00:00Z');a['ItemDefaultUrl']=path
+    collect('who-don',document([who(),a],'who-don'))
  def test_who_declared_count_mismatch_rejects(self):
   d=document([who()],'who-don');d['@odata.count']=2
   with self.assertRaises(ValueError):collect('who-don',d)

@@ -45,6 +45,54 @@ class CapTests(unittest.TestCase):
  def test_update_chain_is_single_incident(self):
   original=self.parse();update=self.control('Update','updated','2026-10-05T07:30:00Z',self.reference(),True)
   result=apply_lifecycle([update,original],{},NOW);self.assertEqual(len(result),1);self.assertEqual(result[0]['id'],original['record']['id']);self.assertEqual(len(result[0]['sourceMetadata']['capMessageKeys']),2)
+  row=result[0]
+  self.assertEqual(len(row['reports']),2)
+  self.assertCountEqual([r['contentHash'] for r in row['reports']], [m['control']['contentHash'] for m in (original,update)])
+  self.assertTrue(all(r['incidentId']==row['id'] for r in row['reports']))
+  self.assertEqual(row['reports'][1]['sourceMetadata']['infoBlocks'], original['record']['sourceMetadata']['infoBlocks'])
+  self.assertEqual(apply_lifecycle([original,update],{row['id']:row},NOW),[])
+ def test_update_across_runs_retains_original_source_evidence(self):
+  original=self.parse();update=self.control('Update','updated','2026-10-05T07:30:00Z',self.reference(),True)
+  before=copy.deepcopy(original['record'])
+  result=apply_lifecycle([update],{before['id']:original['record']},NOW)[0]
+  self.assertEqual(original['record'],before)
+  self.assertEqual(len(result['reports']),2)
+  self.assertEqual(result['reports'][1],before['reports'][0])
+ def test_same_batch_update_then_cancel_retains_all_three_messages(self):
+  original=self.parse();update=self.control('Update','updated','2026-10-05T07:30:00Z',self.reference(),True)
+  reference='cuaca.ekstrem@bmkg.go.id,updated,2026-10-05T07:30:00Z'
+  cancel=self.control('Cancel','cancel','2026-10-05T08:00:00Z',reference)
+  row=apply_lifecycle([cancel,update,original],{},NOW)[0]
+  self.assertEqual(row['state'],'cancelled');self.assertEqual(len(row['reports']),3)
+  self.assertEqual(len(row['sourceMetadata']['capMessageKeys']),3)
+  self.assertEqual(apply_lifecycle([cancel,update,original],{row['id']:row},NOW),[])
+ def test_severe_downgrade_preserves_both_bulletins_without_duplicate_reports(self):
+  from public_data_pipeline import public_incident
+  original=self.parse(RAW.replace(b'<severity>Moderate</severity>',b'<severity>Severe</severity>'))
+  update=self.control('Update','updated','2026-10-05T07:30:00Z',self.reference(),True)
+  row=apply_lifecycle([update,original],{},NOW)[0]
+  self.assertEqual(row['severity'],'severe');self.assertEqual(row['state'],'expired')
+  self.assertEqual(row['sourceMetadata']['currentProviderSeverity'],'Moderate')
+  self.assertEqual(len(row['reports']),2)
+  self.assertEqual(row['location'],original['record']['location'])
+  self.assertTrue(public_incident(row));self.assertFalse(public_incident(update['record']))
+  self.assertEqual(apply_lifecycle([update,original],{row['id']:row},NOW),[])
+ def test_conflicting_provider_times_still_reject_instead_of_being_corrected(self):
+  import xml.etree.ElementTree as E
+  root=E.fromstring(RAW);root.find('{*}info/{*}expires').text='2026-10-05T06:00:00Z'
+  with self.assertRaisesRegex(ValueError,'expiry precedes'):
+   self.parse(E.tostring(root))
+ def test_same_message_revised_body_keeps_unique_evidence_ids(self):
+  import xml.etree.ElementTree as E
+  original=self.parse();root=E.fromstring(RAW)
+  root.find('{*}info/{*}description').text='Synthetic corrected complete bulletin.'
+  revised=self.parse(E.tostring(root));row=original['record']
+  changed=apply_lifecycle([revised],{row['id']:row},NOW)[0]
+  self.assertEqual(changed['id'],row['id'])
+  self.assertEqual(len(changed['reports']),2)
+  self.assertEqual(len({r['id'] for r in changed['reports']}),2)
+  self.assertEqual(changed['reports'][1],row['reports'][0])
+  self.assertEqual(apply_lifecycle([revised],{changed['id']:changed},NOW),[])
  def test_unknown_cancel_does_not_invent_incident(self):
   self.assertEqual(apply_lifecycle([self.control('Cancel','cancel','2026-10-05T08:00:00Z',self.reference())],{},NOW),[])
  def test_outside_country_not_admitted(self):

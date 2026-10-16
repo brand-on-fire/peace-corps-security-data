@@ -29,7 +29,9 @@ jobs:
       github.repository == 'brand-on-fire/peace-corps-security-data' &&
       github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
     runs-on: ubuntu-24.04
-    timeout-minutes: 12
+    # Standard public runners are free. A bounded window avoids requiring a new
+    # runner start for every check; GitHub's next handoff remains best effort.
+    timeout-minutes: 300
     permissions:
       contents: write
     env:
@@ -40,6 +42,9 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 1
+          # A queued schedule may reference an older data commit. Record both
+          # the triggering SHA and the actual collector SHA in each publication.
+          ref: main
       - name: Audit public bundle and storage limits
         id: audit
         run: python3 scripts/public_data_publish.py --audit
@@ -47,18 +52,17 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
       - name: Verify collector safety and lifecycle rules offline
         run: python3 -m unittest discover -s scripts -p 'test_*.py' -v
-      - name: Refresh due free public sources transactionally
+      - name: Collect and publish within a bounded public-runner window
         id: collect
-        continue-on-error: true
-        run: python3 scripts/public_data_refresh.py
-      - name: Publish changed public JSON only
-        if: always() && steps.audit.outcome == 'success' && (steps.collect.outcome == 'success' || steps.collect.outcome == 'failure')
-        run: python3 scripts/public_data_publish.py --publish
+        run: |
+          if [ "$COLLECTION_EVENT" = schedule ] || [ "$COLLECTION_EVENT" = push ]; then
+            python3 scripts/public_collection_loop.py --scheduled-window
+          else
+            python3 scripts/public_collection_loop.py
+          fi
         env:
           GITHUB_TOKEN: ${{ github.token }}
-      - name: Surface failed collection after publishing its diagnostic
-        if: always() && steps.collect.outcome == 'failure'
-        run: exit 1
+          COLLECTION_EVENT: ${{ github.event_name }}
 
 # No cache, upload-artifact, package registry, Pages deployment artifact, larger
 # runner, Cloudflare binding, third-party model, persistent token, or paid API.

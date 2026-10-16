@@ -49,10 +49,12 @@ class WeatherScopeTests(unittest.TestCase):
         self.assertEqual([r['id'] for r in pipeline.load(self.data/'history.json')],[severe['id']])
         self.assertEqual(pipeline.load(self.data/'history-manifest.json')['recordCount'],1)
         self.assertEqual(pipeline.current_snapshot_rows(records,{'GH':COUNTRY}),[pipeline.public_snapshot_record(severe)])
-    def test_new_routine_forecast_is_not_admitted_and_source_stays_healthy(self):
+    def test_new_routine_forecast_is_retained_without_public_admission_and_source_stays_healthy(self):
         audit=self.run_messages([message()])
-        self.assertEqual(pipeline.read_archive(self.data,{'GH':COUNTRY}),{})
-        self.assertFalse((self.data/'retained-weather/GH.json').exists())
+        retained=pipeline.read_archive(self.data,{'GH':COUNTRY})
+        self.assertEqual(len(retained),1)
+        self.assertEqual(next(iter(retained.values()))['reports'],message()['record']['reports'])
+        self.assertEqual(len(pipeline.load(self.data/'retained-weather/GH.json')),1)
         self.assertEqual(pipeline.load(self.data/'snapshot.json')['incidents'],[])
         self.assertEqual(audit['publicArchiveCount'],0)
         self.assertEqual(audit['sources'][0]['acceptedCount'],0)

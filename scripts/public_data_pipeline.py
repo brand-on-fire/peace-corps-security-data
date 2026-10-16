@@ -25,6 +25,9 @@ import zlib
 from email.utils import parsedate_to_datetime
 from html.parser import HTMLParser
 from pathlib import Path
+from public_weather_relevance import (SCOPE as WEATHER_SCOPE, decision as weather_decision,
+    annotate as annotate_weather, exclusion_index as weather_exclusion_index,
+    preserve_significant_history)
 
 UTC = dt.timezone.utc
 INDEX_FIELDS = ('id', 'title', 'countryCode', 'admin1Code', 'admin1Name', 'admin2Code',
@@ -84,6 +87,22 @@ def publication_revision(value):
 
 def load(path, default=None):
     return json.loads(path.read_bytes()) if path.exists() else default
+
+
+def load_boundary_layer(path):
+    """Lossless storage only: identical JSON coordinates and source metadata."""
+    compressed = path.with_suffix(path.suffix + '.gz')
+    if path.exists() and compressed.exists():
+        raise ValueError('Ambiguous duplicate boundary representations')
+    if path.exists():
+        return load(path)
+    if not compressed.exists():
+        return None
+    with gzip.open(compressed, 'rb') as stream:
+        raw = stream.read(25_000_001)
+    if len(raw) > 25_000_000:
+        raise ValueError('Complete boundary layer exceeds 25MB')
+    return json.loads(raw)
 
 
 def save(path, value):
@@ -382,12 +401,12 @@ class Geography:
         for level in ('ADM1', 'ADM2'):
             key = code+'-'+level
             path = self.root/f'config/map-areas/{key}.geojson'
-            if not path.exists():
+            if key not in self.admin_cache:
+                self.admin_cache[key] = load_boundary_layer(path)
+            layer = self.admin_cache[key]
+            if layer is None:
                 assignment['levels'][level] = dict(status='unavailable')
                 continue
-            if key not in self.admin_cache:
-                self.admin_cache[key] = load(path)
-            layer = self.admin_cache[key]
             found = []
             for feature in layer['features']:
                 geom = feature['geometry']
@@ -567,7 +586,7 @@ def routine_weather_forecast(row):
 
 
 def public_incident(row):
-    return not routine_weather_forecast(row)
+    return weather_decision(row)['public']
 
 
 def read_archive(data, countries):
@@ -596,6 +615,23 @@ def public_snapshot_record(row):
     if 'infoBlocks' in metadata:
         del metadata['infoBlocks']
         omitted = True
+    lower_update = metadata.get('lowerRelevanceUpdate', {})
+    if lower_update:
+        omitted = lower_update.get('location', {}).pop('geometry', None) is not None or omitted
+        update_metadata = lower_update.get('sourceMetadata', {})
+        if 'infoBlocks' in update_metadata:
+            del update_metadata['infoBlocks']
+            update_metadata['fullDetailInCountryArchive'] = True
+            omitted = True
+    reports = list(compact.get('reports', []))
+    for revision in compact.get('revisions', []):
+        reports.extend(revision.get('previousReports', []))
+    for report in reports:
+        details = report.get('sourceMetadata', {})
+        if 'infoBlocks' in details:
+            del details['infoBlocks']
+            details['fullDetailInCountryArchive'] = True
+            omitted = True
     if omitted:
         compact.setdefault('sourceMetadata', {})['fullDetailInCountryArchive'] = True
     return compact
@@ -606,7 +642,7 @@ def current_snapshot_rows(records, countries):
             if not row['historical'] and row['countryCode'] in countries and public_incident(row)]
 
 
-def write_archive(data, records, countries, public_country_codes=None):
+def write_archive(data, records, countries, public_country_codes=None, publication=None):
     # Retain complete previously collected country files, while exposing only
     # the currently admitted roster in the public index and manifest.
     public_codes = set(countries if public_country_codes is None else public_country_codes)
@@ -639,12 +675,27 @@ def write_archive(data, records, countries, public_country_codes=None):
         if len(groups) == 1:
             save(data/directory/f'{code}.json', rows)
         else:
+            if len(groups) > 999:
+                raise ValueError('Country archive exceeds the bounded 999-part index')
+            part_index = []
             for number, group in enumerate(groups, 1):
                 name = f'{code}-{number:03d}.json'
                 save(data/directory/name, group)
                 parts.append(name)
+                raw = (data/directory/name).read_bytes()
+                part_index.append(dict(path=name, recordCount=len(group), bytes=len(raw),
+                                       sha256=hashlib.sha256(raw).hexdigest(), ids=[row['id'] for row in group]))
             save(data/directory/f'{code}.json', dict(format='country-parts', countryCode=code,
                                                  recordCount=len(rows), parts=parts))
+            if directory == 'history' and publication is not None:
+                ids = [identity for part in part_index for identity in part['ids']]
+                if len(set(ids)) != len(rows) or ids != [row['id'] for row in rows]:
+                    raise ValueError('Country part index lost or duplicated an incident')
+                sidecar = dict(format='country-part-index-v1', countryCode=code,
+                               publicationRevision=publication['revision'], recordCount=len(rows), parts=part_index)
+                if len(encode(sidecar)) > 2*1024*1024:
+                    raise ValueError('Complete country part index exceeds 2MiB; no partial write allowed')
+                save(data/directory/f'{code}-index.json', sidecar)
         return parts
     for code in countries:
         rows = [r for r in ordered if r['countryCode'] == code and public_incident(r)]
@@ -660,14 +711,20 @@ def write_archive(data, records, countries, public_country_codes=None):
 
 def apply_archive_age(row, now):
     row['historical'] = dt.datetime.fromisoformat(row['occurredAt'].replace('Z', '+00:00')) < now-dt.timedelta(days=30)
-    if row['historical'] and row['state'] == 'reported':
+    active_notice = ('cdc-travel-notices' in row.get('sourceIds', []) and
+        row.get('sourceMetadata', {}).get('provider') == 'CDC' and
+        row.get('sourceMetadata', {}).get('providerActiveNotice') is True)
+    if row['historical'] and row['state'] == 'reported' and not active_notice:
         row['state'] = 'expired'
 
 
 def run(root, now, fixtures=None):
     from public_cap import collect_cap, apply_lifecycle, expire_warnings
     from public_official import ADAPTERS, prepare_official_policy, request_state, collect_official
+    from public_security_official import (ADAPTERS as SECURITY_ADAPTERS,
+        prepare_security_policy, collect_security_official)
     from local_news_archive import jcf_curfew_incidents, expire_curfews
+    from public_news_runtime import automatic_news, news_window
     now_text = stamp(now)
     data = root/'docs/data'
     all_countries = {c['code']:c for c in load(root/'config/countries.json')}
@@ -682,6 +739,8 @@ def run(root, now, fixtures=None):
         if sid not in states:
             states[sid] = dict(sourceId=sid, lastSuccessAt=baseline_coverage.get(sid,{}).get('lastSuccessAt'))
     records = read_archive(data, all_countries)
+    for row in records.values():
+        annotate_weather(row)
     discoveries = {r['id']:r for r in load(data/'discovery.json', [])}
     geo = Geography(root, countries)
     iso3 = load(root/'config/country-iso3.json')
@@ -690,7 +749,9 @@ def run(root, now, fixtures=None):
     due = [p for p in policies if p['sourceId'] in sources and
            source_due(p, states.get(p['sourceId'], {}), now)]
     due = [prepare_official_policy(p, states.get(p['sourceId'], {}), now_text)
-           if p.get('adapter') in ADAPTERS else p for p in due]
+           if p.get('adapter') in ADAPTERS else
+           prepare_security_policy(p, states.get(p['sourceId'], {}), now_text)
+           if p.get('adapter') in SECURITY_ADAPTERS else p for p in due]
     changes, source_results = [], []
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
         responses = list(pool.map(lambda p:fetch(p, request_state(p, states.get(p['sourceId'], {})), now_text, fixtures), due))
@@ -707,13 +768,18 @@ def run(root, now, fixtures=None):
             if policy['mode'] == 'discovery' and policy.get('format', 'rss-atom') not in DISCOVERY_FORMATS:
                 # Reject unknown formats even for an unchanged HTTP response.
                 raise ValueError('Discovery format has no reviewed adapter')
+            if policy['mode'] == 'discovery' and policy.get('newsAdapter'):
+                automatic_news(source, policy, [], now_text, countries, areas)
             if raw is not None:
                 if policy['mode'] == 'official':
                     pending_discoveries = []
                     official_receipts = None
-                    if policy.get('adapter') in ADAPTERS:
-                        collected = collect_official(source, policy, raw, now_text, countries, geo,
-                            previous, records, fetch, fixtures, initial_http_status=result.get('httpStatus', 200))
+                    if policy.get('adapter') in ADAPTERS | SECURITY_ADAPTERS:
+                        collected = (collect_security_official(source, policy, raw, now_text, countries, geo,
+                            previous, records, fetch, fixtures, areas=areas, history_from=snapshot['history']['from'])
+                            if policy.get('adapter') in SECURITY_ADAPTERS else
+                            collect_official(source, policy, raw, now_text, countries, geo,
+                            previous, records, fetch, fixtures, initial_http_status=result.get('httpStatus', 200)))
                         incoming = collected['incidents']
                         pending_discoveries = collected['discoveries']
                         result.update(collected['state'])
@@ -741,8 +807,26 @@ def run(root, now, fixtures=None):
                     if policy.get('format') != 'google-news-sitemap':
                         incoming = reviewed_news_incidents(source, items, reviews, now_text, countries, areas)
                         incoming.extend(jcf_curfew_incidents(source, items, now_text, countries, areas))
+                    automatic, decisions = automatic_news(source, policy, items, now_text, countries, areas, reviews, records)
+                    incoming.extend(automatic)
+                    if policy.get('newsAdapter'):
+                        result.update(news_window(items, previous, now_text))
+                    decisions_by_url = {decision['url']:decision for decision in decisions}
+                    for discovery in pending_discoveries:
+                        decision = decisions_by_url.get(discovery['url'])
+                        if decision:
+                            discovery.update(status=decision['status'], reviewReason=decision['reason'])
+                            if 'incidentId' in decision:
+                                discovery.update(incidentId=decision['incidentId'], locationStatus='source-context-validated',
+                                    note='Admitted by a reviewed complete-source event, place and date adapter.')
+                    result['automaticNews'] = dict(accepted=sum(d['status']=='automatic-source-record' for d in decisions),
+                        held=sum(d['status']=='needs-review' for d in decisions),
+                        heldReasons={reason:sum(d['reason']==reason for d in decisions)
+                                     for reason in sorted({d['reason'] for d in decisions if d['status']=='needs-review'})})
                     accepted = len(incoming)
-                    message = f'Complete feed parsed ({len(items)} items); {len(pending_discoveries)} keyword discoveries; {accepted} unchanged source representations match explicit incident approvals.'
+                    message = f'Complete feed parsed ({len(items)} items); {len(pending_discoveries)} discoveries; {accepted} reviewed or source-profile-validated incident records.'
+                    if result.get('coverageGap'):
+                        message += ' Possible missed article interval: '+result['coverageGap']['reason']
                 else:
                     raise ValueError('Collection mode has no reviewed adapter')
                 # Stage all source updates before committing any: a malformed item or
@@ -754,13 +838,13 @@ def run(root, now, fixtures=None):
                         # expired -> reported -> expired revision on every fetch.
                         apply_archive_age(row, now)
                         old = records.get(row['id'])
-                        if old is None and routine_weather_forecast(row):
-                            continue
                         if old and dt.datetime.fromisoformat(row['updatedAt'].replace('Z', '+00:00')) < dt.datetime.fromisoformat(old['updatedAt'].replace('Z', '+00:00')):
                             # A delayed provider response must not replace newer facts.
                             # Adapters merge genuinely new evidence into the current
                             # record before reaching this transaction.
                             continue
+                        row = preserve_significant_history(row, old)
+                        annotate_weather(row)
                         if (old and [(r['id'],r['contentHash'],r.get('independentGroup')) for r in old['reports']] == [(r['id'],r['contentHash'],r.get('independentGroup')) for r in row['reports']]
                                 and old['occurredAt'] == row['occurredAt']
                                 and old['updatedAt'] == row['updatedAt']
@@ -772,12 +856,18 @@ def run(root, now, fixtures=None):
                             row['firstSeenAt'] = old['firstSeenAt']
                             row['revisions'] = old.get('revisions', []) + [dict(at=now_text,
                                 note='Refreshed source representation; prior archived report retained.', previousReports=old['reports'])]
-                        if old and old['location'] == row['location']:
+                        if (old and row['location'].get('precision') == 'point' and old['location'] == row['location']
+                                and old.get('adminAssignment', {}).get('method') == 'strict_point_containment'
+                                and 'adminAssignment' not in row):
                             for key in ('admin1Id','admin1Code','admin1Name','admin2Id','admin2Code','admin2Name','adminAssignment'):
                                 if key in old:
                                     row[key] = old[key]
                         if 'adminAssignment' not in row:
                             geo.administrative(row)
+                        # Fail this source transaction before admission, so one
+                        # oversized complete record cannot block other feeds.
+                        if len(encode(row))+3 > PART_LIMIT:
+                            raise ValueError('Complete incident exceeds 12MB; source deferred without truncation: '+row['id'])
                         pending_records[row['id']] = row
                 for row in pending_discoveries:
                         old = discoveries.get(row['id'])
@@ -814,7 +904,8 @@ def run(root, now, fixtures=None):
                                   requestedNewsCadenceMinutes=360, latestRunAt=now_text,
                                   activeReviewedCountries=len(countries), discoveryCount=len(discoveries),
                                   newsPromotion='review-required', scheduleGuarantee=False,
-                                  incidentScope='severe-cap-weather-v1')
+                                  incidentScope=WEATHER_SCOPE,
+                                  weatherExclusions=weather_exclusion_index(records, countries, snapshot['history']['from']))
     coverage = {c['sourceId']:c for c in snapshot['coverage']}
     for sid, state in states.items():
         coverage[sid] = {k:state.get(k) for k in ('sourceId','lastAttemptAt','lastSuccessAt','status','message')}
@@ -832,8 +923,12 @@ def run(root, now, fixtures=None):
                                   revision=publication_revision(snapshot), activeCountryCodes=sorted(countries))
     if len(encode(snapshot)) > MAX_SNAPSHOT:
         raise ValueError('Complete current overview exceeds 10MB; no partial snapshot permitted')
-    write_archive(data, records, all_countries, countries)
+    write_archive(data, records, all_countries, countries, snapshot['publication'])
     save(data/'snapshot.json', snapshot)
+    # A tiny change hint lets readers poll without downloading the full map data.
+    # Readers still validate the complete snapshot before accepting any change.
+    save(data/'publication.json', dict(schemaVersion=1, generatedAt=now_text,
+                                     revision=snapshot['publication']['revision']))
     save(data/'discovery.json', sorted(discoveries.values(), key=lambda r:r['retrievedAt'], reverse=True))
     save(data/'collector-state.json', states)
     audit = dict(generatedAt=now_text, requested=len(due), changedIncidents=changes,

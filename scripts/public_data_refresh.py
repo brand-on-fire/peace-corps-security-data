@@ -16,6 +16,7 @@ from pathlib import Path
 
 import public_data_pipeline as pipeline
 import public_data_publish as publisher
+from collector_health import source_health, collection_timing
 
 REPOSITORY = 'brand-on-fire/peace-corps-security-data'
 DEADLINE_SECONDS = 480
@@ -34,8 +35,16 @@ def provenance(environment, now):
     event = environment.get('GITHUB_EVENT_NAME')
     if event not in ('schedule', 'push', 'workflow_dispatch'):
         raise ValueError('Unapproved workflow event')
-    return dict(event=event, startedAt=now, id=run_id, attempt=int(attempt), headSha=sha,
-                url=f'https://github.com/{REPOSITORY}/actions/runs/{run_id}')
+    result = dict(event=event, startedAt=now, id=run_id, attempt=int(attempt), headSha=sha,
+                  url=f'https://github.com/{REPOSITORY}/actions/runs/{run_id}')
+    collector_sha = environment.get('COLLECTOR_CODE_SHA')
+    cycle = environment.get('COLLECTOR_CYCLE')
+    if collector_sha is not None or cycle is not None:
+        if (not collector_sha or len(collector_sha) != 40 or any(c not in '0123456789abcdef' for c in collector_sha)
+                or not cycle or not cycle.isdigit() or not 1 <= int(cycle) <= 20):
+            raise ValueError('Invalid collection-window provenance')
+        result.update(collectorHeadSha=collector_sha, cycle=int(cycle))
+    return result
 
 
 def validate_candidate(root, baseline):
@@ -113,8 +122,13 @@ def promote(candidate, destination):
             shutil.rmtree(pending)
 
 
-def refresh(root, now=None, fixtures=None, runner=subprocess.run, environment=None):
-    now = now or dt.datetime.now(dt.timezone.utc)
+def refresh(root, now=None, fixtures=None, runner=subprocess.run, environment=None, clock=None):
+    # A supplied start time keeps offline replay deterministic. Production reads
+    # the wall clock again after the child, rather than judging new source checks
+    # against a timestamp captured before a potentially large directory copy.
+    if clock is None:
+        clock = (lambda: now) if now is not None else lambda: dt.datetime.now(dt.timezone.utc)
+    now = now or clock()
     now_text = pipeline.stamp(now)
     environment = dict(os.environ if environment is None else environment)
     data = root/'docs/data'
@@ -124,6 +138,12 @@ def refresh(root, now=None, fixtures=None, runner=subprocess.run, environment=No
                   publicationGeneratedAt=baseline['generatedAt'],
                   lastSuccessfulCollectionAt=previous.get('lastSuccessfulCollectionAt'),
                   scheduleGuarantee=False, sources=[], errors=[])
+    def evaluation_time():
+        # The independently timed child creates its own generation timestamp.
+        # It is also the deterministic replay lower bound; source timestamps
+        # later than that are still checked rather than silently corrected.
+        generated = dt.datetime.fromisoformat(status['generatedAt'].replace('Z', '+00:00'))
+        return max(now, clock(), generated)
     try:
         status['run'] = provenance(environment, now_text)
         status['lastScheduledRun'] = status['run'] if status['run']['event']=='schedule' else previous.get('lastScheduledRun')
@@ -144,6 +164,8 @@ def refresh(root, now=None, fixtures=None, runner=subprocess.run, environment=No
             audit = pipeline.load(stage/'docs/data/refresh-status.json')
             status.update(audit)
             status['schemaVersion'] = 1
+            evaluated_at = evaluation_time()
+            status['completedAt'] = pipeline.stamp(evaluated_at)
             healthy = sum(s.get('status')=='healthy' for s in audit['sources'])
             failed = len(audit['sources'])-healthy
             status['sourceCounts'] = dict(attempted=len(audit['sources']), healthy=healthy, failed=failed)
@@ -155,20 +177,45 @@ def refresh(root, now=None, fixtures=None, runner=subprocess.run, environment=No
                 status['publicationGeneratedAt'] = candidate['generatedAt']
                 if healthy:
                     status['lastSuccessfulCollectionAt'] = candidate['generatedAt']
+                status['sourceHealth'] = source_health(
+                    pipeline.load(root/'config/collection-policy.json')['sources'],
+                    candidate.get('coverage', []), status['sources'], evaluated_at)
+                if status['sourceHealth']['state'] == 'degraded':
+                    status['outcome'] = 'degraded'
+                status['collectionTiming'] = collection_timing(previous, status, evaluated_at)
                 pipeline.save(stage/'docs/data/refresh-status.json', status)
                 promote(stage/'docs/data', data)
     except subprocess.TimeoutExpired:
+        status['outcome'] = 'failed'
         status['errors'] = ['Collector exceeded the eight-minute deadline; the last validated publication was retained.']
     except Exception as error:
         # Public diagnostics never include machine paths, subprocess output, or
         # authentication context. Detailed source failures are already public URLs.
+        status['outcome'] = 'failed'
         status['errors'] = [f'Collection or validation failed ({type(error).__name__}); the last validated publication was retained.']
+    if status['outcome'] == 'failed':
+        status['publicationGeneratedAt'] = baseline['generatedAt']
+        status['lastSuccessfulCollectionAt'] = previous.get('lastSuccessfulCollectionAt')
+        # Failure observations still diagnose sources not attempted in this run.
+        # Do not re-date the retained snapshot or turn an old healthy check green.
+        try:
+            evaluated_at = evaluation_time()
+            status['generatedAt'] = status['completedAt'] = pipeline.stamp(evaluated_at)
+            status['sourceHealth'] = source_health(
+                pipeline.load(root/'config/collection-policy.json')['sources'],
+                baseline.get('coverage', []), status['sources'], evaluated_at)
+            status['collectionTiming'] = collection_timing(previous, status, evaluated_at)
+        except Exception as error:
+            status['errors'].append(f'Health diagnostics unavailable ({type(error).__name__}).')
     pipeline.save(data/'refresh-status.json', status)
     summary = environment.get('GITHUB_STEP_SUMMARY')
     if summary:
         text = f"## Public collection: {status['outcome']}\n\n"
         text += f"Trigger: {status.get('run', {}).get('event', 'unknown')}. Last validated publication: {status['publicationGeneratedAt']}.\n\n"
         text += f"Sources attempted/healthy/failed: {status.get('sourceCounts', {})}.\n\n"
+        text += f"All configured source checks: {status.get('sourceHealth', {}).get('counts', {})}.\n\n"
+        gap = status.get('collectionTiming', {}).get('previousCollectionGapSeconds')
+        text += f"Observed time since the previous collection: {gap} seconds.\n\n"
         text += '\n'.join(status['errors']) + '\n\nScheduled runs are best effort; this run does not establish a future delivery guarantee.\n'
         Path(summary).write_text(text)
     return status

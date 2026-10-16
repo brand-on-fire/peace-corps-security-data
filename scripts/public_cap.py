@@ -65,8 +65,9 @@ def feed_links(raw):
 def jamaica_atom_links(raw, policy):
     """Recognize only the issuer's documented empty-feed placeholder.
 
-    The HTTP self-link is an identifier, never a URL to retrieve or upgrade.
-    Every actual warning still uses the existing reviewed-HTTPS-host checks.
+    The HTTP self-link is an identifier, never a URL to retrieve. The issuer also
+    emits HTTP bulletin links whose exact HTTPS counterparts have been verified.
+    Upgrade only that issuer's dated bulletin path; never make an HTTP request.
     Returns links plus a diagnostic when the empty template coexists with alerts.
     """
     if policy['url'] != 'https://alert.metservice.gov.jm/capfeed.php':
@@ -87,8 +88,21 @@ def jamaica_atom_links(raw, policy):
             raise ValueError('Jamaica empty-feed placeholder is malformed')
         root.remove(entry)
         remaining = feed_links(ET.tostring(root))
-        return remaining, bool(remaining)
-    return feed_links(raw), False
+        return jamaica_https_bulletins(remaining), bool(remaining)
+    return jamaica_https_bulletins(feed_links(raw)), False
+
+
+def jamaica_https_bulletins(links):
+    """Secure the reviewed issuer path without trusting arbitrary HTTP links."""
+    result = []
+    for address in links:
+        parsed = urllib.parse.urlsplit(address)
+        if (parsed.scheme == 'http' and parsed.netloc == 'alert.metservice.gov.jm'
+                and not parsed.query and not parsed.fragment
+                and re.fullmatch(r'/{1,2}data/{1,2}publishedCap/\d{4}/\d{2}/\d{14}/[A-Za-z0-9_.-]+\.xml', parsed.path)):
+            address = urllib.parse.urlunsplit(parsed._replace(scheme='https'))
+        result.append(address)
+    return list(dict.fromkeys(result))
 
 
 def geometry(info):
@@ -183,9 +197,12 @@ def parse_alert(source, raw, url, now, countries, areas):
                   evidenceStatus='official', state='cancelled' if kind=='Cancel' else ('expired' if expires and expires <= now else 'reported'),
                   occurredAt=sent, updatedAt=sent, firstSeenAt=now, historical=False, aiStatus='not-requested',
                   sourceIds=[source['id']], location=location, sourceMetadata=metadata,
-                  reports=[dict(id=iid+'-report',incidentId=iid,sourceId=source['id'],title=headline,url=url,
+                  reports=[dict(id=iid+'-report-'+control['contentHash'][:16],incidentId=iid,sourceId=source['id'],title=headline,url=url,
                                 language=language,publishedAt=sent,retrievedAt=now,excerpt=summary,
-                                contentHash=control['contentHash'],independentGroup=source['id'])])
+                                contentHash=control['contentHash'],independentGroup=source['id'],
+                                sourceMetadata=dict(recordId=identifier, messageType=kind,
+                                    sent=sent, effective=onset, expires=expires,
+                                    infoBlocks=copy.deepcopy(metadata['infoBlocks'])))])
     # Only exact unique issuer place names can supply one administrative label.
     normal = lambda s: ''.join(c for c in s.casefold() if c.isalnum())
     named = {normal(d) for d in descriptions if d}
@@ -265,7 +282,7 @@ def apply_lifecycle(messages, records, now):
                 row=copy.deepcopy(old);row['state']='cancelled';row['updatedAt']=c['sent']
                 meta=row['sourceMetadata'];meta['capMessageKeys']=list(dict.fromkeys(meta.get('capMessageKeys',[])+[c['key']]))
                 meta['cancelledAt']=c['sent'];meta['cancellationUrl']=c['url']
-                row['reports']=[dict(id=iid+'-cancel-'+c['key'][:12],incidentId=iid,sourceId=c['sourceId'],title='Warning cancelled',url=c['url'],language='und',publishedAt=c['sent'],retrievedAt=now,excerpt='The issuing authority cancelled its referenced warning.',contentHash=c['contentHash'],independentGroup=c['sourceId'])]+row['reports']
+                row['reports']=[dict(id=iid+'-cancel-'+c['key'][:12]+'-'+c['contentHash'][:16],incidentId=iid,sourceId=c['sourceId'],title='Warning cancelled',url=c['url'],language='und',publishedAt=c['sent'],retrievedAt=now,excerpt='The issuing authority cancelled its referenced warning.',contentHash=c['contentHash'],independentGroup=c['sourceId'])]+row['reports']
                 working[iid]=row;lookup[own]=iid
             continue
         row=copy.deepcopy(message['record'])
@@ -278,6 +295,13 @@ def apply_lifecycle(messages, records, now):
             row['id']=iid;row['firstSeenAt']=old['firstSeenAt']
             for report in row['reports']:report['incidentId']=iid
             row['sourceMetadata']['capMessageKeys']=list(dict.fromkeys(old.get('sourceMetadata',{}).get('capMessageKeys',[])+[c['key']]))
+            # A feed may contain the original and several updates in one batch.
+            # Keep every accepted bulletin here; the archive transaction only
+            # sees this final consolidated incident, not intermediate messages.
+            reports={}
+            for report in row['reports']+old['reports']:
+                reports.setdefault((report['id'],report['contentHash']),copy.deepcopy(report))
+            row['reports']=list(reports.values())
             if (old['category']=='weather' and old['severity']=='severe'
                     and row['category']=='weather' and row['severity']!='severe'):
                 # The severe warning is part of incident history even after a
@@ -291,7 +315,7 @@ def apply_lifecycle(messages, records, now):
                 meta['currentProviderSeverity']=update['sourceMetadata']['providerSeverity']
                 meta['downgradeInfoBlocks']=copy.deepcopy(update['sourceMetadata']['infoBlocks'])
                 meta['expires']=min(meta.get('expires') or c['sent'],c['sent'])
-                row['reports']=update['reports']+row['reports']
+                row['reports']=update['reports']
         elif len(targets)>1:
             # A replacement can explicitly supersede several warnings; retain each.
             for iid in targets:

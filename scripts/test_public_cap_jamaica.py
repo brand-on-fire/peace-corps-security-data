@@ -120,6 +120,27 @@ class JamaicaCapTests(unittest.TestCase):
                 self.collect(feed([URLS[0], url]), dict(zip(URLS, WARNINGS)))
             self.assertEqual(self.calls, [])
 
+    def test_reviewed_dated_http_bulletin_is_fetched_only_over_https(self):
+        path = '//data//publishedCap/2026/10/20261015100732/20261015100732_0000_ALERT_2.49.0.0.388.0.JM.test.xml'
+        http = 'http://alert.metservice.gov.jm'+path
+        https = 'https://alert.metservice.gov.jm'+path
+        messages = self.collect(feed([http, https]), {https: WARNINGS[0]})
+        self.assertEqual(self.calls, [https])
+        self.assertEqual(messages[0]['record']['reports'][0]['url'], https)
+
+    def test_dated_http_exception_does_not_admit_other_hosts_ports_or_paths(self):
+        path = '/data/publishedCap/2026/10/20261015100732/test.xml'
+        urls = ['http://evil.example'+path, 'http://user@alert.metservice.gov.jm'+path,
+                'http://alert.metservice.gov.jm:80'+path,
+                'http://alert.metservice.gov.jm'+path+'?redirect=elsewhere',
+                'http://alert.metservice.gov.jm'+path+'#fragment',
+                'http://alert.metservice.gov.jm/data/publishedCap/../test.xml',
+                'http://alert.metservice.gov.jm/data/publishedCap/2026/10/20261015100732/test%2f.xml']
+        for url in urls:
+            with self.subTest(url=url), self.assertRaises(ValueError):
+                self.collect(feed([url]), {})
+            self.assertEqual(self.calls, [])
+
     def test_failed_or_malformed_second_bulletin_retains_prior_records(self):
         row = self.collect(feed(URLS[:1]), {URLS[0]: WARNINGS[0]})[0]['record']
         records = {row['id']: row}
@@ -159,7 +180,7 @@ class JamaicaCapTests(unittest.TestCase):
         self.assertEqual(changed[0]['state'], 'cancelled')
         self.assertEqual(changed[0]['id'], row['id'])
         self.assertEqual(changed[0]['location'], row['location'])
-        self.assertEqual(len(changed[0]['reports']), 2)
+        self.assertEqual(len(changed[0]['reports']), 3)
         self.assertEqual(apply_lifecycle(cancel, {row['id']: changed[0]}, NOW), [])
 
 
