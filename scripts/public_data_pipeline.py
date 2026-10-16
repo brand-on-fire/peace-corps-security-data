@@ -96,6 +96,143 @@ def infrastructure_deadline():
         raise ValueError('Municipality exceeded its source wall-time budget; prior checkpoint retained') from None
 
 
+class CollectionDiagnostics:
+    """Bounded metadata only; elapsed sums may overlap and are not wall time."""
+    def __init__(self, clock=None, monotonic=None, detail_limit=1024, aggregate_limit=512):
+        self.clock = clock or (lambda: dt.datetime.now(UTC))
+        self.monotonic = monotonic or time.monotonic_ns
+        self.detail_limit = max(0, min(detail_limit, 1024))
+        self.aggregate_limit = max(1, min(aggregate_limit, 512))
+        self.lock = threading.Lock()
+        self.requests, self.stages, self.request_groups, self.stage_groups = [], [], {}, {}
+        self.request_count = self.stage_count = 0
+        self.request_omitted = self.stage_omitted = 0
+        self.started = self.start()
+
+    def wall(self):
+        return self.clock().isoformat(timespec='milliseconds').replace('+00:00', 'Z')
+
+    def start(self):
+        return self.wall(), self.monotonic()
+
+    def elapsed(self, token):
+        return dict(startedAt=token[0], endedAt=self.wall(),
+                    durationMs=round(max(0, self.monotonic()-token[1])/1_000_000, 3))
+
+    @staticmethod
+    def identity(value):
+        # Only reviewed source IDs are readable. Never copy arbitrary URLs,
+        # paths, headers, exception text or an unbounded caller-supplied string.
+        if isinstance(value, str) and re.fullmatch(r'[a-z0-9][a-z0-9-]{0,127}', value):
+            return value
+        return 'sha256-'+hashlib.sha256(str(value).encode()).hexdigest()
+
+    def group(self, groups, key):
+        if key not in groups:
+            if len(groups) >= self.aggregate_limit:
+                key = ('aggregate-overflow',)
+            groups.setdefault(key, dict(count=0, durationMsSum=0, durationMsMax=0,
+                                       outcomes={}, modes={}, httpStatuses={}, transportCount=0,
+                                       transportDurationMsSum=0, transportDurationMsMax=0))
+        return groups[key]
+
+    @staticmethod
+    def add(group, row):
+        group['count'] += 1
+        group['durationMsSum'] = round(group['durationMsSum']+row['durationMs'], 3)
+        group['durationMsMax'] = max(group['durationMsMax'], row['durationMs'])
+        for field, plural in [('outcome', 'outcomes'), ('mode', 'modes'), ('httpStatus', 'httpStatuses')]:
+            if field in row:
+                key = str(row[field]); group[plural][key] = group[plural].get(key, 0)+1
+        transport = row.get('transportTiming', {})
+        if 'durationMs' in transport:
+            group['transportCount'] += 1
+            group['transportDurationMsSum'] = round(group['transportDurationMsSum']+transport['durationMs'], 3)
+            group['transportDurationMsMax'] = max(group['transportDurationMsMax'], transport['durationMs'])
+
+    def fetcher(self, parent, phase, fetcher):
+        parent = self.identity(parent)
+        if phase not in ('initial', 'child'):
+            raise ValueError('Unknown diagnostic request phase')
+        def measured(policy, previous, now, fixture=None):
+            token = self.start(); result = None; outcome = 'returned'
+            try:
+                result, raw = fetcher(policy, previous, now, fixture)
+                return result, raw
+            except BaseException as error:
+                outcome = 'raised' if isinstance(error, Exception) else 'interrupted'
+                raise
+            finally:
+                row = dict(sourceId=parent, phase=phase, outcome=outcome, **self.elapsed(token))
+                row['urlSha256'] = hashlib.sha256(str(policy.get('url', '')).encode()).hexdigest()
+                transport = result.get('transportTiming', {}) if isinstance(result, dict) else {}
+                row['mode'] = ('fixture-replay' if fixture else
+                    transport.get('mode') if transport.get('mode') in ('live-http', 'not-requested') else 'unobserved')
+                # Explicit projection: adding provider headers to fetch later
+                # cannot accidentally expose them in timing diagnostics.
+                timing = {}
+                for key in ('requestStartedAt', 'requestCompletedAt', 'requestFailedAt'):
+                    value = transport.get(key)
+                    if isinstance(value, str) and re.fullmatch(r'\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z', value):
+                        timing[key] = value
+                duration = transport.get('durationMs')
+                if type(duration) in (float, int) and math.isfinite(duration) and duration >= 0:
+                    timing['durationMs'] = duration
+                if transport.get('outcome') in ('response-complete', 'request-failed'):
+                    timing['outcome'] = transport['outcome']
+                if row['mode'] == 'live-http':
+                    row['transportTiming'] = timing
+                if isinstance(result, dict) and type(result.get('httpStatus')) is int and 100 <= result['httpStatus'] <= 599:
+                    row['httpStatus'] = result['httpStatus']
+                with self.lock:
+                    self.request_count += 1
+                    row['sequence'] = self.request_count
+                    self.add(self.group(self.request_groups, (parent, phase)), row)
+                    if len(self.requests) < self.detail_limit:
+                        self.requests.append(row)
+                    else:
+                        self.request_omitted += 1
+        return measured
+
+    def end(self, name, token, source=None, outcome='complete', detail=True):
+        row = dict(stage=name, outcome=outcome, **self.elapsed(token))
+        if source is not None:
+            row['sourceId'] = self.identity(source)
+        with self.lock:
+            self.stage_count += 1
+            self.add(self.group(self.stage_groups, (name, row.get('sourceId'))), row)
+            if detail and len(self.stages) < self.detail_limit:
+                self.stages.append(row)
+            else:
+                self.stage_omitted += 1
+
+    @contextlib.contextmanager
+    def stage(self, name, source=None, detail=True):
+        token = self.start(); outcome = 'complete'
+        try:
+            yield
+        except BaseException as error:
+            outcome = 'failed' if isinstance(error, Exception) else 'interrupted'
+            raise
+        finally:
+            self.end(name, token, source, outcome, detail)
+
+    def snapshot(self):
+        elapsed = self.elapsed(self.started)
+        with self.lock:
+            def groups(values, labels):
+                return [dict(identityOverflow=key==('aggregate-overflow',),
+                    **({} if key==('aggregate-overflow',) else dict(zip(labels,key))), **value)
+                    for key,value in values.items()]
+            return copy.deepcopy(dict(schemaVersion=1, **elapsed,
+                requestCalls=self.request_count, requestDetailsOmitted=self.request_omitted,
+                stageCalls=self.stage_count, stageDetailsOmitted=self.stage_omitted,
+                detailLimit=self.detail_limit, aggregateLimit=self.aggregate_limit,
+                requests=self.requests, stages=self.stages,
+                requestAggregates=groups(self.request_groups, ('sourceId','phase')),
+                stageAggregates=groups(self.stage_groups, ('stage','sourceId'))))
+
+
 KEYWORDS = {
     'earthquake': r'\b(earthquakes?|sismos?|terremotos?|séisme)\b',
     'flood': r'\b(flood(?:s|ed|ing)?|inundaci[oó]n(?:es)?|inondation)\b',
@@ -852,7 +989,9 @@ def apply_archive_age(row, now):
         row['state'] = 'expired'
 
 
-def run(root, now, fixtures=None):
+def run(root, now, fixtures=None, diagnostics=None):
+    diagnostics = diagnostics or CollectionDiagnostics()
+    startup_started = diagnostics.start()
     from public_cap import collect_cap, collect_cap_batch, apply_lifecycle, expire_warnings
     from public_official import ADAPTERS, prepare_official_policy, request_state, collect_official
     from public_security_official import (ADAPTERS as SECURITY_ADAPTERS,
@@ -890,9 +1029,13 @@ def run(root, now, fixtures=None):
         retained = states[sid]
         queue = retained.get('capQuarantine', []) + observation['capQuarantine']
         retained['capQuarantine'] = list({q['url']:q for q in queue}.values())
+    diagnostics.end('startup-config', startup_started)
+    archive_started = diagnostics.start()
     records = read_archive(data, all_countries)
     for row in records.values():
         annotate_weather(row)
+    diagnostics.end('archive-read-and-weather', archive_started)
+    geography_started = diagnostics.start()
     discoveries = {r['id']:r for r in load(data/'discovery.json', [])}
     geo = Geography(root, countries)
     iso3 = load(root/'config/country-iso3.json')
@@ -916,6 +1059,7 @@ def run(root, now, fixtures=None):
            if p.get('adapter') in INFRASTRUCTURE_ADAPTERS else
            prepare_elmundo_policy(p, states.get(p['sourceId'], {}), now_text)
            if p.get('adapter') in ELMUNDO_ADAPTERS else p for p in due]
+    diagnostics.end('geography-and-policy-setup', geography_started)
     changes, source_results = [], []
     def prefetch(policy):
         if policy.get('adapter') in INFRASTRUCTURE_ADAPTERS:
@@ -926,11 +1070,14 @@ def run(root, now, fixtures=None):
         requested = request_state(policy, prior)
         if sources[policy['sourceId']].get('kind') == 'cap' and prior.get('capQuarantine'):
             requested = {k:v for k,v in requested.items() if k not in ('etag','lastModified')}
-        return fetch(policy, requested, now_text, fixtures)
-    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
-        responses = list(pool.map(prefetch, due))
+        return diagnostics.fetcher(policy['sourceId'], 'initial', fetch)(policy, requested, now_text, fixtures)
+    with diagnostics.stage('initial-prefetch'):
+        with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
+            responses = list(pool.map(prefetch, due))
     for policy, (result, raw) in zip(due, responses):
         sid = policy['sourceId']
+        source_started = diagnostics.start()
+        child_fetch = diagnostics.fetcher(sid, 'child', fetch)
         previous = states.get(sid, {})
         source = sources[sid]
         transport_state = {}
@@ -959,9 +1106,9 @@ def run(root, now, fixtures=None):
                 if policy['mode'] != 'official' or not policy.get('historyFrom'):
                     raise ValueError('Municipality collection requires official mode and a fixed historyFrom boundary')
                 with infrastructure_deadline():
-                    result, raw = fetch(policy, request_state(policy, previous), now_text, fixtures)
+                    result, raw = diagnostics.fetcher(sid, 'initial', fetch)(policy, request_state(policy, previous), now_text, fixtures)
                     infrastructure_collected = (collect_infrastructure(source, policy, raw, now_text, countries,
-                        previous, records, fetch, fixtures, history_from=snapshot['history']['from'])
+                        previous, records, child_fetch, fixtures, history_from=snapshot['history']['from'])
                         if raw is not None else None)
             if policy['mode'] == 'discovery' and policy.get('format', 'rss-atom') not in DISCOVERY_FORMATS:
                 # Reject unknown formats even for an unchanged HTTP response.
@@ -983,21 +1130,21 @@ def run(root, now, fixtures=None):
                             except (OSError, ValueError, EOFError, zlib.error):
                                 pass  # Valid source evidence remains country-only.
                         collected = (collect_elmundo_source(source, policy, raw, now_text, countries,
-                            previous, records, fetch, fixtures,
+                            previous, records, child_fetch, fixtures,
                             history_from=max(snapshot['history']['from'], policy.get('historyFrom', snapshot['history']['from'])),
                             reviews=reviews,areas=areas,boundary_layers=elmundo_layers)
                             if policy.get('adapter') in ELMUNDO_ADAPTERS else
                             infrastructure_collected
                             if policy.get('adapter') in INFRASTRUCTURE_ADAPTERS else
                             collect_transport(source, policy, raw, now_text, countries,
-                            previous, records, fetch, fixtures,
+                            previous, records, child_fetch, fixtures,
                             history_from=max(snapshot['history']['from'], policy.get('historyFrom', snapshot['history']['from'])))
                             if policy.get('adapter') in TRANSPORT_ADAPTERS else
                             collect_security_official(source, policy, raw, now_text, countries, geo,
-                            previous, records, fetch, fixtures, areas=areas, history_from=snapshot['history']['from'])
+                            previous, records, child_fetch, fixtures, areas=areas, history_from=snapshot['history']['from'])
                             if policy.get('adapter') in SECURITY_ADAPTERS else
                             collect_official(source, policy, raw, now_text, countries, geo,
-                            previous, records, fetch, fixtures, initial_http_status=result.get('httpStatus', 200)))
+                            previous, records, child_fetch, fixtures, initial_http_status=result.get('httpStatus', 200)))
                         incoming = collected['incidents']
                         pending_discoveries = collected['discoveries']
                         if policy.get('adapter') in TRANSPORT_ADAPTERS | ELMUNDO_ADAPTERS | INFRASTRUCTURE_ADAPTERS:
@@ -1014,10 +1161,10 @@ def run(root, now, fixtures=None):
                     elif source['kind'] == 'cap':
                         if cap_policy:
                             cap_batch = collect_cap_batch(source, policy, raw, now_text, countries, areas,
-                                fetch, fixtures, previous_quarantined=previous.get('capQuarantine', []))
+                                child_fetch, fixtures, previous_quarantined=previous.get('capQuarantine', []))
                             messages = cap_batch['messages']
                         else:
-                            messages = collect_cap(source, policy, raw, now_text, countries, areas, fetch, fixtures)
+                            messages = collect_cap(source, policy, raw, now_text, countries, areas, child_fetch, fixtures)
                         incoming = apply_lifecycle(messages, records, now_text)
                     else:
                         incoming = official_incidents(source, raw, now_text, countries, geo, iso3)
@@ -1095,7 +1242,8 @@ def run(root, now, fixtures=None):
                                 if key in old:
                                     row[key] = old[key]
                         if 'adminAssignment' not in row:
-                            geo.administrative(row)
+                            with diagnostics.stage('geographic-assignment', sid, detail=False):
+                                geo.administrative(row)
                         # Fail this source transaction before admission, so one
                         # oversized complete record cannot block other feeds.
                         if len(encode(row))+3 > PART_LIMIT:
@@ -1148,6 +1296,8 @@ def run(root, now, fixtures=None):
         except Exception as error:
             result.update(status='unavailable', lastSuccessAt=previous.get('lastSuccessAt'),
                           message='Source response rejected; prior archive retained: '+str(error))
+        finally:
+            diagnostics.end('source-processing', source_started, sid, result.get('status', 'unknown'))
         states[sid] = dict(previous, **result)
         if 'validatedPartial' not in result:
             states[sid].pop('validatedPartial',None)
@@ -1155,6 +1305,7 @@ def run(root, now, fixtures=None):
             # A failed payload's ETag must not suppress a necessary full retry.
             states[sid]['etag'], states[sid]['lastModified'] = previous.get('etag'), previous.get('lastModified')
         source_results.append(result)
+    projection_started = diagnostics.start()
     prior_states = {key:row['state'] for key,row in records.items()}
     expire_warnings(records, now_text)
     expire_curfews(records, now_text)
@@ -1189,12 +1340,17 @@ def run(root, now, fixtures=None):
     snapshot['coverage'] = list(coverage.values())
     snapshot['countries'] = list(countries.values())
     snapshot['sources'] = list(sources.values())
+    diagnostics.end('lifecycle-and-projection', projection_started)
+    canonical_started = diagnostics.start()
     snapshot.pop('publication', None)
     snapshot['publication'] = dict(format='peace-corps-public-data-v1', generatedAt=now_text,
                                   revision=publication_revision(snapshot), activeCountryCodes=sorted(countries))
     if len(encode(snapshot)) > MAX_SNAPSHOT:
         raise ValueError('Complete current overview exceeds 10MB; no partial snapshot permitted')
-    write_archive(data, records, all_countries, countries, snapshot['publication'])
+    diagnostics.end('canonical-revision', canonical_started)
+    with diagnostics.stage('archive-write'):
+        write_archive(data, records, all_countries, countries, snapshot['publication'])
+    write_started = diagnostics.start()
     save(data/'snapshot.json', snapshot)
     # A tiny change hint lets readers poll without downloading the full map data.
     # Readers still validate the complete snapshot before accepting any change.
@@ -1202,10 +1358,12 @@ def run(root, now, fixtures=None):
                                      revision=snapshot['publication']['revision']))
     save(data/'discovery.json', sorted(discoveries.values(), key=lambda r:r['retrievedAt'], reverse=True))
     save(data/'collector-state.json', states)
+    diagnostics.end('snapshot-and-state-write', write_started)
     audit = dict(generatedAt=now_text, requested=len(due), changedIncidents=changes,
                  archiveCount=len(records), publicArchiveCount=snapshot['archiveTotal'],
                  currentCount=len(snapshot['incidents']), discoveryCount=len(discoveries),
-                 activeReviewedCountries=len(countries), sources=source_results)
+                 activeReviewedCountries=len(countries), sources=source_results,
+                 diagnostics=diagnostics.snapshot())
     save(data/'refresh-status.json', audit)
     return audit
 

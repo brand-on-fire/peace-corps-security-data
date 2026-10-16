@@ -15,6 +15,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'scripts'))
 from public_news_runtime import automatic_news, PARSER, PROFILES, event_day, category_for, news_window
+import public_news_runtime as runtime
 from local_news_archive import parse_wordpress
 from public_data_pipeline import digest
 
@@ -25,6 +26,12 @@ class NewsRuntimeTests(unittest.TestCase):
     areas=[dict(id='adm1:KE:Garissa',name='Garissa',countryCode='KE',level='ADM1',parentId='country:KE'),
            dict(id='adm1:ZM:Copperbelt',name='Copperbelt',countryCode='ZM',level='ADM1',parentId='country:ZM'),
            dict(id='adm2:ZM:Chingola',name='Chingola',countryCode='ZM',level='ADM2',parentId='adm1:ZM:Copperbelt')]
+    def setUp(self):
+        from unittest.mock import patch
+        # Unit fixtures get their own explicit review hashes. Production hashes
+        # are independently exercised against complete saved source responses.
+        review_patch=patch.object(runtime,'REVIEWED_SECURITY_ACCOUNTS',copy.deepcopy(runtime.REVIEWED_SECURITY_ACCOUNTS))
+        review_patch.start();self.addCleanup(review_patch.stop)
     def source(self,sid='gov-jm-jcf'):
         p=PROFILES[sid]
         return dict(id=sid,url='https://'+p['host']+'/',name=sid,language='en',countryCodes=[p['country']],tier='official' if sid.startswith('gov-') else 'local')
@@ -336,5 +343,172 @@ class NewsRuntimeTests(unittest.TestCase):
         self.assertEqual(rows[0]['state'],'expired');self.assertEqual(rows[0]['evidenceStatus'],'unverified')
         self.assertEqual(rows[0]['reports'][0],old['reports'][0]);self.assertEqual(rows[0]['occurredAt'],item['publishedAt'])
         self.assertEqual(rows[0]['firstSeenAt'],old['firstSeenAt']);self.assertEqual(len(rows[0]['reports']),2)
+
+    # Short structural fixtures based on the complete two KBC articles linked in
+    # ENGLISH_SECURITY_CATEGORY_EXPANSION.md. No full publisher text is bundled.
+    def health_account(self):
+        sid='gov-ke-kenya-broadcasting-corporation'
+        item=self.item('Kenya confirms second Ebola case',
+            'Kenya has confirmed a second case of Ebola, a week after the country reported its first imported case on October 6, 2026. '
+            'According to the Ministry of Health, the patient, a family contact, was monitored when he developed symptoms on Tuesday, October 13, 2026. '
+            'Director General for Health Dr Patrick Amoth said the patient was isolated. '
+            'Samples tested positive at both the National Virology Reference Laboratory and the Kenya Medical Research Institute (KEMRI)-CDC laboratory, with both facilities returning matching results. '
+            'The ministry says the two cases are linked, with no evidence of transmission in the wider community. '
+            'Kenya remains open, with no restrictions on travel, trade or public gatherings.',sid)
+        item['url']='https://www.kbc.co.ke/kenya-confirms-second-ebola-case/'
+        runtime.REVIEWED_SECURITY_ACCOUNTS[item['url']]['contentHash']=digest(item)
+        return sid,item
+
+    def conflict_account(self):
+        sid='gov-ke-kenya-broadcasting-corporation'
+        item=self.item('Kenya elite forces foil attack by Al-Shabaab in Garissa',
+            'Kenya’s Special Operations Group (SOG) has foiled an attempted attack by suspected Al-Shabaab terrorists in the Riverbend area of Garissa County. '
+            'According to the National Counter Terrorism Centre (NCTC), the militants were attempting to plant Improvised Explosive Devices (IEDs) when the elite security unit, acting on a tip-off, intercepted and thwarted their plan. '
+            'The officers recovered the assembled IEDs. '
+            'Attacks along the Kenya-Somalia border are frequent, mostly targeting patrol cars and civilians',sid)
+        item['url']='https://www.kbc.co.ke/kenya-elite-forces-foil-attack-by-al-shabaab-in-garissa/'
+        runtime.REVIEWED_SECURITY_ACCOUNTS[item['url']]['contentHash']=digest(item)
+        return sid,item
+
+    def test_health_account_keeps_publication_separate_from_first_case_and_symptom_onset(self):
+        sid,item=self.health_account();row=self.run_items([item],source=self.source(sid),policy=self.policy(sid))[0][0]
+        self.assertEqual(row['category'],'health');self.assertEqual(row['occurredAt'],item['publishedAt'])
+        self.assertEqual(row['sourceMetadata']['reportedSymptomOnsetDate'],'2026-10-13')
+        self.assertEqual(row['sourceMetadata']['eventTimeBasis'],'publication');self.assertFalse(row['sourceMetadata']['eventDateKnown'])
+        self.assertEqual(row['sourceMetadata']['eventDatePrecision'],'unknown');self.assertEqual(row['location'],{'precision':'country'})
+        self.assertEqual(row['region'],'Kenya');self.assertNotIn('adminAssignment',row)
+        self.assertEqual(row['evidenceStatus'],'reported');self.assertEqual(row['severity'],'unknown')
+        self.assertIn('no evidence of wider community transmission',row['summary']);self.assertIn('no travel, trade or public-gathering restrictions',row['summary'])
+        self.assertEqual(row['reports'][0]['contentHash'],digest(item));self.assertEqual(row['title'],item['title'])
+
+    def test_changed_reviewed_health_requires_new_complete_review(self):
+        sid,item=self.health_account()
+        replacements=[('has confirmed a second case','may confirm a second case'),
+            ('Samples tested positive','Samples did not test positive'),('matching results','conflicting results'),
+            ('According to the Ministry of Health','According to an unnamed social account'),
+            ('Director General for Health Dr Patrick Amoth','An unidentified author'),
+            ('October 6, 2026','October 6, 2025'),('Tuesday, October 13, 2026','Monday, October 13, 2026'),
+            ('Tuesday, October 13, 2026','Friday, October 16, 2026'),
+            ('no evidence of transmission in the wider community','confirmed widespread transmission'),
+            ('no restrictions on travel, trade or public gatherings','new restrictions on public gatherings')]
+        changes=[dict(item,description=item['description'].replace(a,b)) for a,b in replacements]
+        changes += [dict(item,description=item['description']+suffix) for suffix in
+            (' The report describes a case in 2010.', ' This was a historical example.',
+             ' The ministry later confirmed community transmission.',
+             ' Travel restrictions have been imposed.', ' The case occurred in Somalia.',
+             ' The Ministry of Health says this is not a confirmed Ebola case.',
+             ' Both laboratories later reported that their positive results were errors.',
+             ' Correction: no case was confirmed.', ' The situation is a simulation.')]
+        changes += [dict(item,title='What you need to know about Ebola'),dict(item,title='Kenya confirms third Ebola case')]
+        for changed in changes:
+            with self.subTest(title=changed['title'],body=changed['description']):
+                self.assertEqual(self.run_items([changed],source=self.source(sid),policy=self.policy(sid))[0],[])
+        # A different reviewed publisher cannot borrow KBC's authority profile.
+        other='news-zm-lusaka-times';changed=dict(item,url='https://www.lusakatimes.com/example/')
+        self.assertEqual(self.run_items([changed],source=self.source(other),policy=self.policy(other))[0],[])
+
+    def test_local_ied_recovery_preserves_suspected_actor_and_unknown_time(self):
+        sid,item=self.conflict_account();row=self.run_items([item],source=self.source(sid),policy=self.policy(sid))[0][0]
+        self.assertEqual(row['category'],'conflict');self.assertEqual(row['occurredAt'],item['publishedAt'])
+        self.assertEqual(row['sourceMetadata']['actorAffiliation'],'suspected Al-Shabaab')
+        self.assertTrue(row['sourceMetadata']['allegationsRetained']);self.assertFalse(row['sourceMetadata']['eventDateKnown'])
+        self.assertEqual(row['evidenceStatus'],'reported');self.assertEqual(row['severity'],'unknown')
+        self.assertEqual(row['location'],{'precision':'area'});self.assertEqual(row['admin1Id'],'adm1:KE:Garissa')
+        self.assertEqual(row['adminAssignment'],{'method':'explicit_source_place_names','confidence':'source_reported_area','pointInferred':False})
+        self.assertIn('suspected, not independently verified',row['summary'])
+        self.assertEqual(row['reports'][0]['contentHash'],digest(item))
+
+    def test_changed_ied_representation_cannot_borrow_background_exception(self):
+        sid,item=self.conflict_account()
+        replacements=[('has foiled','may have foiled'),('has foiled','has not foiled'),
+            ('The officers recovered the assembled IEDs.','The officers did not recover the assembled IEDs.'),
+            ('The officers recovered the assembled IEDs.','The officers reportedly recovered the assembled IEDs.'),
+            ('National Counter Terrorism Centre (NCTC)','an unknown social media user'),
+            ('Riverbend area of Garissa County','Riverbend area in Somalia'),
+            ('Riverbend area of Garissa County','Riverbend area of Garissashire County')]
+        changes=[dict(item,description=item['description'].replace(a,b)) for a,b in replacements]
+        changes += [dict(item,description=item['description']+suffix) for suffix in
+            ('. The attack occurred in Somalia.', '. The operation happened in 2010.',
+             '. This was a historical operation.', '. No IEDs were found.',
+             '. Another device recovery occurred in Nairobi.',
+             '. The account is hypothetical.', '. A correction withdrew the account.',
+             '. This is a background quote from an earlier account.')]
+        changes.append(dict(item,title='Police arrest suspects following an Al-Shabaab attack in Garissa'))
+        # Insert contradictions before the closing background, so foreign-context
+        # rejection cannot accidentally mask a missing contradictory-evidence gate.
+        background='Attacks along the Kenya-Somalia border'
+        changes += [dict(item,description=item['description'].replace(background,extra+' '+background))
+            for extra in ('Police later determined that the recovered devices were not explosives.',
+                          'The officers recovered nothing; the claimed recovery was incorrect.')]
+        for changed in changes:
+            with self.subTest(body=changed['description']):
+                self.assertEqual(self.run_items([changed],source=self.source(sid),policy=self.policy(sid))[0],[])
+        self.assertEqual(category_for('Fatal shooting in Garissa','A fatal shooting killed a civilian in Garissa.'),'crime')
+
+    def test_reviewed_health_and_ied_corrections_keep_evidence_and_manual_ownership(self):
+        for factory in (self.health_account,self.conflict_account):
+            sid,item=factory();source=self.source(sid);policy=self.policy(sid)
+            old=self.run_items([item],source=source,policy=policy)[0][0]
+            changed=dict(item,description=item['description']+' Correction: this report is withdrawn.',modifiedAt='2026-10-15T12:00:00Z')
+            updated=self.run_items([changed],source=source,policy=policy,existing={old['id']:old})[0][0]
+            self.assertEqual(updated['state'],'expired');self.assertEqual(updated['evidenceStatus'],'unverified')
+            self.assertEqual(updated['reports'][0],old['reports'][0]);self.assertEqual(len(updated['reports']),2)
+            self.assertEqual(updated['occurredAt'],old['occurredAt']);self.assertEqual(updated['firstSeenAt'],old['firstSeenAt'])
+            self.assertEqual(self.run_items([item],source=source,policy=policy,reviews=[dict(sourceId=sid,url=item['url'])])[0],[])
+
+    def test_pipeline_persists_new_unsupported_account_despite_stale_or_unchanged_cms_clock(self):
+        import public_data_pipeline as pipeline
+        from unittest.mock import patch
+        sid,item=self.health_account();source=dict(self.source(sid),kind='rss',enabled=True)
+        item['guid']='123';runtime.REVIEWED_SECURITY_ACCOUNTS[item['url']]['contentHash']=digest(item)
+        policy=dict(self.policy(sid),sourceId=sid,mode='discovery',cadenceMinutes=15)
+        country=dict(self.countries['KE'],status='active',reviewDue='2026-11-04')
+        now=dt.datetime.fromisoformat(self.now.replace('Z','+00:00'))
+        original=self.run_items([item],source=source,policy=policy)[0][0]
+        for modified in ('2026-10-13T12:00:00Z',item['modifiedAt']):
+            with self.subTest(modified=modified),tempfile.TemporaryDirectory() as directory:
+                root=Path(directory);data=root/'docs/data'
+                for name,value in {'countries':[country],'sources':[source],'collection-policy':{'sources':[policy]},
+                        'country-iso3':{},'admin-places':[],'news-reviews':[],'geo/index':[]}.items():
+                    pipeline.save(root/'config'/f'{name}.json',value)
+                pipeline.save(data/'snapshot.json',dict(coverage=[],history={'from':'2021-10-05T00:00:00Z'}))
+                pipeline.write_archive(data,{original['id']:original},{'KE':country})
+                changed=dict(item,description=item['description']+' Correction: the account was withdrawn.',modifiedAt=modified)
+                post=dict(id=123,status='publish',type='post',link=item['url'],title={'rendered':item['title']},
+                    content={'protected':False,'rendered':changed['description']},date_gmt=item['publishedAt'][:-1],modified_gmt=modified[:-1])
+                raw=pipeline.encode([post])
+                def fetched(policy,prior,clock,fixtures):return dict(sourceId=sid,lastAttemptAt=clock,httpStatus=200),raw
+                with patch.object(pipeline,'fetch',side_effect=fetched):result=pipeline.run(root,now)
+                held=pipeline.read_archive(data,{'KE':country})[original['id']]
+                self.assertIn(original['id'],result['changedIncidents'])
+                self.assertEqual(held['state'],'expired');self.assertEqual(held['evidenceStatus'],'unverified')
+                self.assertEqual(held['updatedAt'],self.now);self.assertEqual(held['occurredAt'],original['occurredAt'])
+                self.assertEqual(held['firstSeenAt'],original['firstSeenAt']);self.assertEqual(held['reports'][0],original['reports'][0])
+                evidence=held['reports'][-1];self.assertEqual(evidence['publishedAt'],item['publishedAt'])
+                self.assertEqual(evidence['retrievedAt'],self.now);self.assertEqual(evidence['sourceMetadata']['sourceModifiedAt'],modified)
+                self.assertEqual(held['revisions'][-1]['previousReports'],original['reports'])
+                with patch.object(pipeline,'fetch',side_effect=fetched):repeat=pipeline.run(root,now+dt.timedelta(minutes=15))
+                self.assertEqual(pipeline.read_archive(data,{'KE':country})[original['id']],held)
+                self.assertEqual(repeat['changedIncidents'],[])
+                # An older positive representation cannot undo the observed hold.
+                post['content']['rendered']=item['description'];post['modified_gmt']=item['modifiedAt'][:-1];raw=pipeline.encode([post])
+                with patch.object(pipeline,'fetch',side_effect=fetched):restored=pipeline.run(root,now+dt.timedelta(minutes=30))
+                self.assertEqual(pipeline.read_archive(data,{'KE':country})[original['id']],held)
+                self.assertEqual(restored['changedIncidents'],[])
+
+    def test_complete_review_hash_rejects_any_changed_field_and_generic_fallback(self):
+        for factory in (self.health_account,self.conflict_account):
+            sid,item=factory();old=self.run_items([item],source=self.source(sid),policy=self.policy(sid))[0][0]
+            for field,value in [('description',item['description']+' Neutral extra text.'),('title',item['title']+' Updated'),
+                    ('guid','other-guid'),('publishedAt','2026-10-14T11:00:00Z'),('modifiedAt','2026-10-15T01:00:00Z')]:
+                with self.subTest(field=field,title=item['title']):
+                    changed=dict(item,**{field:value});rows,decs=self.run_items([changed],source=self.source(sid),policy=self.policy(sid))
+                    self.assertEqual(rows,[]);self.assertEqual(decs[0]['reason'],'reviewed-complete-representation-changed')
+            changed=dict(item,title='Fatal shooting in Garissa',description='A fatal shooting occurred in Garissa County on Tuesday, October 13, 2026.')
+            held=self.run_items([changed],source=self.source(sid),policy=self.policy(sid),existing={old['id']:old})[0][0]
+            self.assertEqual(held['state'],'expired');self.assertEqual(held['evidenceStatus'],'unverified')
+            self.assertEqual(held['reports'][0],old['reports'][0])
+            moved=dict(item,url=item['url'].rstrip('/')+'-unreviewed/')
+            self.assertEqual(self.run_items([moved],source=self.source(sid),policy=self.policy(sid))[0],[])
 
 if __name__=='__main__':unittest.main()

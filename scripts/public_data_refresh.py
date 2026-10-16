@@ -194,7 +194,8 @@ def promote(candidate, destination):
             shutil.rmtree(pending)
 
 
-def refresh(root, now=None, fixtures=None, runner=subprocess.run, environment=None, clock=None):
+def refresh(root, now=None, fixtures=None, runner=subprocess.run, environment=None, clock=None, diagnostics=None):
+    diagnostics = diagnostics or pipeline.CollectionDiagnostics()
     # A supplied start time keeps offline replay deterministic. Production reads
     # the wall clock again after the child, rather than judging new source checks
     # against a timestamp captured before a potentially large directory copy.
@@ -221,8 +222,9 @@ def refresh(root, now=None, fixtures=None, runner=subprocess.run, environment=No
         status['lastScheduledRun'] = status['run'] if status['run']['event']=='schedule' else previous.get('lastScheduledRun')
         with tempfile.TemporaryDirectory(prefix='public-data-refresh-') as temporary:
             stage = Path(temporary)
-            shutil.copytree(root/'config', stage/'config')
-            shutil.copytree(data, stage/'docs/data')
+            with diagnostics.stage('transaction-copy'):
+                shutil.copytree(root/'config', stage/'config')
+                shutil.copytree(data, stage/'docs/data')
             command = ['python3', str(root/'scripts/public_data_pipeline.py'), '--root', str(stage)]
             if fixtures:
                 command.extend(['--fixtures', str(fixtures)])
@@ -230,9 +232,11 @@ def refresh(root, now=None, fixtures=None, runner=subprocess.run, environment=No
             # public sources and local executables; preserve ordinary runtime PATH.
             collector_environment = {k:v for k,v in environment.items()
                                      if not any(term in k.upper() for term in ('TOKEN','SECRET','PASSWORD','CREDENTIAL','KEY'))}
-            runner(command, env=collector_environment, check=True, capture_output=True,
-                   timeout=DEADLINE_SECONDS)
-            candidate = validate_candidate(stage, data)
+            with diagnostics.stage('collector-child'):
+                runner(command, env=collector_environment, check=True, capture_output=True,
+                       timeout=DEADLINE_SECONDS)
+            with diagnostics.stage('candidate-validation'):
+                candidate = validate_candidate(stage, data)
             audit = pipeline.load(stage/'docs/data/refresh-status.json')
             status.update(audit)
             status['schemaVersion'] = 1
@@ -258,7 +262,8 @@ def refresh(root, now=None, fixtures=None, runner=subprocess.run, environment=No
                     status['outcome'] = 'degraded'
                 status['collectionTiming'] = collection_timing(previous, status, evaluated_at)
                 pipeline.save(stage/'docs/data/refresh-status.json', status)
-                promote(stage/'docs/data', data)
+                with diagnostics.stage('promotion'):
+                    promote(stage/'docs/data', data)
     except subprocess.TimeoutExpired:
         status['outcome'] = 'failed'
         status['errors'] = ['Collector exceeded the eight-minute deadline; the last validated publication was retained.']
@@ -292,6 +297,7 @@ def refresh(root, now=None, fixtures=None, runner=subprocess.run, environment=No
             status['collectionTiming'] = collection_timing(previous, status, evaluated_at)
         except Exception as error:
             status['errors'].append(f'Health diagnostics unavailable ({type(error).__name__}).')
+    status['wrapperDiagnostics'] = diagnostics.snapshot()
     pipeline.save(data/'refresh-status.json', status)
     summary = environment.get('GITHUB_STEP_SUMMARY')
     if summary:

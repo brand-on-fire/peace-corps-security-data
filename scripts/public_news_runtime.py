@@ -150,6 +150,46 @@ def headline_event_place(source_id, title, statement):
     return None
 
 
+# These two complete canonical representations were reviewed in full. This is
+# finite reviewed intake, not a classifier for future health/conflict articles.
+REVIEWED_SECURITY_ACCOUNTS = {
+    'https://www.kbc.co.ke/kenya-confirms-second-ebola-case/': dict(
+        contentHash='65e6e1d56549bb72d4cbbb8d6af52b13ef9aab56c0b72013aa87e43f334a9904',
+        category='health',statement='A confirmed Ebola case was reported in Kenya.',
+        summary='KBC, citing Kenya’s Ministry of Health, reports a second laboratory-confirmed Ebola case linked to the first case. The ministry reports no evidence of wider community transmission and no travel, trade or public-gathering restrictions.',
+        metadata=dict(admissionProfile='reviewed-kbc-linked-ebola-case-v1',reportedSymptomOnsetDate='2026-10-13',
+            healthAuthority='Kenya Ministry of Health',transmissionQualifier='No evidence of transmission in the wider community, according to the ministry')),
+    'https://www.kbc.co.ke/kenya-elite-forces-foil-attack-by-al-shabaab-in-garissa/': dict(
+        contentHash='23c25358c3f50f15693269a87e15b64018d396231d3726075124267fb260a4b3',
+        category='conflict',statement='An attempted attack and recovery of explosive devices was reported in Garissa County.',
+        summary='KBC, citing the National Counter Terrorism Centre, reports that officers recovered assembled explosive devices after intercepting an attempted attack in Garissa County. The reported Al-Shabaab affiliation is suspected, not independently verified.',
+        metadata=dict(admissionProfile='reviewed-kbc-local-ied-recovery-v1',allegationsRetained=True,
+            attribution='National Counter Terrorism Centre, as reported by KBC',actorAffiliation='suspected Al-Shabaab')),
+}
+
+
+def reviewed_security_account(source_id, item, representation_hash):
+    """Project only a reviewed complete representation; changed text is held.
+
+    The hash includes the full accepted text, headline, URL, GUID and source
+    clocks. A later matching phrase cannot override changed/contradictory text.
+    """
+    if source_id!='gov-ke-kenya-broadcasting-corporation':return None
+    review=REVIEWED_SECURITY_ACCOUNTS.get(item['url'])
+    if not review or representation_hash!=review['contentHash']:return None
+    result=copy.deepcopy(review)
+    result['metadata']['reviewedRepresentationHash']=review['contentHash']
+    result['metadata']['admissionBasis']='Explicit complete-representation review; changes require review'
+    text=item['description']
+    if review['category']=='conflict':
+        # This background exception is bound to the full reviewed representation.
+        background='Attacks along the Kenya-Somalia border are frequent, mostly targeting patrol cars and civilians'
+        if not text.endswith(background):return None
+        text=text[:-len(background)].rstrip()
+    result['foreignScreenText']=text
+    return result
+
+
 def place_evidence(text, profile, areas, country):
     """Require a place in an event statement; do not geocode a publisher's nation."""
     # Reporting offices do not establish the incident location. Remove only a
@@ -238,7 +278,9 @@ def automatic_news(source, policy, items, now, countries, areas, reviews=(), exi
         if url in seen_urls:raise ValueError('Duplicate automatic news article URL')
         seen_urls.add(url)
         if url in manual_urls:continue
-        category=category_for(title,body)
+        pinned_review=REVIEWED_SECURITY_ACCOUNTS.get(url) if source['id']=='gov-ke-kenya-broadcasting-corporation' else None
+        reviewed=reviewed_security_account(source['id'],item,digest(item))
+        category=pinned_review['category'] if pinned_review else category_for(title,body)
         decision=dict(url=url,contentHash=digest(item),status='needs-review',reason=None)
         iid='news-'+hashlib.sha256(url.encode()).hexdigest()[:20]
         if iid in known and known[iid].get('sourceMetadata',{}).get('parser')!=PARSER:continue
@@ -250,14 +292,18 @@ def automatic_news(source, policy, items, now, countries, areas, reviews=(), exi
                     and old.get('sourceMetadata',{}).get('latestRepresentationHash',old['reports'][-1]['contentHash'])!=digest(item)):
                 # Do not silently preserve a now unsupported automatic assertion.
                 row=copy.deepcopy(old);row['evidenceStatus']='unverified';row['state']='expired'
-                row['updatedAt']=item.get('modifiedAt',item['publishedAt'])
+                # This is an observed withdrawal of our automatic assertion, not
+                # a claim that the publisher advanced its CMS clock. Otherwise
+                # the pipeline's stale-positive guard discards this safe hold.
+                row['updatedAt']=max(instant(old['updatedAt']),current).isoformat(timespec='seconds').replace('+00:00','Z')
                 row['summary']='The publisher changed this report; the updated account requires review.'
                 row['sourceMetadata'].update(reviewRequired=True,reviewReason=reason,latestRepresentationHash=digest(item))
                 report_id=iid+'-update-'+digest(item)[:12]
                 if not any(report['id']==report_id for report in row['reports']):
                     row['reports'].append(dict(id=report_id,incidentId=iid,sourceId=source['id'],
                         title=title,url=url,language=source['language'],publishedAt=item['publishedAt'],retrievedAt=now,
-                        excerpt='',contentHash=digest(item),independentGroup=source.get('independentGroup',source['id'])))
+                        excerpt='',contentHash=digest(item),independentGroup=source.get('independentGroup',source['id']),
+                        sourceMetadata=dict(sourceModifiedAt=item.get('modifiedAt',item['publishedAt']),holdObservedAt=now)))
                 rows.append(row)
         if item.get('representationFormat')!='wordpress-full-content-v1':hold('complete-source-body-required');continue
         parts=urllib.parse.urlsplit(url)
@@ -266,25 +312,33 @@ def automatic_news(source, policy, items, now, countries, areas, reviews=(), exi
         published=instant(item['publishedAt']);modified=instant(item.get('modifiedAt',item['publishedAt']))
         if published>current+dt.timedelta(minutes=5) or modified>current+dt.timedelta(minutes=5) or published<current-dt.timedelta(days=366):
             hold('publication-outside-supported-window');continue
+        if pinned_review and not reviewed:hold('reviewed-complete-representation-changed');continue
         if not category:hold('changed-account-no-longer-supports-event');continue
         investigation=investigated_shooting(source['id'],title,body)
         if re.search(HOLD_TITLE,title,re.I) and not investigation:hold('non-event-or-allegation-headline');continue
         if re.search(NON_EVENT+'|'+NEGATED_HARM,title+' '+body,re.I):hold('planned-simulated-or-denied-event');continue
         if re.search(HOLD_TEXT,title+' '+body,re.I):hold('uncertain-or-corrected-account');continue
-        foreign_country=any(c['code']!=code and re.search(r'\b(?:in|across|near)\s+'+re.escape(c['name'])+r'(?!\w)',body,re.I) for c in countries.values())
-        if foreign_country or re.search(FOREIGN,title+' '+body,re.I):hold('foreign-or-cross-border-context-requires-review');continue
+        foreign_text=reviewed['foreignScreenText'] if reviewed else body
+        foreign_country=any(c['code']!=code and re.search(r'\b(?:in|across|near)\s+'+re.escape(c['name'])+r'(?!\w)',foreign_text,re.I) for c in countries.values())
+        if foreign_country or re.search(FOREIGN,title+' '+foreign_text,re.I):hold('foreign-or-cross-border-context-requires-review');continue
         if category=='conflict' and not re.search(r'\b(?:armed|militants?|terrorists?|forces|soldiers|fighters|insurgents?)\b',body,re.I):
             hold('organized-violence-evidence-required');continue
         if category=='other' and not re.search(r'\b(?:acid|toxic|chemical|contaminat\w*|poison\w*|gas leak)\b',body,re.I):
             hold('physical-security-impact-required');continue
         statements=sentences(body,title)
         candidates=[];conflicting_day=False
+        if reviewed:
+            location=place_evidence(reviewed['statement'],profile,areas,countries[code])
+            if (reviewed['category']=='conflict' and
+                    place_evidence(body,profile,areas,countries[code])!=location):
+                hold('multiple-event-localities-require-review');continue
+            if location:candidates.append((published.astimezone(ZoneInfo(profile['timezone'])).date(),location,'publication'))
         explicit_event_days=[event_day(s,published,profile['timezone']) for s in statements
             if re.search(r'\bthe incident (?:happened|occurred)\b',s,re.I)]
         explicit_event_days=[day for day in explicit_event_days if day is not None]
         # Primary event statements are the opening three sentences. All text above
         # has still been examined for conflicts/corrections/foreign context.
-        for index,statement in enumerate(statements[:3]):
+        for index,statement in enumerate([] if reviewed else statements[:3]):
             if not re.search(CATEGORY[category],statement,re.I) or not re.search(EVENT_VERB,statement,re.I):continue
             if re.search(r'\b(?:allegedly|reportedly|suspected|unconfirmed)\b',statement,re.I) and not investigation:continue
             if category=='transport' and not re.search(TRANSPORT_IMPACT,statement,re.I):continue
@@ -320,7 +374,7 @@ def automatic_news(source, policy, items, now, countries, areas, reviews=(), exi
         when,(place,area),basis=candidates[0]
         occurred=(published.isoformat(timespec='seconds').replace('+00:00','Z') if basis in ('current-condition-reported-at-publication','publication')
                   else when.isoformat()+'T00:00:00Z')
-        summary=f'{source["name"]} reports: {title}'
+        summary=reviewed['summary'] if reviewed else f'{source["name"]} reports: {title}'
         if investigation:
             summary=(f'{source["name"]} reports that police are investigating gunfire in Belize City '
                 'and recovered a spent shell casing. Allegations about who fired remain unverified.')
@@ -332,7 +386,8 @@ def automatic_news(source, policy, items, now, countries, areas, reviews=(), exi
             languageProcessing='Original English source; no translation or generative model',reviewRequired=False)
         if basis=='publication':
             provider.update(eventDateKnown=False,eventDatePrecision='unknown')
-            summary+=' The source does not specify the event date.'
+            summary+=(' The source does not specify the confirmation date.' if category=='health' else ' The source does not specify the event date.')
+        if reviewed:provider.update(reviewed['metadata'])
         if investigation:provider['allegationsRetained']=True
         row=make_incident(source,iid,title,summary,countries[code],category,occurred,item.get('modifiedAt',item['publishedAt']),now,
             dict(precision='area' if area else 'country'),url,provider,item,published=item['publishedAt'])
