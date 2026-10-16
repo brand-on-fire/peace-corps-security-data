@@ -323,7 +323,8 @@ class ReviewedSourceRedirect(urllib.request.HTTPRedirectHandler):
 
 def fetch(policy, previous, now, fixture=None):
     """Read the entire response or fail; never parse/publish a truncated response."""
-    result = dict(sourceId=policy['sourceId'], lastAttemptAt=now, url=policy['url'])
+    result = dict(sourceId=policy['sourceId'], lastAttemptAt=now, url=policy['url'],
+                  transportTiming=dict(mode='fixture-replay' if fixture else 'not-requested'))
     try:
         if not safe_url(policy['url']):
             raise ValueError('Only anonymous HTTPS sources are permitted')
@@ -341,14 +342,23 @@ def fetch(policy, previous, now, fixture=None):
             if previous.get('lastModified'):
                 headers['If-Modified-Since'] = previous['lastModified']
             request = urllib.request.Request(policy['url'], headers=headers)
+            opener = urllib.request.build_opener(ReviewedSourceRedirect(urllib.parse.urlsplit(policy['url']).hostname))
+            started = time.monotonic_ns()
+            timing = result['transportTiming'] = dict(mode='live-http',
+                requestStartedAt=dt.datetime.now(UTC).isoformat(timespec='milliseconds').replace('+00:00','Z'))
+            complete = False
             try:
-                opener = urllib.request.build_opener(ReviewedSourceRedirect(urllib.parse.urlsplit(policy['url']).hostname))
                 with opener.open(request, timeout=30) as response:
                     raw = read_complete(response)
                     status, final_url = response.status, response.url
                     etag, modified = response.headers.get('ETag'), response.headers.get('Last-Modified')
                     encoding = response.headers.get('Content-Encoding','').lower()
+                complete = True
             except urllib.error.HTTPError as error:
+                # A 304 has no representation body. Transport completed even
+                # when the existing prior-representation gate rejects its use.
+                if error.code == 304:
+                    complete = True
                 # Only this reviewed adapter interprets a missing exact article
                 # as a changed representation. Read it whole under the normal
                 # decoding/budget gates; listing errors retain the failed batch.
@@ -361,6 +371,7 @@ def fetch(policy, previous, now, fixture=None):
                     status, final_url = 404, error.url
                     etag, modified = error.headers.get('ETag'), error.headers.get('Last-Modified')
                     encoding = error.headers.get('Content-Encoding','').lower()
+                    complete = True
                 elif error.code != 304 or policy.get('adapter')=='kg-bishkek-water':
                     raise
                 else:
@@ -369,6 +380,14 @@ def fetch(policy, previous, now, fixture=None):
                     result.update(status='healthy', httpStatus=304, lastSuccessAt=now,
                                   unchanged=True, message='Source confirms its prior validated response is unchanged.')
                     return result, None
+            finally:
+                # Never catch BaseException here: a source deadline must still
+                # escape without returning or publishing a partial response.
+                duration_ms = (time.monotonic_ns()-started)/1_000_000
+                ended = dt.datetime.now(UTC).isoformat(timespec='milliseconds').replace('+00:00','Z')
+                timing.update(outcome='response-complete' if complete else 'request-failed',
+                              durationMs=round(duration_ms,3))
+                timing['requestCompletedAt' if complete else 'requestFailedAt'] = ended
         if not safe_url(final_url):
             raise ValueError('Redirect did not remain anonymous HTTPS')
         if urllib.parse.urlsplit(final_url).hostname != urllib.parse.urlsplit(policy['url']).hostname:
@@ -834,7 +853,7 @@ def apply_archive_age(row, now):
 
 
 def run(root, now, fixtures=None):
-    from public_cap import collect_cap, apply_lifecycle, expire_warnings
+    from public_cap import collect_cap, collect_cap_batch, apply_lifecycle, expire_warnings
     from public_official import ADAPTERS, prepare_official_policy, request_state, collect_official
     from public_security_official import (ADAPTERS as SECURITY_ADAPTERS,
         prepare_security_policy, collect_security_official)
@@ -859,6 +878,18 @@ def run(root, now, fixtures=None):
         sid = policy['sourceId']
         if sid not in states:
             states[sid] = dict(sourceId=sid, lastSuccessAt=baseline_coverage.get(sid,{}).get('lastSuccessAt'))
+    # An all-invalid cycle retains the publication, but its failure audit may
+    # contain newly discovered exact URLs which must not vanish with the index.
+    prior_audit = load(data/'refresh-status.json', {})
+    prior_cap_observations = [dict(sourceId=sid, capQuarantine=queue)
+        for sid,queue in prior_audit.get('retainedCapQuarantines', {}).items()]
+    for observation in prior_cap_observations + prior_audit.get('sources', []):
+        sid = observation.get('sourceId')
+        if sid not in states or sid not in sources or sources[sid].get('kind') != 'cap' or not observation.get('capQuarantine'):
+            continue
+        retained = states[sid]
+        queue = retained.get('capQuarantine', []) + observation['capQuarantine']
+        retained['capQuarantine'] = list({q['url']:q for q in queue}.values())
     records = read_archive(data, all_countries)
     for row in records.values():
         annotate_weather(row)
@@ -891,7 +922,11 @@ def run(root, now, fixtures=None):
             # Its initial request and child requests share one interruptible
             # source budget on the main thread, outside this worker pool.
             return dict(sourceId=policy['sourceId'],lastAttemptAt=now_text,url=policy['url']), None
-        return fetch(policy, request_state(policy, states.get(policy['sourceId'], {})), now_text, fixtures)
+        prior = states.get(policy['sourceId'], {})
+        requested = request_state(policy, prior)
+        if sources[policy['sourceId']].get('kind') == 'cap' and prior.get('capQuarantine'):
+            requested = {k:v for k,v in requested.items() if k not in ('etag','lastModified')}
+        return fetch(policy, requested, now_text, fixtures)
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
         responses = list(pool.map(prefetch, due))
     for policy, (result, raw) in zip(due, responses):
@@ -901,12 +936,25 @@ def run(root, now, fixtures=None):
         transport_state = {}
         article_health = None
         infrastructure_unresolved = []
+        cap_batch = None
+        cap_policy = (source.get('kind') == 'cap' and source.get('tier') == 'official'
+            and source.get('enabled') is True and source.get('feedUrl') == policy.get('url')
+            and policy.get('mode') == 'official' and sid.startswith('cap-')
+            and policy.get('format') in (None, 'jamaica-cap-atom')
+            and policy.get('capVersion') in (None, '1.2') and safe_url(policy.get('url', '')))
+        if source.get('kind') == 'cap' and previous.get('capQuarantine'):
+            result['capQuarantine'] = copy.deepcopy(previous['capQuarantine'])
         try:
             group = policy.get('independentGroup', sid)
             if not isinstance(group, str) or group not in sources:
                 raise ValueError('Source independence group is not a reviewed registry identity')
             # Collection policy is reviewed configuration, never publisher input.
             source = dict(source, independentGroup=group)
+            if source.get('kind') == 'cap' and previous.get('capQuarantine') and not cap_policy:
+                raise ValueError('CAP quarantine requires its reviewed source and collection policy')
+            if source.get('kind') == 'cap' and previous.get('capQuarantine') and raw is None:
+                # Even an unsolicited 304 cannot confirm queued child documents.
+                raise ValueError('CAP quarantine requires complete index and bulletin retries')
             if policy.get('adapter') in INFRASTRUCTURE_ADAPTERS:
                 if policy['mode'] != 'official' or not policy.get('historyFrom'):
                     raise ValueError('Municipality collection requires official mode and a fixed historyFrom boundary')
@@ -964,7 +1012,12 @@ def run(root, now, fixtures=None):
                         if policy.get('adapter') in INFRASTRUCTURE_ADAPTERS:
                             infrastructure_unresolved = transport_state['infrastructureUnresolvedCorrectionIds']
                     elif source['kind'] == 'cap':
-                        messages = collect_cap(source, policy, raw, now_text, countries, areas, fetch, fixtures)
+                        if cap_policy:
+                            cap_batch = collect_cap_batch(source, policy, raw, now_text, countries, areas,
+                                fetch, fixtures, previous_quarantined=previous.get('capQuarantine', []))
+                            messages = cap_batch['messages']
+                        else:
+                            messages = collect_cap(source, policy, raw, now_text, countries, areas, fetch, fixtures)
                         incoming = apply_lifecycle(messages, records, now_text)
                     else:
                         incoming = official_incidents(source, raw, now_text, countries, geo, iso3)
@@ -1060,6 +1113,18 @@ def run(root, now, fixtures=None):
                 changes.extend(pending_records)
                 discoveries.update({r['id']:r for r in pending_discoveries})
                 result.update(status='healthy', lastSuccessAt=now_text, acceptedCount=accepted, message=message)
+                if cap_batch is not None:
+                    result['capQuarantine'] = cap_batch['quarantined']
+                    result['capValidatedMessages'] = len(cap_batch['messages'])
+                    if cap_batch['status'] == 'partial':
+                        result.update(status='unavailable',lastSuccessAt=previous.get('lastSuccessAt'),
+                            message=f"CAP batch incomplete: {len(cap_batch['messages'])} valid messages; {len(cap_batch['quarantined'])} bulletins require review.")
+                        if cap_batch['messages']:
+                            result.update(lastPartialSuccessAt=now_text,validatedPartial=dict(
+                                adapter='cap-1.2',sourceId=sid,capVersion='1.2',listingValidated=True,
+                                indexUrl=cap_batch['indexUrl'],indexContentHash=cap_batch['indexContentHash'],
+                                bulletinHosts=sorted(set(policy.get('bulletinHosts', [urllib.parse.urlsplit(policy['url']).hostname]))),
+                                validatedMessages=len(cap_batch['messages']),quarantinedBulletins=len(cap_batch['quarantined'])))
                 if article_health:
                     result.update(article_health)
                     if article_health['status'] != 'healthy':

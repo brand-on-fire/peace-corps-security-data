@@ -199,4 +199,142 @@ class NewsRuntimeTests(unittest.TestCase):
         post=dict(id=1,link=self.item()['url'],status='publish',type='post',date_gmt='2026-10-14T12:00:00',modified_gmt='2026-10-14T12:00:00',title={'rendered':'Test'},content={'protected':False,'rendered':'<p>'+text+'</p>'})
         item=parse_wordpress(json.dumps([post]).encode(),self.source())[0];self.assertEqual(item['description'],text.strip())
 
+    # Factual transformations of complete retained articles, with original URLs
+    # in docs/ENGLISH_NEWS_ADMISSION.md. Original publisher bodies stay local.
+    def test_fatal_stabbing_is_crime_with_event_place_not_victim_residence(self):
+        sid='news-gy-demerara-waves'
+        item=self.item('Kairuni man killed in Linden',
+            'A man of Kairuni was Saturday night stabbed to death in Amelia’s Ward, Linden. '
+            'The Guyana Police Force said it was investigating the fatal incident.',sid)
+        row=self.run_items([item],source=self.source(sid),policy=self.policy(sid))[0][0]
+        self.assertEqual(row['category'],'crime');self.assertEqual(row['region'],'Linden')
+        self.assertEqual(row['occurredAt'],'2026-10-10T00:00:00Z');self.assertEqual(row['location'],{'precision':'country'})
+        item['description']='A man of Linden was Saturday night stabbed to death in an unnamed town. Police are investigating.'
+        self.assertEqual(self.run_items([item],source=self.source(sid),policy=self.policy(sid))[0],[])
+        for body in ['A man was not stabbed to death in Linden on Saturday night.',
+                     'A man was allegedly stabbed to death in Linden on Saturday night.']:
+            self.assertEqual(self.run_items([dict(item,description=body)],source=self.source(sid),policy=self.policy(sid))[0],[])
+        self.assertIsNone(category_for('Man killed in Linden','A man was killed in a workplace accident.'))
+
+    def helicopter(self):
+        sid='gov-ke-kenya-broadcasting-corporation'
+        return sid,self.item('Five people survive helicopter crash in Kericho',
+            'A helicopter has crash-landed at Kericho Golf Club. All passengers survived. '
+            'Kenya Red Cross said all persons on board have been taken to hospital for treatment. '
+            'The pilot sustained serious injuries.',sid)
+
+    def test_supported_unknown_event_date_is_honest_publication_anchor(self):
+        sid,item=self.helicopter();row=self.run_items([item],source=self.source(sid),policy=self.policy(sid))[0][0]
+        self.assertEqual(row['category'],'transport');self.assertEqual(row['occurredAt'],item['publishedAt'])
+        self.assertEqual(row['sourceMetadata']['eventTimeBasis'],'publication')
+        self.assertFalse(row['sourceMetadata']['eventDateKnown']);self.assertEqual(row['sourceMetadata']['eventDatePrecision'],'unknown')
+        self.assertIn('does not specify the event date',row['summary']);self.assertEqual(row['severity'],'unknown')
+        self.assertEqual(row['location'],{'precision':'country'});self.assertNotIn('adminAssignment',row)
+        self.assertEqual(row['reports'][0]['publishedAt'],item['publishedAt'])
+        self.assertEqual(row['reports'][0]['contentHash'],digest(item))
+
+    def test_unknown_date_does_not_hide_retrospective_or_uncertain_source_text(self):
+        sid,item=self.helicopter()
+        for extra in (' This was a historical account.', ' The incident occurred in 2010.',
+                      ' The accident happened last year.', ' This happened on October 1, 2020.',
+                      ' This happened years ago.', ' This was an emergency drill.',
+                      ' A correction withdrew the report.', ' Another source disputed this account.',
+                      ' The event occurred in France.'):
+            with self.subTest(extra=extra):
+                changed=dict(item,description=item['description']+extra)
+                self.assertEqual(self.run_items([changed],source=self.source(sid),policy=self.policy(sid))[0],[])
+        for replacement in ('A helicopter may have crash-landed at Kericho Golf Club.',
+                            'A helicopter will crash-land at Kericho Golf Club.',
+                            'No helicopter has crash-landed at Kericho Golf Club.',
+                            'It is false that a helicopter has crash-landed at Kericho Golf Club.',
+                            'Officials refuted a claim that a helicopter has crash-landed at Kericho Golf Club.'):
+            changed=dict(item,description=item['description'].replace('A helicopter has crash-landed at Kericho Golf Club.',replacement))
+            self.assertEqual(self.run_items([changed],source=self.source(sid),policy=self.policy(sid))[0],[])
+        changed=dict(item,description=item['description'].replace('Kenya Red Cross','An unnamed social account'))
+        self.assertEqual(self.run_items([changed],source=self.source(sid),policy=self.policy(sid))[0],[])
+
+    def test_unknown_date_profile_does_not_turn_arrest_speech_or_court_into_event(self):
+        sid,item=self.helicopter()
+        for title,body in [('Minister discusses helicopter crash in Kericho','A minister discussed a helicopter crash in Kericho. The minister spoke to Kenya Red Cross.'),
+                           ('Pilot charged following helicopter crash in Kericho',item['description']),
+                           ('Helicopter crash simulation in Kericho',item['description'])]:
+            changed=dict(item,title=title,description=body)
+            self.assertEqual(self.run_items([changed],source=self.source(sid),policy=self.policy(sid))[0],[])
+        # The existing undated generic crime example remains held: there is no
+        # blanket replacement of missing occurrence dates with publication dates.
+        self.assertEqual(self.run_items([self.item(body='Police report a fatal shooting in Kingston.')])[0],[])
+
+    def test_zambia_emergency_landing_unknown_date_retains_locality_and_attribution(self):
+        sid='news-zm-lusaka-times'
+        item=self.item('Two pilots survive emergency landing in Nangoma',
+            'Two pilots aboard a corporate aircraft survived an emergency landing after the plane developed a fault near offices in Nangoma. '
+            'A wildlife officer confirmed that both pilots sustained head injuries. They were evacuated to Lusaka for treatment.',sid)
+        row=self.run_items([item],source=self.source(sid),policy=self.policy(sid))[0][0]
+        self.assertEqual(row['region'],'Nangoma');self.assertEqual(row['sourceMetadata']['eventTimeBasis'],'publication')
+        self.assertEqual(row['evidenceStatus'],'reported');self.assertFalse(row['sourceMetadata']['eventDateKnown'])
+        changed=dict(item,description=item['description'].replace('confirmed that both pilots sustained head injuries','said the story was unconfirmed'))
+        self.assertEqual(self.run_items([changed],source=self.source(sid),policy=self.policy(sid))[0],[])
+
+    def test_fatal_collision_claimed_life_phrase_keeps_actual_day(self):
+        sid='news-bz-breaking-belize-news'
+        item=self.item('Man killed, two injured in early morning crash',
+            'A fatal road traffic accident on the Philip Goldson Highway in Ladyville claimed the life of a man early this morning. '
+            'Two others were injured and are receiving treatment.',sid)
+        row=self.run_items([item],source=self.source(sid),policy=self.policy(sid))[0][0]
+        self.assertEqual(row['category'],'transport');self.assertEqual(row['occurredAt'],'2026-10-14T00:00:00Z')
+
+    def test_flood_needs_actual_human_impact_and_explicit_relative_day(self):
+        sid='news-zm-lusaka-times'
+        area=dict(id='adm2:ZM:Lumezi',name='Lumezi',countryCode='ZM',level='ADM2',parentId='adm1:ZM:Eastern')
+        parent=dict(id='adm1:ZM:Eastern',name='Eastern',countryCode='ZM',level='ADM1',parentId='country:ZM')
+        item=self.item('DMMU evacuates flood victims in Lumezi District',
+            'DMMU has evacuated flood victims from Lumezi District following flooding which occurred five days ago. '
+            'The victims were stranded by high water levels.',sid)
+        rows,_=automatic_news(self.source(sid),self.policy(sid),[item],self.now,self.countries,[area,parent])
+        self.assertEqual(rows[0]['category'],'flood');self.assertEqual(rows[0]['occurredAt'],'2026-10-09T00:00:00Z')
+        for body in ['Flooding is forecast in Lumezi District; residents may be evacuated tomorrow.',
+                     'Flooding occurred in Lumezi District five days ago. No people were displaced or evacuated.',
+                     'People may have been evacuated after flooding in Lumezi District five days ago.']:
+            self.assertEqual(automatic_news(self.source(sid),self.policy(sid),[dict(item,description=body)],self.now,self.countries,[area,parent])[0],[])
+        stamp=dt.datetime(2026,1,2,12,tzinfo=dt.timezone.utc)
+        self.assertEqual(event_day('flooding occurred five days ago',stamp,'Africa/Lusaka'),dt.date(2025,12,28))
+        self.assertIsNone(event_day('flooding occurred five days ago and on January 1, 2026',stamp,'Africa/Lusaka'))
+
+    def test_belize_robbery_place_is_title_and_same_event_road_not_police_office(self):
+        sid='news-bz-breaking-belize-news'
+        item=self.item('Armed men rob Orange Walk shop on Palmar Road',
+            'Police in Orange Walk are investigating an armed robbery at a shop on Palmar Road on Thursday night. '
+            'According to police, masked men entered the shop on October 8.',sid)
+        row=self.run_items([item],source=self.source(sid),policy=self.policy(sid))[0][0]
+        self.assertEqual(row['region'],'Palmar Road, Orange Walk');self.assertEqual(row['location'],{'precision':'country'})
+        self.assertEqual(row['occurredAt'],'2026-10-08T00:00:00Z');self.assertNotIn('adminAssignment',row)
+        for changed in (dict(item,title='Police in Orange Walk investigate robbery'),
+                        dict(item,description=item['description'].replace('on Palmar Road','on Unknown Road')),
+                        dict(item,description=item['description']+' The incident occurred on October 9, 2026.'),
+                        dict(item,description=item['description']+' The robbery occurred in Mexico.')):
+            self.assertEqual(self.run_items([changed],source=self.source(sid),policy=self.policy(sid))[0],[])
+
+    def test_physical_evidence_can_support_investigation_without_certifying_alleged_actor(self):
+        sid='news-bz-breaking-belize-news'
+        title='Police are investigating a shooting incident in Belize City after two people allegedly opened fire on Saturday night'
+        body='By News Staff: '+title+'. According to police, it happened on October 10. Police recovered one expended 9mm shell casing from the scene. No injuries were reported.'
+        item=self.item(title,body,sid);row=self.run_items([item],source=self.source(sid),policy=self.policy(sid))[0][0]
+        self.assertEqual(row['category'],'crime');self.assertEqual(row['title'],title)
+        self.assertTrue(row['sourceMetadata']['allegationsRetained']);self.assertEqual(row['evidenceStatus'],'reported')
+        self.assertIn('Allegations about who fired remain unverified',row['summary'])
+        for changed in (dict(item,description=body.replace('Police recovered one expended 9mm shell casing from the scene.','')),
+                        dict(item,description=body+' Correction: the report was false.'),
+                        dict(item,description=body.replace('Police recovered one','Police did not recover any')),
+                        dict(item,title='Suspect charged: '+title),
+                        dict(item,description=body+' This was a simulated shooting.')):
+            self.assertEqual(self.run_items([changed],source=self.source(sid),policy=self.policy(sid))[0],[])
+
+    def test_new_unknown_date_record_correction_preserves_original_evidence(self):
+        sid,item=self.helicopter();old=self.run_items([item],source=self.source(sid),policy=self.policy(sid))[0][0]
+        changed=dict(item,description=item['description']+' Correction: the account was withdrawn.',modifiedAt='2026-10-15T12:00:00Z')
+        rows,_=self.run_items([changed],source=self.source(sid),policy=self.policy(sid),existing={old['id']:old})
+        self.assertEqual(rows[0]['state'],'expired');self.assertEqual(rows[0]['evidenceStatus'],'unverified')
+        self.assertEqual(rows[0]['reports'][0],old['reports'][0]);self.assertEqual(rows[0]['occurredAt'],item['publishedAt'])
+        self.assertEqual(rows[0]['firstSeenAt'],old['firstSeenAt']);self.assertEqual(len(rows[0]['reports']),2)
+
 if __name__=='__main__':unittest.main()

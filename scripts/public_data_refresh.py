@@ -30,6 +30,33 @@ def validated_partial(row, policies):
     """
     marker=row.get('validatedPartial')
     if not isinstance(marker,dict) or row.get('status')!='unavailable':return False
+    if marker.get('adapter')=='cap-1.2':
+        sid=row.get('sourceId');queue=row.get('capQuarantine');count=marker.get('validatedMessages')
+        if (not isinstance(sid,str) or not sid.startswith('cap-') or marker.get('sourceId')!=sid
+                or marker.get('capVersion')!='1.2' or marker.get('listingValidated') is not True
+                or type(count) is not int or not 1<=count<=400
+                or type(row.get('capValidatedMessages')) is not int or row['capValidatedMessages']!=count
+                or not isinstance(queue,list) or not 1<=len(queue)<=400
+                or type(marker.get('quarantinedBulletins')) is not int or marker['quarantinedBulletins']!=len(queue)
+                or count+len(queue)>400):return False
+        def sha(value):return isinstance(value,str) and len(value)==64 and all(c in '0123456789abcdef' for c in value)
+        if not sha(marker.get('indexContentHash')):return False
+        matches=[p for p in policies if p.get('sourceId')==sid and p.get('mode')=='official'
+            and p.get('adapter') is None and p.get('format') in (None,'jamaica-cap-atom')
+            and p.get('capVersion') in (None,'1.2') and p.get('url')==marker.get('indexUrl')]
+        if len(matches)!=1 or not pipeline.safe_url(matches[0]['url']):return False
+        policy=matches[0]
+        hosts=sorted(set(policy.get('bulletinHosts',[pipeline.urllib.parse.urlsplit(policy['url']).hostname])))
+        if marker.get('bulletinHosts')!=hosts:return False
+        urls=[]
+        for item in queue:
+            if (not isinstance(item,dict) or item.get('sourceId')!=sid
+                    or not pipeline.safe_url(item.get('url','')) or not sha(item.get('contentHash'))
+                    or type(item.get('bytes')) is not int or not 0<=item['bytes']<=20_000_000
+                    or not isinstance(item.get('reason'),str) or not item['reason']):return False
+            if pipeline.urllib.parse.urlsplit(item['url']).hostname not in hosts:return False
+            urls.append(item['url'])
+        return len(set(urls))==len(urls)
     if marker.get('adapter')=='kg-bishkek-water':
         sid='gov-kg-bishkek-water'
         ids=row.get('infrastructureUnresolvedCorrectionIds')
@@ -243,6 +270,17 @@ def refresh(root, now=None, fixtures=None, runner=subprocess.run, environment=No
     if status['outcome'] == 'failed':
         status['publicationGeneratedAt'] = baseline['generatedAt']
         status['lastSuccessfulCollectionAt'] = previous.get('lastSuccessfulCollectionAt')
+        # Retry diagnostics discovered by a previously validated failure audit
+        # can exist before any publication commits them into collector-state.
+        # Preserve those across outer failures without inventing current attempts.
+        retained = {sid:list(queue) for sid,queue in previous.get('retainedCapQuarantines', {}).items()}
+        for observation in previous.get('sources', []) + status.get('sources', []):
+            sid = observation.get('sourceId')
+            if isinstance(sid,str) and sid.startswith('cap-') and observation.get('capQuarantine'):
+                queue = retained.get(sid, []) + observation['capQuarantine']
+                retained[sid] = list({item['url']:item for item in queue}.values())
+        if retained:
+            status['retainedCapQuarantines'] = retained
         # Failure observations still diagnose sources not attempted in this run.
         # Do not re-date the retained snapshot or turn an old healthy check green.
         try:

@@ -1,7 +1,7 @@
 import copy
 import pathlib
 import unittest
-from public_cap import parse_alert, apply_lifecycle, collect_cap, expire_warnings, feed_links, info_blocks, deduplicate_info_blocks
+from public_cap import parse_alert, apply_lifecycle, collect_cap, collect_cap_batch, expire_warnings, feed_links, info_blocks, deduplicate_info_blocks
 
 ROOT=pathlib.Path(__file__).resolve().parent.parent
 FIXTURE=ROOT/'tests/fixtures/cap/bmkg.xml'
@@ -140,4 +140,90 @@ class CapTests(unittest.TestCase):
   self.assertEqual(calls,[])
  def test_duplicate_link_once(self):
   self.assertEqual(feed_links(b'<rss><channel><item><link>https://x.test/a</link></item><item><link>https://x.test/a</link></item></channel></rss>'),['https://x.test/a'])
+
+class CapPartialTests(unittest.TestCase):
+ def bulletin(self, identifier='a', kind='Alert', severity='Severe', sent='2026-10-13T04:00:00Z', expires='2026-10-13T07:00:00Z', reference=''):
+  # Complete synthetic source documents. The conflicting offsets reproduce the
+  # retained VMGD failure without copying a third-party bulletin into fixtures.
+  return f'''<alert xmlns="urn:oasis:names:tc:emergency:cap:1.2">
+   <identifier>{identifier}</identifier><sender>issuer@example.test</sender><sent>{sent}</sent>
+   <status>Actual</status><msgType>{kind}</msgType><scope>Public</scope><references>{reference}</references>
+   <info><language>en</language><category>Met</category><event>Severe wind</event>
+   <urgency>Immediate</urgency><severity>{severity}</severity><certainty>Observed</certainty>
+   <expires>{expires}</expires><headline>Wind warning</headline><description>Damaging winds reported.</description>
+   <area><areaDesc>Named area</areaDesc><polygon>-10,160 -10,161 -11,161 -10,160</polygon></area></info>
+   </alert>'''.encode()
+ def bad(self, **kwargs):
+  return self.bulletin(sent='2026-10-13T05:54:56+01:00',expires='2026-10-13T15:00:00+11:00',severity='Moderate',**kwargs)
+ def feed(self, names):
+  return ('<rss><channel>'+''.join(f'<item><link>https://www.bmkg.go.id/{name}</link></item>' for name in names)+'</channel></rss>').encode()
+ def collect(self, bodies, names=None, previous=()):
+  self.calls=[]
+  def fetch(policy,*args):
+   self.calls.append(policy['url']);return ({}, bodies[policy['url'].rsplit('/',1)[-1]])
+  return collect_cap_batch(SOURCE,{'url':URL},self.feed(names if names is not None else bodies),'2026-10-13T06:00:00Z',COUNTRIES,[],fetch,previous_quarantined=previous)
+ def test_bad_moderate_does_not_block_unrelated_severe(self):
+  from public_data_pipeline import public_incident
+  import hashlib
+  bad=self.bad();result=self.collect({'bad':bad,'good':self.bulletin()})
+  self.assertEqual(result['status'],'partial');self.assertEqual(len(result['messages']),1)
+  row=apply_lifecycle(result['messages'],{},'2026-10-13T06:00:00Z')[0]
+  self.assertTrue(public_incident(row));self.assertEqual(row['severity'],'severe')
+  q=result['quarantined'][0];self.assertEqual(q['contentHash'],hashlib.sha256(bad).hexdigest())
+  self.assertEqual(q['bytes'],len(bad));self.assertEqual(q['reason'],'CAP expiry precedes effective/onset time')
+  self.assertEqual(q['identity']['sent'],'2026-10-13T04:54:56Z')
+  self.assertNotIn('raw',q);self.assertNotIn('content',q)
+ def test_valid_moderate_still_excluded(self):
+  from public_data_pipeline import public_incident
+  result=self.collect({'bad':self.bad(),'routine':self.bulletin(severity='Moderate')})
+  self.assertFalse(public_incident(result['messages'][0]['record']))
+ def test_malformed_update_keeps_prior_evidence_and_cannot_cancel(self):
+  original=parse_alert(SOURCE,self.bulletin(),URL,NOW,COUNTRIES,[]);row=original['record'];before=copy.deepcopy(row)
+  ref='issuer@example.test,a,2026-10-13T04:00:00Z'
+  for kind in ('Update','Cancel'):
+   result=self.collect({'bad':self.bad(identifier='bad',kind=kind,reference=ref),'new':self.bulletin(identifier='new')})
+   self.assertEqual(result['quarantined'][0]['identity']['references'],[original['control']['key']])
+   self.assertEqual(result['quarantined'][0]['identity']['kind'],kind)
+   changed=apply_lifecycle(result['messages'],{row['id']:row},NOW)
+   self.assertEqual(len(changed),1);self.assertNotEqual(changed[0]['id'],row['id']);self.assertEqual(row,before)
+ def test_valid_update_and_cancel_history_survives_unrelated_quarantine(self):
+  ref='issuer@example.test,a,2026-10-13T04:00:00Z'
+  update=self.bulletin(identifier='b',kind='Update',sent='2026-10-13T05:00:00Z',reference=ref)
+  cancel=self.bulletin(identifier='c',kind='Cancel',sent='2026-10-13T06:00:00Z',reference='issuer@example.test,b,2026-10-13T05:00:00Z')
+  result=self.collect({'bad':self.bad(identifier='bad'),'a':self.bulletin(),'b':update,'c':cancel})
+  row=apply_lifecycle(result['messages'],{},'2026-10-13T06:00:00Z')[0]
+  self.assertEqual(row['state'],'cancelled');self.assertEqual(len(row['reports']),3)
+  self.assertEqual(apply_lifecycle(result['messages'],{row['id']:row},NOW),[])
+ def test_unlisted_quarantine_is_retried_until_valid_response(self):
+  first=self.collect({'bad':self.bad()});saved=copy.deepcopy(first['quarantined'])
+  again=self.collect({'bad':self.bad(),'new':self.bulletin(identifier='new')},names=['new'],previous=saved)
+  self.assertEqual(len(again['quarantined']),1);self.assertEqual(len(self.calls),2);self.assertEqual(saved,first['quarantined'])
+  recovered=self.collect({'bad':self.bulletin()},names=[],previous=saved)
+  self.assertEqual(recovered['status'],'complete');self.assertEqual(recovered['quarantined'],[]);self.assertEqual(len(recovered['messages']),1)
+ def test_duplicate_current_and_queued_url_is_fetched_once(self):
+  q=self.collect({'bad':self.bad()})['quarantined']
+  self.collect({'bad':self.bad()},previous=q);self.assertEqual(len(self.calls),1)
+ def test_bad_envelope_never_invents_reference(self):
+  for raw in (b'not XML',self.bad(reference='not,a,valid-time'),self.bad().replace(b'</sent>',b'</sent><sent>2026-10-13T04:00:00Z</sent>')):
+   q=self.collect({'bad':raw})['quarantined'][0];self.assertNotIn('identity',q)
+ def test_fetch_failure_is_still_atomic_including_unlisted_queue(self):
+  q=self.collect({'bad':self.bad()})['quarantined']
+  with self.assertRaisesRegex(ValueError,'CAP bulletin fetch failed'):
+   collect_cap_batch(SOURCE,{'url':URL},self.feed([]),NOW,COUNTRIES,[],lambda *args:({'message':'unavailable'},None),previous_quarantined=q)
+ def test_invalid_listing_and_unreviewed_queue_are_atomic_before_fetch(self):
+  calls=[]
+  for raw,q in [(b'not XML',()),(self.feed([]),[{'sourceId':SOURCE['id'],'url':'https://unreviewed.test/bad'}]),(self.feed([]),[{'sourceId':'other','url':URL}])]:
+   with self.assertRaises(Exception):collect_cap_batch(SOURCE,{'url':URL},raw,NOW,COUNTRIES,[],lambda *a:calls.append(a),previous_quarantined=q)
+  self.assertEqual(calls,[])
+ def test_combined_queue_and_aggregate_bytes_remain_bounded(self):
+  from unittest.mock import patch
+  q=self.collect({'bad':self.bad()})['quarantined']
+  with patch('public_cap.MAX_BULLETINS',1):
+   with self.assertRaisesRegex(ValueError,'combined index'):self.collect({'good':self.bulletin()},previous=q)
+  with patch('public_cap.MAX_BYTES',len(self.bulletin())+10):
+   with self.assertRaisesRegex(ValueError,'complete source exceeds'):self.collect({'good':self.bulletin()})
+ def test_direct_cap_quarantine_and_recovery(self):
+  def collect(raw,previous=()):return collect_cap_batch(SOURCE,{'url':URL},raw,NOW,COUNTRIES,[],lambda *a:self.fail('direct document fetched twice'),previous_quarantined=previous)
+  bad=collect(self.bad());self.assertEqual(bad['status'],'partial')
+  good=collect(self.bulletin(),bad['quarantined']);self.assertEqual(good['status'],'complete');self.assertEqual(len(good['messages']),1)
 if __name__=='__main__':unittest.main()

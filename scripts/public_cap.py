@@ -275,18 +275,116 @@ def parse_alert(source, raw, url, now, countries, areas):
     return dict(control=control, record=deduplicate_info_blocks(record))
 
 
+def quarantine_identity(raw, source_id):
+    """Identify a rejected public message only from an independently valid envelope."""
+    try:
+        root = xml(raw)
+        if root.tag != '{'+NS+'}alert':
+            return None
+        names = ('identifier', 'sender', 'sent', 'msgType', 'status', 'scope')
+        if any(len(root.findall('{'+NS+'}'+name)) != 1 for name in names):
+            return None
+        if text(root, 'status') != 'Actual' or text(root, 'scope') != 'Public':
+            return None
+        identifier, sender, kind = text(root, 'identifier'), text(root, 'sender'), text(root, 'msgType')
+        if not identifier or not sender or kind not in ('Alert', 'Update', 'Cancel'):
+            return None
+        sent = timestamp(text(root, 'sent'))
+        if len(root.findall('{'+NS+'}references')) > 1:
+            return None
+        refs = []
+        for reference in text(root, 'references').split():
+            parts = reference.split(',')
+            if len(parts) != 3 or not all(parts):
+                return None
+            refs.append(message_key(*parts))
+        return dict(key=message_key(sender, identifier, sent), sourceId=source_id,
+                    identifier=identifier, sender=sender, sent=sent,
+                    kind=kind, references=refs)
+    except (ValueError, ET.ParseError):
+        return None
+
+
+def quarantine_diagnostic(source, raw, url, now, error):
+    # Provider text in a Python conversion exception is not a safe diagnostic.
+    # Keep a fixed failure class instead; the receipt identifies the full body.
+    reason = str(error)
+    if isinstance(error, ET.ParseError):
+        reason = 'CAP XML is malformed'
+    elif not reason.startswith('CAP '):
+        reason = 'CAP field cannot be parsed'
+    diagnostic = dict(sourceId=source['id'], url=url, retrievedAt=now,
+                      contentHash=hashlib.sha256(raw).hexdigest(), bytes=len(raw),
+                      reason=reason)
+    identity = quarantine_identity(raw, source['id'])
+    if identity is not None:
+        diagnostic['identity'] = identity
+    return diagnostic
+
+
 def collect_cap(source, policy, raw, now, countries, areas, fetcher, fixtures=None):
-    """Fetch all linked bulletins or reject this source atomically. No partial feed."""
+    """Legacy strict contract: one rejected bulletin still rejects the source."""
+    return _collect_cap(source, policy, raw, now, countries, areas, fetcher, fixtures,
+                        partial=False)['messages']
+
+
+def collect_cap_batch(source, policy, raw, now, countries, areas, fetcher,
+                      fixtures=None, previous_quarantined=()):
+    """Explicit partial result; callers must preserve degraded health and retry state.
+
+    Only complete individual parse failures are quarantined. Index, fetch, URL
+    and resource-budget failures still reject the batch. Retained exact URLs are
+    retried even after leaving the index; the caller commits this replacement
+    queue only after its archive transaction succeeds, never on an exception.
+    """
+    return _collect_cap(source, policy, raw, now, countries, areas, fetcher, fixtures,
+                        partial=True, previous_quarantined=previous_quarantined)
+
+
+def _collect_cap(source, policy, raw, now, countries, areas, fetcher, fixtures,
+                 partial, previous_quarantined=()):
     links, inconsistent_empty = (jamaica_atom_links(raw, policy)
         if policy.get('format') == 'jamaica-cap-atom' else (feed_links(raw), False))
-    if links is None:
-        return [v for v in [parse_alert(source,raw,policy['url'],now,countries,areas)] if v]
-    messages, total = [], len(raw)
+    messages, quarantined, total = [], [], len(raw)
+    if total > MAX_BYTES:
+        raise ValueError('CAP complete source exceeds byte budget; deferred without publication')
+    batch = dict(messages=messages, quarantined=quarantined,
+                 indexContentHash=hashlib.sha256(raw).hexdigest(),
+                 indexUrl=policy['url'], retrievedAt=now)
+    def parse(content, url):
+        try:
+            parsed = parse_alert(source, content, url, now, countries, areas)
+        except (ValueError, ET.ParseError) as error:
+            if not partial:
+                raise
+            quarantined.append(quarantine_diagnostic(source, content, url, now, error))
+            return
+        if parsed:
+            if inconsistent_empty and parsed['record'] is not None:
+                parsed['record']['sourceMetadata'].update(
+                    capIndexInconsistentNoActivePlaceholder=True,
+                    capIndexContentHash=batch['indexContentHash'], capIndexUrl=policy['url'])
+            messages.append(parsed)
+    direct = links is None
+    links = [] if direct else links
+    if len(previous_quarantined) > MAX_BULLETINS:
+        raise ValueError('CAP quarantine exceeds bulletin bound; complete source deferred')
+    for item in previous_quarantined:
+        if not isinstance(item, dict) or item.get('sourceId') != source['id'] or not isinstance(item.get('url'), str):
+            raise ValueError('CAP quarantine identity is invalid')
+        links.append(item['url'])
+    links = list(dict.fromkeys(links))
+    if direct:
+        links = [url for url in links if url != policy['url']]
+    if len(links)+int(direct) > MAX_BULLETINS:
+        raise ValueError('CAP combined index and quarantine exceeds bulletin bound; complete source deferred')
     allowed = set(policy.get('bulletinHosts', [urllib.parse.urlsplit(policy['url']).hostname]))
     for url in links:
         parsed = urllib.parse.urlsplit(url)
         if parsed.scheme!='https' or parsed.hostname not in allowed or parsed.username or parsed.password:
             raise ValueError('CAP bulletin URL is outside reviewed HTTPS hosts')
+    if direct:
+        parse(raw, policy['url'])
     # Small parallel batches bound duration; every response is fully parsed.
     import concurrent.futures
     deadline = time.monotonic()+90
@@ -306,15 +404,9 @@ def collect_cap(source, policy, raw, now, countries, areas, fetcher, fixtures=No
                 total += len(content)
                 if total > MAX_BYTES:
                     raise ValueError('CAP complete source exceeds byte budget; deferred without publication')
-                parsed = parse_alert(source,content,url,now,countries,areas)
-                if parsed:
-                    if inconsistent_empty and parsed['record'] is not None:
-                        parsed['record']['sourceMetadata'].update(
-                            capIndexInconsistentNoActivePlaceholder=True,
-                            capIndexContentHash=hashlib.sha256(raw).hexdigest(),
-                            capIndexUrl=policy['url'])
-                    messages.append(parsed)
-    return messages
+                parse(content, url)
+    batch['status'] = 'partial' if quarantined else 'complete'
+    return batch
 
 
 def apply_lifecycle(messages, records, now):
