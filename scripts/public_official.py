@@ -41,7 +41,7 @@ def prepare_official_policy(policy,previous,now):
 def request_state(policy,previous):
  # Their child responses can change while the listing stays byte-identical.
  # Re-fetch the complete listing on each due check to reconcile those children.
- if policy.get('adapter') in {'np-bipad','cdc-notices','fj-fra','sv-elmundo'}:
+ if policy.get('adapter') in {'np-bipad','cdc-notices','fj-fra','sv-elmundo','kg-bishkek-water'}:
   return {k:v for k,v in previous.items() if k not in ('etag','lastModified')}
  return previous if previous.get('url')==policy['url'] else {k:v for k,v in previous.items() if k not in ('etag','lastModified')}
 

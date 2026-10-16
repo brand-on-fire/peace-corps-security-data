@@ -6754,5 +6754,23 @@
     "verifiedAt": "2026-10-16T00:10:29Z",
     "termsUrl": "https://www.fijiroads.org/index.php/privacy-policy/",
     "notes": "Official category-26 public JSON provides complete notice text for local analysis. Only original factual metadata and source links may be published. Reviewed rules recognize dated full bridge/road closures, including planned bridge repairs, emergency bridge work, structural deterioration and broken culverts; other notices require review. No verified asset-to-administrative crosswalk exists. Category, publisher-delay, image/PDF and silent-reopening coverage gaps remain. Expiry of an announced interval does not confirm reopening."
+  },
+  {
+    "id": "gov-kg-bishkek-water",
+    "name": "Bishkek municipality — drinking-water interruptions",
+    "url": "https://www.bishkek.gov.kg/ru",
+    "feedUrl": "https://www.bishkek.gov.kg/ru/post",
+    "countryCodes": [
+      "KG"
+    ],
+    "kind": "html",
+    "tier": "official",
+    "language": "ru",
+    "cadenceMinutes": 60,
+    "enabled": true,
+    "access": "public-page",
+    "verifiedAt": "2026-10-16T01:29:39Z",
+    "termsUrl": "https://www.bishkek.gov.kg/ru",
+    "notes": "Anonymous municipal HTML, including its public search, supplies complete Russian notice text. Robots allows these paths; the municipality reserves copyright. Publish factual intervals, original headlines, named service-area descriptions and source links only; retain complete responses locally for verification. Dated drinking-water schedules and narrowly matched postponements only. No validated service-area polygons, comprehensive outage coverage, restoration stream or advance-warning UI. Publication time is available only as a local calendar date."
   }
 ]

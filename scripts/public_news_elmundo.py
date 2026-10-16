@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Inactive El Mundo Spanish crime pilot; complete public HTML, no model/network.
+"""Reviewed El Mundo Spanish crime intake; complete public HTML, no model/network.
 
 The reviewed publisher's embedded police account supports the event claim; it is
 not a second independent source. Unknown event dates use an explicitly labeled
@@ -33,6 +33,25 @@ PLACES = {
     'santa tecla': ('Santa Tecla', 'La Libertad Sur'),
     'zacatecoluca': ('Zacatecoluca', 'La Paz Este'),
 }
+# Reviewed names, not a geocoder. Law 762 establishes the administrative
+# relationships; it does not certify these provider-simplified legacy polygons.
+# The shortened provider name "Opico" remains deliberately unassigned at ADM2.
+ADMIN_REVIEW = 'sv-elmundo-named-areas-2026-10-16-v1'
+ADMIN_INDEX_SHA256 = '248aae25962b4c530c900ea2d87a2f802bd9c48d9273c1d88c650dfda46190a1'
+ADMIN_LAYERS = {
+    'ADM1': ('SLV-ADM1-98794003', '2021', 'f9244692cbce900c1c23b69be7371ee7ea7a99413ef1b76fabc920be774f9f9e'),
+    'ADM2': ('SLV-ADM2-79315794', '2007', '625800b49cb893b399d788d4b971d6af6974413c9cf1f5554df605ecd99cac5b'),
+}
+ADMIN_PLACES = {
+    'Ciudad Barrios': ('gb:98794003B50968784291710', 'Departamento de San Miguel', 'gb:79315794B38727167793446', 14),
+    'San Juan Opico': ('gb:98794003B3671241590115', 'La Libertad', None, 6),
+    'Colón': ('gb:98794003B3671241590115', 'La Libertad', 'gb:79315794B90706400022034', 6),
+    'Acajutla': ('gb:98794003B56835012218806', 'Departamento de Sonsonate', 'gb:79315794B43866171766073', 12),
+    'Sensuntepeque': ('gb:98794003B16890138661932', 'Departamento de Cabañas', 'gb:79315794B14613066597096', 9),
+    'Santa Tecla': ('gb:98794003B3671241590115', 'La Libertad', 'gb:79315794B65816888820880', 7),
+    'Zacatecoluca': ('gb:98794003B62092818645437', 'Departamento de La Paz', 'gb:79315794B51596434492977', 10),
+}
+ADMIN_FIELDS = ('admin1Code','admin1Name','admin1Id','admin2Code','admin2Name','admin2Id','adminAssignment')
 MONTHS = {v:i for i,v in enumerate(('enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'),1)}
 # Includes complete-body correction/denial guards, not a length-limited lead.
 HOLD = (r'\b(?:simulacro|simulacion|ficcion|novela|hipotetico|rectificacion|retractacion|'
@@ -50,6 +69,76 @@ def norm(value):
 
 def tight(value):
     return re.sub(r'\s+', '', html.unescape(html.unescape(value)))
+
+
+def administrative_matches(areas=(), boundary_layers=None):
+    """Fail closed unless the complete reviewed SV index and layers match.
+
+    Hash canonical JSON, including geometry, rather than trusting an externally
+    supplied hash or a layer's claimed date. Other countries are out of scope.
+    """
+    def fingerprint(value):
+        return hashlib.sha256(json.dumps(value,ensure_ascii=False,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+    try:
+        fields=('id','name','countryCode','level','parentId')
+        sv=[{k:a[k] for k in fields} for a in areas if a['countryCode']=='SV']
+        if fingerprint(sorted(sv,key=lambda a:a['id']))!=ADMIN_INDEX_SHA256:return {}
+        for level,(layer_id,year,sha) in ADMIN_LAYERS.items():
+            layer=boundary_layers[level]
+            if (fingerprint(layer)!=sha or layer['source']['layerId']!=layer_id or
+                    layer['source']['boundaryYearRepresented']!=year):return {}
+        result={}
+        for place,(parent_id,parent_name,child_id,page) in ADMIN_PLACES.items():
+            parent=[a for a in sv if a['level']=='ADM1' and a['name']==parent_name]
+            child=[a for a in sv if a['level']=='ADM2' and a['name']==place and a['parentId']==parent_id]
+            if len(parent)!=1 or parent[0]['id']!=parent_id or parent[0]['parentId']!='country:SV':continue
+            if child_id and (len(child)!=1 or child[0]['id']!=child_id):continue
+            result[place]=dict(parent=parent[0],child=child[0] if child_id else None,lawPage=page)
+        return result
+    except (KeyError,TypeError,ValueError):
+        return {}
+
+
+def assign_administration(row, facts, matches):
+    """A named source area supports filters, never a point or impact polygon."""
+    for key in ADMIN_FIELDS:row.pop(key,None)
+    row['sourceMetadata'].pop('administrativeAssociation',None)
+    row['sourceMetadata']['administrativeMatchStatus']='unverified-dataset-or-place' if facts else 'source-place-requires-review'
+    row['location']=dict(precision='country')
+    if (not isinstance(facts,dict) or not isinstance(facts.get('place'),str) or
+            PLACES.get(norm(facts['place']))!=(facts['place'],facts.get('municipality'))):return
+    match=matches.get(facts['place'])
+    if not match:return
+    levels={}
+    for level,area in (('ADM1',match['parent']),('ADM2',match['child'])):
+        if area is None:continue
+        prefix='admin'+level[-1]
+        row[prefix+'Code']=row[prefix+'Id']=area['id'];row[prefix+'Name']=area['name']
+        layer_id,year,sha=ADMIN_LAYERS[level]
+        levels[level]=dict(id=area['id'],name=area['name'],parentId=area['parentId'],layerId=layer_id,
+            boundaryYearRepresented=year,canonicalLayerSha256=sha)
+    row['location']=dict(precision='area')
+    row['sourceMetadata']['administrativeMatchStatus']='reviewed-name-association'
+    row['adminAssignment']=dict(method='explicit_source_place_names',confidence='source_reported_area',pointInferred=False)
+    row['sourceMetadata']['administrativeAssociation']=dict(review=ADMIN_REVIEW,reviewedAt='2026-10-16',
+        reportedDistrict=facts['place'],reportedMunicipality=facts['municipality'],
+        lawUrl='https://www.jurisprudencia.gob.sv/DocumentosBoveda/D/2/2020-2029/2023/06/F9625.PDF',
+        lawSha256='41c096af17e53e37c87d120f1d509928d65b37c44ea07a008816626d08c96dfa',lawArticle=1,lawPdfPage=match['lawPage'],
+        canonicalIndexSha256=ADMIN_INDEX_SHA256,levels=levels,geometryResolution='provider_simplified',
+        currentBoundaryVerified=False,impactBoundary=False)
+
+
+def administrative_change(before,row,now):
+    def projection(record):
+        return dict(location=record['location'],**{k:record[k] for k in ADMIN_FIELDS if k in record},
+            association=record.get('sourceMetadata',{}).get('administrativeAssociation'),
+            status=record.get('sourceMetadata',{}).get('administrativeMatchStatus'))
+    previous=projection(before)
+    if previous==projection(row):return False
+    row['sourceMetadata']['administrativeHistory']=copy.deepcopy(before.get('sourceMetadata',{}).get('administrativeHistory',[]))+[
+        dict(at=now,previous=previous)]
+    row['sourceMetadata']['administrativeUpdatedAt']=now
+    return True
 
 
 def canonical(url):
@@ -196,7 +285,7 @@ def classify(item):
         policeAccount=item['policeQuotes'][0]['url']),'reviewed-police-event-account'
 
 
-def collect_elmundo(source,documents,now,countries,*,existing=None,reviews=()):
+def collect_elmundo(source,documents,now,countries,*,existing=None,reviews=(),areas=(),boundary_layers=None):
     """documents=[{'url': canonical, 'raw': complete bytes}]; validate atomically.
 
     No requests or automatic activation. A malformed representation raises before
@@ -211,6 +300,7 @@ def collect_elmundo(source,documents,now,countries,*,existing=None,reviews=()):
     if len({x['url'] for x in items})!=len(items):raise ValueError('Duplicate article URL')
     if countries.get('SV',{}).get('status')!='active':return dict(incidents=[],decisions=[])
     known=copy.deepcopy(existing or {});changes={};decisions=[]
+    geography=administrative_matches(areas,boundary_layers)
     manual={r['url'] for r in reviews if r['sourceId']==SOURCE_ID}
     for item in items:
         url=item['url'];before=next((r for r in known.values() if any(x.get('url')==url for x in r.get('reports',[]))),None)
@@ -231,6 +321,15 @@ def collect_elmundo(source,documents,now,countries,*,existing=None,reviews=()):
         iid=before['id'] if before else iid
         latest=before.get('sourceMetadata',{}).get('latestRepresentations',{}) if before else {}
         if latest.get(url)==representation:
+            # A later reviewed map crosswalk may improve (or invalidate) a
+            # name association without fabricating a new source representation.
+            row=copy.deepcopy(before);assign_administration(row,facts,geography)
+            if administrative_change(before,row,now):
+                row['updatedAt']=max(before['updatedAt'],now)
+                known[iid]=row;changes[iid]=row
+                decision.update(status='automatic-source-record' if facts else 'needs-review',incidentId=iid,
+                    reason='administrative-association-rechecked')
+                decisions.append(decision);continue
             decision.update(status='unchanged',incidentId=iid);decisions.append(decision);continue
         report=dict(id=iid+'-'+representation[:12],incidentId=iid,sourceId=SOURCE_ID,title=item['title'],url=url,
             language='es',publishedAt=item['publishedAt'],retrievedAt=now,excerpt='',contentHash=representation,
@@ -256,8 +355,12 @@ def collect_elmundo(source,documents,now,countries,*,existing=None,reviews=()):
         else:
             row=copy.deepcopy(before);row.update(title=item['title'],summary='The changed source account requires review.',
                 severity='unknown',state='expired',evidenceStatus='unverified',location=dict(precision='country'))
-            for k in ('admin1Code','admin1Name','admin1Id','admin2Code','admin2Name','admin2Id','adminAssignment'):row.pop(k,None)
             row['sourceMetadata'].update(reviewRequired=True,reviewReason=decision['reason'])
+        assign_administration(row,facts,geography)
+        if before:
+            for key in ('administrativeHistory','administrativeUpdatedAt'):
+                if key in before['sourceMetadata']:row['sourceMetadata'][key]=copy.deepcopy(before['sourceMetadata'][key])
+            administrative_change(before,row,now)
         row['sourceMetadata'].update(latestRepresentations={**latest,url:representation},providerPublishedAt=item['publishedAt'],providerModifiedAt=item['modifiedAt'])
         if before:row['sourceMetadata']['changeObservedAt']=now
         row['updatedAt']=max(item['publishedAt'],item['modifiedAt'],before['updatedAt'] if before else '',now if before else '')
@@ -268,4 +371,15 @@ def collect_elmundo(source,documents,now,countries,*,existing=None,reviews=()):
         row['reports']=[copy.deepcopy(old_version)]+[r for r in old_reports if r['id']!=report['id']]
         if before and before.get('revisions'):row['revisions']=copy.deepcopy(before['revisions'])
         known[iid]=row;changes[iid]=row;decisions.append(decision)
+    # A validated listing batch can reproject retained source facts without
+    # waiting for their rotating article recheck. Never revive a held account or
+    # touch a reviewer-owned record. No discovery, source report or clock is made.
+    for iid,before in known.items():
+        meta=before.get('sourceMetadata',{})
+        if (iid in changes or before.get('countryCode')!='SV' or before.get('sourceIds')!=[SOURCE_ID] or
+                meta.get('parser')!=PARSER or any(r.get('url') in manual for r in before.get('reports',[]))):continue
+        facts=meta.get('facts') if before.get('evidenceStatus')=='reported' and meta.get('reviewRequired') is False else None
+        row=copy.deepcopy(before);assign_administration(row,facts,geography)
+        if administrative_change(before,row,now):
+            row['updatedAt']=max(before['updatedAt'],now);changes[iid]=row
     return dict(incidents=list(changes.values()),decisions=decisions)

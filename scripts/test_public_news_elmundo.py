@@ -7,9 +7,10 @@ and *.receipt.json. Fixtures omit names, images and complete published articles.
 import copy
 import html
 import json
+from pathlib import Path
 import unittest
 
-from public_news_elmundo import SOURCE_ID,PARSER,collect_elmundo,parse_article
+from public_news_elmundo import SOURCE_ID,PARSER,ADMIN_PLACES,collect_elmundo,parse_article
 
 SOURCE=dict(id=SOURCE_ID,name='Diario El Mundo',url='https://diario.elmundo.sv/',language='es',tier='local-news',countryCodes=['SV'])
 COUNTRIES={'SV':dict(code='SV',name='El Salvador',region='Americas',status='active')}
@@ -55,6 +56,17 @@ def article(case='robbery',*,title=None,quote=None,extra='',url=URL,status='2110
 
 
 def collect(documents=None,**kw):return collect_elmundo(SOURCE,[article()] if documents is None else documents,NOW,COUNTRIES,**kw)
+
+
+def reviewed_geography():
+    """The same complete versioned layers shipped to the public collector."""
+    from public_data_pipeline import load_boundary_layer
+    root=Path(__file__).resolve().parents[1]
+    if (root/'config/admin-places.json').exists():
+        areas=json.loads((root/'config/admin-places.json').read_text());folder=root/'config/map-areas'
+    else:
+        areas=json.loads((root/'data/admin-areas.json').read_text())['areas'];folder=root/'data/map-areas'
+    return dict(areas=areas,boundary_layers={level:load_boundary_layer(folder/f'SV-{level}.geojson') for level in ('ADM1','ADM2')})
 
 
 class ElMundoTests(unittest.TestCase):
@@ -181,6 +193,85 @@ class ElMundoTests(unittest.TestCase):
         self.assertEqual(collect(existing={first['id']:first})['incidents'],[])
         self.assertEqual(collect([])['incidents'],[])
         self.assertEqual(collect_elmundo(SOURCE,[article()],NOW,{'SV':dict(COUNTRIES['SV'],status='suspended')})['incidents'],[])
+
+    def test_reviewed_seven_place_pairs_use_area_names_without_coordinates_or_impact_claim(self):
+        geography=reviewed_geography();rows=[]
+        for case in CASE:
+            row=collect([article(case)],**geography)['incidents'][0];rows.append(row)
+            parent,name,child,_=ADMIN_PLACES[row['region']]
+            self.assertEqual((row['admin1Code'],row['admin1Name']),(parent,name))
+            self.assertEqual(row.get('admin2Code'),child)
+            self.assertEqual(row['location'],{'precision':'area'})
+            self.assertEqual(row['adminAssignment'],dict(method='explicit_source_place_names',confidence='source_reported_area',pointInferred=False))
+            provenance=row['sourceMetadata']['administrativeAssociation']
+            self.assertFalse(provenance['currentBoundaryVerified']);self.assertFalse(provenance['impactBoundary'])
+            self.assertEqual(provenance['levels']['ADM1']['boundaryYearRepresented'],'2021')
+            if child:self.assertEqual(provenance['levels']['ADM2']['boundaryYearRepresented'],'2007')
+            else:self.assertNotIn('ADM2',provenance['levels'])
+        self.assertEqual(sum('admin2Code' in r for r in rows),6)
+
+    def test_missing_changed_or_ambiguous_complete_geography_fails_closed(self):
+        base=reviewed_geography();sv=[a for a in base['areas'] if a['countryCode']=='SV']
+        changes=[]
+        duplicate=copy.deepcopy(base);colon=next(a for a in duplicate['areas'] if a['name']=='Colón' and a['countryCode']=='SV')
+        duplicate['areas'].append(dict(colon,id='duplicate-same-department'));changes.append(duplicate)
+        renamed=copy.deepcopy(base);next(a for a in renamed['areas'] if a['id']==colon['id'])['name']='Colón changed';changes.append(renamed)
+        reparented=copy.deepcopy(base);next(a for a in reparented['areas'] if a['id']==colon['id'])['parentId']='country:SV';changes.append(reparented)
+        changed_geometry=copy.deepcopy(base);changed_geometry['boundary_layers']['ADM2']['features'][0]['geometry']['coordinates']=[];changes.append(changed_geometry)
+        changes.extend([dict(areas=sv,boundary_layers={}),dict(areas=[],boundary_layers=base['boundary_layers']),
+            dict(areas=[None],boundary_layers=base['boundary_layers']),dict(areas=sv,boundary_layers={'ADM1':None,'ADM2':None})])
+        for changed in changes:
+            with self.subTest(changed=changes.index(changed)):
+                row=collect(**changed)['incidents'][0]
+                self.assertEqual(row['location'],{'precision':'country'});self.assertNotIn('adminAssignment',row)
+                self.assertNotIn('administrativeAssociation',row['sourceMetadata'])
+                self.assertEqual(row['sourceMetadata']['administrativeMatchStatus'],'unverified-dataset-or-place')
+
+    def test_geography_reprojection_preserves_source_evidence_dates_and_is_idempotent(self):
+        geography=reviewed_geography();first=collect()['incidents'][0]
+        now='2026-10-16T02:06:00Z'
+        result=collect_elmundo(SOURCE,[article()],now,COUNTRIES,existing={first['id']:first},**geography)
+        improved=result['incidents'][0]
+        self.assertEqual(improved['reports'],first['reports']);self.assertEqual(improved['occurredAt'],first['occurredAt'])
+        self.assertEqual(improved['firstSeenAt'],first['firstSeenAt']);self.assertEqual(improved['updatedAt'],now)
+        for key in ('providerPublishedAt','providerModifiedAt','latestRepresentations'):
+            self.assertEqual(improved['sourceMetadata'][key],first['sourceMetadata'][key])
+        self.assertNotIn('changeObservedAt',improved['sourceMetadata'])
+        self.assertEqual(collect(existing={improved['id']:improved},**geography)['incidents'],[])
+        unavailable=collect(existing={improved['id']:improved})['incidents'][0]
+        self.assertEqual(unavailable['location'],{'precision':'country'});self.assertNotIn('admin2Code',unavailable)
+        self.assertEqual(unavailable['reports'],first['reports'])
+        prior=unavailable['sourceMetadata']['administrativeHistory'][-1]['previous']
+        self.assertEqual(prior['admin2Code'],improved['admin2Code'])
+        self.assertEqual(collect(existing={unavailable['id']:unavailable})['incidents'],[])
+
+    def test_geographic_correction_clears_old_assignment_keeps_evidence_and_restores_once(self):
+        geography=reviewed_geography();first=collect(**geography)['incidents'][0]
+        first['revisions']=[dict(at=NOW,note='Prior complete source evidence.',previousReports=copy.deepcopy(first['reports']))]
+        held=collect([article(extra='No ocurrió este hecho.')],existing={first['id']:first},**geography)['incidents'][0]
+        self.assertEqual(held['location'],{'precision':'country'});self.assertNotIn('admin1Code',held)
+        self.assertNotIn('administrativeAssociation',held['sourceMetadata'])
+        self.assertEqual(held['revisions'],first['revisions']);self.assertIn(first['reports'][0],held['reports'])
+        self.assertEqual(held['sourceMetadata']['administrativeHistory'][-1]['previous']['admin2Code'],first['admin2Code'])
+        restored=collect(existing={held['id']:held},**geography)['incidents'][0]
+        self.assertEqual(restored['admin2Code'],first['admin2Code']);self.assertEqual(len(restored['reports']),2)
+        self.assertEqual(collect(existing={restored['id']:restored},**geography)['incidents'],[])
+
+    def test_unselected_retained_rows_reproject_without_new_reports_or_source_dates(self):
+        geography=reviewed_geography()
+        original=collect([article(),article('assault',url=URL+'-second',status='2110000000000000002')])['incidents']
+        known={r['id']:r for r in original}
+        for kwargs,precision in [(geography,'area'),({},'country'),(geography,'area')]:
+            result=collect([],existing=known,**kwargs)
+            self.assertEqual(result['decisions'],[]);self.assertEqual(len(result['incidents']),2)
+            for row in result['incidents']:
+                before=known[row['id']]
+                self.assertEqual(row['location'],{'precision':precision})
+                for key in ('reports','occurredAt','firstSeenAt'):self.assertEqual(row[key],before[key])
+                for key in ('providerPublishedAt','providerModifiedAt','latestRepresentations'):
+                    self.assertEqual(row['sourceMetadata'][key],before['sourceMetadata'][key])
+            known={r['id']:r for r in result['incidents']}
+            self.assertEqual(collect([],existing=known,**kwargs)['incidents'],[])
 
 
 if __name__=='__main__':unittest.main()

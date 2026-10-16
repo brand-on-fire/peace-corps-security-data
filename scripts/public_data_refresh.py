@@ -23,13 +23,26 @@ DEADLINE_SECONDS = 480
 
 
 def validated_partial(row, policies):
-    """Only the reviewed article collector may commit a partial validated cycle.
+    """Only explicitly reviewed collectors may commit a partial validated cycle.
 
     A failed initial listing or canonical record gate never creates this marker.
     The source remains unavailable and its full-success clock stays unchanged.
     """
     marker=row.get('validatedPartial')
     if not isinstance(marker,dict) or row.get('status')!='unavailable':return False
+    if marker.get('adapter')=='kg-bishkek-water':
+        sid='gov-kg-bishkek-water'
+        ids=row.get('infrastructureUnresolvedCorrectionIds')
+        responses=marker.get('validatedResponses')
+        count=marker.get('unresolvedCorrections')
+        return (row.get('sourceId')==sid and marker.get('sourceId')==sid
+            and marker.get('listingValidated') is True and row.get('infrastructureLiveCaughtUp') is True
+            and isinstance(ids,list) and all(type(i) is int and i>0 for i in ids)
+            and len(set(ids))==len(ids) and type(count) is int and count==len(ids) and 1<=count<=20
+            and type(responses) is int and 1<=responses<=100
+            and any(p.get('sourceId')==sid and p.get('adapter')=='kg-bishkek-water'
+                and p.get('mode')=='official' and p.get('historyFrom')
+                and p.get('url')=='https://www.bishkek.gov.kg/ru/post' for p in policies))
     sid='news-sv-diario-el-mundo'
     if (row.get('sourceId')!=sid or marker.get('sourceId')!=sid
             or marker.get('adapter')!='sv-elmundo' or marker.get('listingValidated') is not True):return False

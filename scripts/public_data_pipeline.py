@@ -6,6 +6,7 @@ saved responses offline. RSS discovery is deliberately separate from incidents.
 """
 import argparse
 import concurrent.futures
+import contextlib
 import copy
 import datetime as dt
 import hashlib
@@ -16,7 +17,10 @@ import json
 import math
 import os
 import re
+import signal
 import subprocess
+import threading
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -38,6 +42,60 @@ PART_LIMIT = 12_000_000
 MAX_RESPONSE = 20_000_000
 MAX_SNAPSHOT = 10_000_000
 MAX_HISTORY_INDEX = 25_000_000
+INFRASTRUCTURE_DEADLINE_SECONDS = 90
+
+
+class _SourceDeadlineExpired(BaseException):
+    """Escape request/parser Exception handlers before rejecting the source batch."""
+
+
+@contextlib.contextmanager
+def infrastructure_deadline():
+    # The public collector runs on the Ubuntu main thread. Refuse unsupported
+    # execution before requesting the source, rather than silently losing its cap.
+    if (threading.current_thread() is not threading.main_thread()
+            or not all(hasattr(signal, name) for name in ('SIGALRM', 'ITIMER_REAL', 'setitimer', 'getitimer',
+                'pthread_sigmask', 'sigpending', 'sigwait', 'SIG_BLOCK', 'SIG_SETMASK'))):
+        raise ValueError('Municipality wall-time isolation requires a POSIX main thread')
+    alarm = {signal.SIGALRM}
+    mask = signal.pthread_sigmask(signal.SIG_BLOCK, alarm)
+    owned = False
+    def expired(signum, frame):
+        raise _SourceDeadlineExpired()
+    try:
+        try:
+            if signal.SIGALRM in mask or signal.SIGALRM in signal.sigpending():
+                raise ValueError('Municipality wall-time isolation cannot use a blocked or pending alarm')
+            if signal.getitimer(signal.ITIMER_REAL) != (0.0, 0.0):
+                raise ValueError('Municipality wall-time isolation cannot replace an existing timer')
+            handler = signal.getsignal(signal.SIGALRM)
+            signal.signal(signal.SIGALRM, expired)
+            owned = True
+            started = time.monotonic()
+            signal.setitimer(signal.ITIMER_REAL, INFRASTRUCTURE_DEADLINE_SECONDS)
+            signal.pthread_sigmask(signal.SIG_SETMASK, mask)
+            yield
+            if time.monotonic()-started >= INFRASTRUCTURE_DEADLINE_SECONDS:
+                raise _SourceDeadlineExpired()
+        finally:
+            try:
+                signal.pthread_sigmask(signal.SIG_BLOCK, alarm)
+            finally:
+                # Even expiry at the cleanup mask call must restore ownership.
+                try:
+                    if owned:
+                        try:
+                            signal.setitimer(signal.ITIMER_REAL, 0)
+                            while signal.SIGALRM in signal.sigpending():
+                                signal.sigwait(alarm)
+                        finally:
+                            signal.signal(signal.SIGALRM, handler)
+                finally:
+                    signal.pthread_sigmask(signal.SIG_SETMASK, mask)
+    except _SourceDeadlineExpired:
+        raise ValueError('Municipality exceeded its source wall-time budget; prior checkpoint retained') from None
+
+
 KEYWORDS = {
     'earthquake': r'\b(earthquakes?|sismos?|terremotos?|séisme)\b',
     'flood': r'\b(flood(?:s|ed|ing)?|inundaci[oó]n(?:es)?|inondation)\b',
@@ -291,13 +349,26 @@ def fetch(policy, previous, now, fixture=None):
                     etag, modified = response.headers.get('ETag'), response.headers.get('Last-Modified')
                     encoding = response.headers.get('Content-Encoding','').lower()
             except urllib.error.HTTPError as error:
-                if error.code != 304:
+                # Only this reviewed adapter interprets a missing exact article
+                # as a changed representation. Read it whole under the normal
+                # decoding/budget gates; listing errors retain the failed batch.
+                water_article = (policy.get('adapter')=='kg-bishkek-water'
+                    and policy['sourceId'].startswith('gov-kg-bishkek-water-')
+                    and re.fullmatch(r'https://www\.bishkek\.gov\.kg/ru/post/[1-9]\d*',policy['url']))
+                if error.code == 404 and water_article and error.url == policy['url']:
+                    with error:
+                        raw = read_complete(error)
+                    status, final_url = 404, error.url
+                    etag, modified = error.headers.get('ETag'), error.headers.get('Last-Modified')
+                    encoding = error.headers.get('Content-Encoding','').lower()
+                elif error.code != 304 or policy.get('adapter')=='kg-bishkek-water':
                     raise
-                if not previous.get('lastSuccessAt'):
-                    raise ValueError('304 without a prior validated representation')
-                result.update(status='healthy', httpStatus=304, lastSuccessAt=now,
-                              unchanged=True, message='Source confirms its prior validated response is unchanged.')
-                return result, None
+                else:
+                    if not previous.get('lastSuccessAt'):
+                        raise ValueError('304 without a prior validated representation')
+                    result.update(status='healthy', httpStatus=304, lastSuccessAt=now,
+                                  unchanged=True, message='Source confirms its prior validated response is unchanged.')
+                    return result, None
         if not safe_url(final_url):
             raise ValueError('Redirect did not remain anonymous HTTPS')
         if urllib.parse.urlsplit(final_url).hostname != urllib.parse.urlsplit(policy['url']).hostname:
@@ -769,6 +840,8 @@ def run(root, now, fixtures=None):
         prepare_security_policy, collect_security_official)
     from public_transport import (ADAPTERS as TRANSPORT_ADAPTERS,
         prepare_transport_policy, collect_transport)
+    from public_infrastructure import (ADAPTERS as INFRASTRUCTURE_ADAPTERS,
+        SOURCE_ID as INFRASTRUCTURE_SOURCE_ID, prepare_infrastructure_policy, collect_infrastructure)
     from public_news_elmundo_fetch import (ADAPTERS as ELMUNDO_ADAPTERS,
         prepare_elmundo_policy, collect_elmundo_source)
     from local_news_archive import jcf_curfew_incidents, expire_curfews
@@ -793,8 +866,14 @@ def run(root, now, fixtures=None):
     geo = Geography(root, countries)
     iso3 = load(root/'config/country-iso3.json')
     reviews = load(root/'config/news-reviews.json', [])
-    areas = load(root/'config/admin-places.json', [])
+    try:
+        areas = load(root/'config/admin-places.json', [])
+    except (OSError, ValueError):
+        areas = []
+    if not isinstance(areas, list):
+        areas = []
     due = [p for p in policies if p['sourceId'] in sources and
+           (p.get('adapter') not in INFRASTRUCTURE_ADAPTERS or sources[p['sourceId']].get('enabled') is True) and
            source_due(p, states.get(p['sourceId'], {}), now)]
     due = [prepare_official_policy(p, states.get(p['sourceId'], {}), now_text)
            if p.get('adapter') in ADAPTERS else
@@ -802,23 +881,40 @@ def run(root, now, fixtures=None):
            if p.get('adapter') in SECURITY_ADAPTERS else
            prepare_transport_policy(p, states.get(p['sourceId'], {}), now_text)
            if p.get('adapter') in TRANSPORT_ADAPTERS else
+           prepare_infrastructure_policy(p, states.get(p['sourceId'], {}), now_text)
+           if p.get('adapter') in INFRASTRUCTURE_ADAPTERS else
            prepare_elmundo_policy(p, states.get(p['sourceId'], {}), now_text)
            if p.get('adapter') in ELMUNDO_ADAPTERS else p for p in due]
     changes, source_results = [], []
+    def prefetch(policy):
+        if policy.get('adapter') in INFRASTRUCTURE_ADAPTERS:
+            # Its initial request and child requests share one interruptible
+            # source budget on the main thread, outside this worker pool.
+            return dict(sourceId=policy['sourceId'],lastAttemptAt=now_text,url=policy['url']), None
+        return fetch(policy, request_state(policy, states.get(policy['sourceId'], {})), now_text, fixtures)
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
-        responses = list(pool.map(lambda p:fetch(p, request_state(p, states.get(p['sourceId'], {})), now_text, fixtures), due))
+        responses = list(pool.map(prefetch, due))
     for policy, (result, raw) in zip(due, responses):
         sid = policy['sourceId']
         previous = states.get(sid, {})
         source = sources[sid]
         transport_state = {}
         article_health = None
+        infrastructure_unresolved = []
         try:
             group = policy.get('independentGroup', sid)
             if not isinstance(group, str) or group not in sources:
                 raise ValueError('Source independence group is not a reviewed registry identity')
             # Collection policy is reviewed configuration, never publisher input.
             source = dict(source, independentGroup=group)
+            if policy.get('adapter') in INFRASTRUCTURE_ADAPTERS:
+                if policy['mode'] != 'official' or not policy.get('historyFrom'):
+                    raise ValueError('Municipality collection requires official mode and a fixed historyFrom boundary')
+                with infrastructure_deadline():
+                    result, raw = fetch(policy, request_state(policy, previous), now_text, fixtures)
+                    infrastructure_collected = (collect_infrastructure(source, policy, raw, now_text, countries,
+                        previous, records, fetch, fixtures, history_from=snapshot['history']['from'])
+                        if raw is not None else None)
             if policy['mode'] == 'discovery' and policy.get('format', 'rss-atom') not in DISCOVERY_FORMATS:
                 # Reject unknown formats even for an unchanged HTTP response.
                 raise ValueError('Discovery format has no reviewed adapter')
@@ -828,11 +924,23 @@ def run(root, now, fixtures=None):
                 if policy['mode'] == 'official':
                     pending_discoveries = []
                     official_receipts = None
-                    if policy.get('adapter') in ADAPTERS | SECURITY_ADAPTERS | TRANSPORT_ADAPTERS | ELMUNDO_ADAPTERS:
+                    if policy.get('adapter') in ADAPTERS | SECURITY_ADAPTERS | TRANSPORT_ADAPTERS | ELMUNDO_ADAPTERS | INFRASTRUCTURE_ADAPTERS:
+                        if policy.get('adapter') in INFRASTRUCTURE_ADAPTERS and not policy.get('historyFrom'):
+                            raise ValueError('Municipality collection requires a fixed historyFrom boundary')
+                        elmundo_layers = None
+                        if policy.get('adapter') in ELMUNDO_ADAPTERS:
+                            try:
+                                elmundo_layers = {level:load_boundary_layer(root/f'config/map-areas/SV-{level}.geojson')
+                                                  for level in ('ADM1', 'ADM2')}
+                            except (OSError, ValueError, EOFError, zlib.error):
+                                pass  # Valid source evidence remains country-only.
                         collected = (collect_elmundo_source(source, policy, raw, now_text, countries,
                             previous, records, fetch, fixtures,
-                            history_from=max(snapshot['history']['from'], policy.get('historyFrom', snapshot['history']['from'])),reviews=reviews)
+                            history_from=max(snapshot['history']['from'], policy.get('historyFrom', snapshot['history']['from'])),
+                            reviews=reviews,areas=areas,boundary_layers=elmundo_layers)
                             if policy.get('adapter') in ELMUNDO_ADAPTERS else
+                            infrastructure_collected
+                            if policy.get('adapter') in INFRASTRUCTURE_ADAPTERS else
                             collect_transport(source, policy, raw, now_text, countries,
                             previous, records, fetch, fixtures,
                             history_from=max(snapshot['history']['from'], policy.get('historyFrom', snapshot['history']['from'])))
@@ -844,7 +952,7 @@ def run(root, now, fixtures=None):
                             previous, records, fetch, fixtures, initial_http_status=result.get('httpStatus', 200)))
                         incoming = collected['incidents']
                         pending_discoveries = collected['discoveries']
-                        if policy.get('adapter') in TRANSPORT_ADAPTERS | ELMUNDO_ADAPTERS:
+                        if policy.get('adapter') in TRANSPORT_ADAPTERS | ELMUNDO_ADAPTERS | INFRASTRUCTURE_ADAPTERS:
                             # A failed record/size gate must not advance a baseline
                             # page or exact-ID cursor in an otherwise healthy run.
                             transport_state = collected['state']
@@ -853,6 +961,8 @@ def run(root, now, fixtures=None):
                         official_receipts = result['evidenceReceipts'] = collected['evidence']
                         if policy.get('adapter') in ELMUNDO_ADAPTERS:
                             article_health = dict(status=collected['sourceStatus'],message=collected['message'])
+                        if policy.get('adapter') in INFRASTRUCTURE_ADAPTERS:
+                            infrastructure_unresolved = transport_state['infrastructureUnresolvedCorrectionIds']
                     elif source['kind'] == 'cap':
                         messages = collect_cap(source, policy, raw, now_text, countries, areas, fetch, fixtures)
                         incoming = apply_lifecycle(messages, records, now_text)
@@ -960,6 +1070,16 @@ def run(root, now, fixtures=None):
                             listingValidated=True,checkedArticles=len(pending_discoveries),
                             failedArticles=len(transport_state['elmundoQuarantine']),
                             queuedArticles=len(transport_state['elmundoPending']))
+                if policy.get('adapter') in INFRASTRUCTURE_ADAPTERS:
+                    result['message'] = (f'Water notices checked; {accepted} records; '
+                        f"{len(transport_state['infrastructurePending'])} upcoming; "
+                        f'{len(infrastructure_unresolved)} corrections require review. Keyword baseline '
+                        +('complete.' if transport_state['infrastructureBaseline']['complete'] else 'incomplete.'))
+                    if infrastructure_unresolved:
+                        result.update(status='unavailable',lastSuccessAt=previous.get('lastSuccessAt'),
+                            lastPartialSuccessAt=now_text,validatedPartial=dict(adapter='kg-bishkek-water',
+                                sourceId=sid,listingValidated=True,validatedResponses=len(official_receipts),
+                                unresolvedCorrections=len(infrastructure_unresolved)))
         except Exception as error:
             result.update(status='unavailable', lastSuccessAt=previous.get('lastSuccessAt'),
                           message='Source response rejected; prior archive retained: '+str(error))
@@ -992,12 +1112,15 @@ def run(root, now, fixtures=None):
     coverage = {c['sourceId']:c for c in snapshot['coverage']}
     for sid, state in states.items():
         coverage[sid] = {k:state.get(k) for k in ('sourceId','lastAttemptAt','lastSuccessAt','status','message')}
-    admitted_sources = {policy['sourceId'] for policy in policies}
+    admitted_sources = {policy['sourceId'] for policy in policies if
+        policy.get('adapter') not in INFRASTRUCTURE_ADAPTERS or sources.get(policy['sourceId'],{}).get('enabled') is True}
     for sid in sources:
         coverage.setdefault(sid, dict(sourceId=sid, lastAttemptAt=None, lastSuccessAt=None,
             status='pending' if sid in admitted_sources else 'disabled',
             message='No collector attempt recorded.' if sid in admitted_sources else
                     'Reference only; no automatic collection policy is enabled.'))
+        if sid == INFRASTRUCTURE_SOURCE_ID and sources[sid].get('enabled') is not True:
+            coverage[sid].update(status='disabled',message='Automatic drinking-water collection is disabled.')
     snapshot['coverage'] = list(coverage.values())
     snapshot['countries'] = list(countries.values())
     snapshot['sources'] = list(sources.values())

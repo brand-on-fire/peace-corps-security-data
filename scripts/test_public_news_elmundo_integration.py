@@ -11,7 +11,7 @@ import public_data_pipeline as pipeline
 import public_data_refresh as refresh
 import public_official as official
 import public_news_elmundo_fetch as elmundo
-from test_public_news_elmundo import SOURCE as IDENTITY, NOW, URL, article
+from test_public_news_elmundo import SOURCE as IDENTITY, NOW, URL, article, reviewed_geography
 from test_public_news_elmundo_fetch import POLICY, listing, Fetch
 
 COUNTRY=dict(code='SV',name='El Salvador',region='Americas',lat=13.7,lon=-89.2,status='active',
@@ -82,6 +82,38 @@ class ElMundoIntegrationTests(unittest.TestCase):
         self.assertEqual(row['sourceMetadata']['summaryLanguage'],'en');self.assertEqual(row['location'],{'precision':'country'})
         state=pipeline.load(self.data/'collector-state.json')[SOURCE['id']]
         self.assertEqual(state['lastSuccessAt'],NOW);self.assertNotIn('validatedPartial',result['sources'][0])
+
+    def install_geography(self):
+        geography=reviewed_geography()
+        pipeline.save(self.root/'config/admin-places.json',geography['areas'])
+        for level,layer in geography['boundary_layers'].items():
+            pipeline.save(self.root/f'config/map-areas/SV-{level}.geojson',layer)
+
+    def test_geography_only_upgrade_and_invalidation_survive_complete_pipeline_transaction(self):
+        self.run_pipeline();first=next(iter(pipeline.read_archive(self.data,{'SV':COUNTRY}).values()))
+        self.install_geography()
+        result=self.run_pipeline(now='2026-10-16T08:06:00Z')
+        self.assertEqual(result['sources'][0]['status'],'healthy')
+        upgraded=next(iter(pipeline.read_archive(self.data,{'SV':COUNTRY}).values()))
+        self.assertEqual(upgraded['admin2Name'],'Colón');self.assertEqual(upgraded['location'],{'precision':'area'})
+        self.assertEqual(upgraded['reports'],first['reports']);self.assertEqual(upgraded['occurredAt'],first['occurredAt'])
+        self.assertEqual(upgraded['revisions'][-1]['previousReports'],first['reports'])
+        # A corrupt local boundary must remove unsupported precision, without
+        # failing the valid complete crime response or fabricating source changes.
+        (self.root/'config/map-areas/SV-ADM2.geojson').write_text('{broken complete boundary')
+        result=self.run_pipeline(now='2026-10-16T15:06:00Z')
+        self.assertEqual(result['sources'][0]['status'],'healthy')
+        invalidated=next(iter(pipeline.read_archive(self.data,{'SV':COUNTRY}).values()))
+        self.assertEqual(invalidated['location'],{'precision':'country'});self.assertNotIn('admin1Code',invalidated)
+        self.assertEqual(invalidated['reports'],first['reports']);self.assertEqual(len(invalidated['revisions']),2)
+        self.assertEqual(invalidated['sourceMetadata']['administrativeHistory'][-1]['previous']['admin2Name'],'Colón')
+
+    def test_malformed_local_geographic_index_cannot_drop_valid_crime_evidence(self):
+        self.install_geography();(self.root/'config/admin-places.json').write_text('{broken complete index')
+        result=self.run_pipeline();self.assertEqual(result['sources'][0]['status'],'healthy')
+        row=next(iter(pipeline.read_archive(self.data,{'SV':COUNTRY}).values()))
+        self.assertEqual(row['location'],{'precision':'country'});self.assertNotIn('adminAssignment',row)
+        self.assertEqual(row['sourceMetadata']['administrativeMatchStatus'],'unverified-dataset-or-place')
 
     def test_all_partial_refresh_publishes_healthy_article_retains_failed_evidence_and_clocks(self):
         first=self.run_refresh(self.documents,NOW);self.assertEqual(first['outcome'],'complete')
