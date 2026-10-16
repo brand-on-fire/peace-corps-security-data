@@ -72,6 +72,28 @@ class ArchiveTests(unittest.TestCase):
         self.assertEqual(news.expire_curfews({row['id']:row},'2026-01-02T00:00:00Z'),[row['id']])
         self.assertEqual(row['state'],'expired')
         self.assertEqual(news.expire_curfews([row],'2026-01-03T00:00:00Z'),[])
+
+    def test_fixed_history_keeps_curfew_identity_after_rolling_window_moves(self):
+        window={'from':'2025-10-16T00:00:00Z','through':'2026-10-16T00:00:00Z'}
+        items=self.parse(self.post());later='2028-01-01T00:00:00Z'
+        self.assertEqual(news.jcf_curfew_incidents(self.source,items,later,{'JM':{}},[]),[])
+        row=news.jcf_curfew_incidents(self.source,items,later,{'JM':{}},[],history_window=window)[0]
+        original=self.incidents(self.post())[0]
+        for field in ('id','occurredAt','updatedAt','sourceIds','state'):
+            self.assertEqual(row[field],original[field])
+        self.assertEqual(row['reports'][0]['contentHash'],original['reports'][0]['contentHash'])
+
+    def test_history_curfew_requires_publication_and_start_inside_reviewed_interval(self):
+        items=self.parse(self.post());now='2026-10-17T00:00:00Z'
+        for window in [
+            {'from':'2026-01-01T00:00:00Z','through':'2026-10-16T00:00:00Z'},
+            {'from':'2025-10-16T00:00:00Z','through':'2026-01-01T12:00:00Z'}]:
+            self.assertEqual(news.jcf_curfew_incidents(self.source,items,now,{'JM':{}},[],history_window=window),[])
+        for window in [{}, {'from':'2025-01-01T00:00:00Z','through':'2026-10-16T00:00:00Z'},
+                       {'from':'2025-10-16T00:00:00Z','through':'2026-10-18T00:00:00Z'}]:
+            with self.assertRaises(ValueError):
+                news.jcf_curfew_incidents(self.source,items,now,{'JM':{}},[],history_window=window)
+
     def test_redirect_identity_before_follow(self):
         request=news.urllib.request.Request('https://jcf.gov.jm/a')
         for url in ['http://jcf.gov.jm/b','https://outside.example/b']:

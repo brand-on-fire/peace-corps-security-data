@@ -162,6 +162,61 @@ class NewsRuntimeTests(unittest.TestCase):
     def test_duplicate_urls_and_future_publication_fail_safely(self):
         with self.assertRaises(ValueError):self.run_items([self.item(),self.item()])
         item=self.item();item['publishedAt']='2027-01-01T00:00:00Z';self.assertEqual(self.run_items([item])[0],[])
+
+    def history_profile(self):
+        policy=dict(self.policy(),sourceId='gov-jm-jcf',mode='discovery',
+            wordpressHistory={'from':'2025-10-16T00:00:00Z','through':'2026-10-16T00:00:00Z'})
+        source=dict(self.source(),enabled=True,kind='rss',access='public-feed',feedUrl=policy['url'])
+        return source,policy
+
+    def test_fixed_history_window_survives_later_resume_without_moving_event_dates(self):
+        source,policy=self.history_profile();item=self.item();later='2028-01-01T00:00:00Z'
+        rows,decisions=automatic_news(source,policy,[item],later,self.countries,self.areas,
+            history_window=policy['wordpressHistory'])
+        self.assertEqual(len(rows),1);self.assertEqual(rows[0]['occurredAt'],'2026-10-13T00:00:00Z')
+        self.assertEqual(rows[0]['reports'][0]['publishedAt'],item['publishedAt'])
+        self.assertEqual(decisions[0]['status'],'automatic-source-record')
+        self.assertEqual(automatic_news(source,policy,[item],later,self.countries,self.areas)[0],[])
+
+    def test_history_rejects_publications_and_events_outside_exact_fixed_window(self):
+        source,policy=self.history_profile();later='2026-10-17T00:00:00Z'
+        for publication in ('2025-10-15T23:59:59Z','2026-10-16T00:00:00Z'):
+            item=dict(self.item(),publishedAt=publication,modifiedAt=publication)
+            rows,decisions=automatic_news(source,policy,[item],later,self.countries,self.areas,
+                history_window=policy['wordpressHistory'])
+            self.assertEqual(rows,[]);self.assertEqual(decisions[0]['reason'],'publication-outside-supported-window')
+        item=self.item(body='Police are investigating a fatal shooting in Kingston on Wednesday, October 15, 2025.')
+        item.update(publishedAt='2025-10-17T12:00:00Z',modifiedAt='2025-10-17T12:00:00Z')
+        rows,decisions=automatic_news(source,policy,[item],later,self.countries,self.areas,
+            history_window=policy['wordpressHistory'])
+        self.assertEqual(rows,[]);self.assertEqual(decisions[0]['reason'],'event-outside-reviewed-history-window')
+
+    def test_history_requires_enabled_exact_source_and_matching_opt_in(self):
+        source,policy=self.history_profile();later='2026-10-17T00:00:00Z'
+        for changed_source,changed_policy,window in [
+            (dict(source,enabled=False),policy,policy['wordpressHistory']),
+            (dict(source,feedUrl='https://jcf.gov.jm/feed/'),policy,policy['wordpressHistory']),
+            (source,self.policy(),policy['wordpressHistory']),
+            (source,policy,dict(policy['wordpressHistory'],through='2026-10-15T00:00:00Z'))]:
+            with self.assertRaises(ValueError):
+                automatic_news(changed_source,changed_policy,[self.item()],later,self.countries,self.areas,
+                    history_window=window)
+
+    def test_shared_history_admission_does_not_broaden_window_for_manual_reviews(self):
+        from public_data_pipeline import collect_news_records
+        source,policy=self.history_profile();item=self.item();later='2026-10-17T00:00:00Z'
+        review=dict(sourceId=source['id'],url=item['url'],approvedItemHash=digest(item),decision='include',
+            countryCode='JM',locationPrecision='country',summary='Reviewed source report.',category='crime',
+            occurredAt='2025-01-01T00:00:00Z',eventTimeBasis='reviewed-source-date',
+            evidenceScope='Source-attributed report.',reviewedAt=later)
+        args=(source,policy,[item],later,self.countries,self.areas,[review],{})
+        self.assertEqual(len(collect_news_records(*args)[0]),1)
+        self.assertEqual(collect_news_records(*args,history_window=policy['wordpressHistory'])[0],[])
+        review['occurredAt']='2026-10-13T00:00:00Z'
+        self.assertEqual(len(collect_news_records(*args,history_window=policy['wordpressHistory'])[0]),1)
+        item['publishedAt']='2026-10-16T00:00:00Z';review['approvedItemHash']=digest(item)
+        self.assertEqual(collect_news_records(*args,history_window=policy['wordpressHistory'])[0],[])
+
     def test_bounded_window_records_and_retains_missed_interval(self):
         items=[dict(self.item(),modifiedAt='2026-10-15T12:00:00Z') for _ in range(100)]
         first=news_window(items,{},self.now);self.assertTrue(first['newsCollectionWindow']['boundedInitialWindow'])

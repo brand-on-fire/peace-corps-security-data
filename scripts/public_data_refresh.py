@@ -70,6 +70,31 @@ def validated_partial(row, policies):
             and any(p.get('sourceId')==sid and p.get('adapter')=='kg-bishkek-water'
                 and p.get('mode')=='official' and p.get('historyFrom')
                 and p.get('url')=='https://www.bishkek.gov.kg/ru/post' for p in policies))
+    if marker.get('adapter')=='cr-caribe':
+        from public_news_caribe_fetch import SOURCE_ID, LATEST_URL, prior_state
+        queue=row.get('caribeQuarantine');checks=row.get('caribeRechecks')
+        count=marker.get('validatedRepresentations');failed=marker.get('failedRechecks');pending=marker.get('pendingRechecks')
+        sha=marker.get('listingContentHash')
+        if (row.get('sourceId')!=SOURCE_ID or marker.get('sourceId')!=SOURCE_ID
+                or marker.get('listingValidated') is not True or row.get('caribeListingValidated') is not True
+                or marker.get('initialUrl')!=LATEST_URL
+                or not isinstance(sha,str) or not pipeline.re.fullmatch('[0-9a-f]{64}',sha)
+                or row.get('caribeListingContentHash')!=sha
+                or row.get('caribeListingCheckedAt')!=row.get('lastAttemptAt')
+                or type(row.get('caribeVersion')) is not int or row['caribeVersion']!=1
+                or row.get('caribeAllYearBackfill') is not False
+                or type(count) is not int or not 0<=count<=103 or row.get('caribeValidatedRepresentations')!=count
+                or type(failed) is not int or not 0<=failed<=256 or row.get('caribeFailedRechecks')!=failed
+                or type(pending) is not int or not 0<=pending<=2500 or row.get('caribePendingRechecks')!=pending
+                or failed+pending==0 or not isinstance(queue,dict) or len(queue)!=failed
+                or not isinstance(checks,dict) or not set(queue)<=set(checks)):
+            return False
+        matches=[p for p in policies if p.get('sourceId')==SOURCE_ID and p.get('adapter')=='cr-caribe'
+            and p.get('mode')=='official' and p.get('url')==LATEST_URL and p.get('enabled') is not False]
+        if len(matches)!=1:return False
+        try:prior_state(row,checks,row['lastAttemptAt'])
+        except (ValueError,TypeError,KeyError,OverflowError):return False
+        return True
     sid='news-sv-diario-el-mundo'
     if (row.get('sourceId')!=sid or marker.get('sourceId')!=sid
             or marker.get('adapter')!='sv-elmundo' or marker.get('listingValidated') is not True):return False

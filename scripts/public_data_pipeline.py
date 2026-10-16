@@ -43,6 +43,7 @@ MAX_RESPONSE = 20_000_000
 MAX_SNAPSHOT = 10_000_000
 MAX_HISTORY_INDEX = 25_000_000
 INFRASTRUCTURE_DEADLINE_SECONDS = 90
+CARIBE_DEADLINE_SECONDS = 90
 
 
 class _SourceDeadlineExpired(BaseException):
@@ -50,13 +51,17 @@ class _SourceDeadlineExpired(BaseException):
 
 
 @contextlib.contextmanager
-def infrastructure_deadline():
+def source_deadline(seconds, label):
+    if type(seconds) not in (int, float) or not math.isfinite(seconds) or not 0 < seconds <= 480:
+        raise ValueError('Source wall-time budget is invalid')
+    if label not in ('Municipality', 'WordPress history', 'Caribe news'):
+        raise ValueError('Unreviewed source deadline label')
     # The public collector runs on the Ubuntu main thread. Refuse unsupported
     # execution before requesting the source, rather than silently losing its cap.
     if (threading.current_thread() is not threading.main_thread()
             or not all(hasattr(signal, name) for name in ('SIGALRM', 'ITIMER_REAL', 'setitimer', 'getitimer',
                 'pthread_sigmask', 'sigpending', 'sigwait', 'SIG_BLOCK', 'SIG_SETMASK'))):
-        raise ValueError('Municipality wall-time isolation requires a POSIX main thread')
+        raise ValueError(f'{label} wall-time isolation requires a POSIX main thread')
     alarm = {signal.SIGALRM}
     mask = signal.pthread_sigmask(signal.SIG_BLOCK, alarm)
     owned = False
@@ -65,17 +70,17 @@ def infrastructure_deadline():
     try:
         try:
             if signal.SIGALRM in mask or signal.SIGALRM in signal.sigpending():
-                raise ValueError('Municipality wall-time isolation cannot use a blocked or pending alarm')
+                raise ValueError(f'{label} wall-time isolation cannot use a blocked or pending alarm')
             if signal.getitimer(signal.ITIMER_REAL) != (0.0, 0.0):
-                raise ValueError('Municipality wall-time isolation cannot replace an existing timer')
+                raise ValueError(f'{label} wall-time isolation cannot replace an existing timer')
             handler = signal.getsignal(signal.SIGALRM)
             signal.signal(signal.SIGALRM, expired)
             owned = True
             started = time.monotonic()
-            signal.setitimer(signal.ITIMER_REAL, INFRASTRUCTURE_DEADLINE_SECONDS)
+            signal.setitimer(signal.ITIMER_REAL, seconds)
             signal.pthread_sigmask(signal.SIG_SETMASK, mask)
             yield
-            if time.monotonic()-started >= INFRASTRUCTURE_DEADLINE_SECONDS:
+            if time.monotonic()-started >= seconds:
                 raise _SourceDeadlineExpired()
         finally:
             try:
@@ -93,7 +98,13 @@ def infrastructure_deadline():
                 finally:
                     signal.pthread_sigmask(signal.SIG_SETMASK, mask)
     except _SourceDeadlineExpired:
-        raise ValueError('Municipality exceeded its source wall-time budget; prior checkpoint retained') from None
+        raise ValueError(f'{label} exceeded its source wall-time budget; prior checkpoint retained') from None
+
+
+@contextlib.contextmanager
+def infrastructure_deadline():
+    with source_deadline(INFRASTRUCTURE_DEADLINE_SECONDS, 'Municipality'):
+        yield
 
 
 class CollectionDiagnostics:
@@ -462,6 +473,7 @@ def fetch(policy, previous, now, fixture=None):
     """Read the entire response or fail; never parse/publish a truncated response."""
     result = dict(sourceId=policy['sourceId'], lastAttemptAt=now, url=policy['url'],
                   transportTiming=dict(mode='fixture-replay' if fixture else 'not-requested'))
+    wordpress_pagination = None
     try:
         if not safe_url(policy['url']):
             raise ValueError('Only anonymous HTTPS sources are permitted')
@@ -490,6 +502,10 @@ def fetch(policy, previous, now, fixture=None):
                     status, final_url = response.status, response.url
                     etag, modified = response.headers.get('ETag'), response.headers.get('Last-Modified')
                     encoding = response.headers.get('Content-Encoding','').lower()
+                    if policy.get('format') == 'wordpress':
+                        counts = [response.headers.get(name) for name in ('X-WP-Total', 'X-WP-TotalPages')]
+                        if all(isinstance(value, str) and re.fullmatch(r'(?:0|[1-9][0-9]{0,9})', value) for value in counts):
+                            wordpress_pagination = dict(total=int(counts[0]), pages=int(counts[1]))
                 complete = True
             except urllib.error.HTTPError as error:
                 # A 304 has no representation body. Transport completed even
@@ -502,14 +518,17 @@ def fetch(policy, previous, now, fixture=None):
                 water_article = (policy.get('adapter')=='kg-bishkek-water'
                     and policy['sourceId'].startswith('gov-kg-bishkek-water-')
                     and re.fullmatch(r'https://www\.bishkek\.gov\.kg/ru/post/[1-9]\d*',policy['url']))
-                if error.code == 404 and water_article and error.url == policy['url']:
+                caribe_match = re.fullmatch(r'https://caribeactual\.com/wp-json/wp/v2/posts/([1-9][0-9]{0,9})',policy['url'])
+                caribe_article = (policy.get('adapter')=='cr-caribe' and caribe_match
+                    and policy['sourceId']=='news-cr-caribe-actual-'+caribe_match[1])
+                if error.code == 404 and (water_article or caribe_article) and error.url == policy['url']:
                     with error:
                         raw = read_complete(error)
                     status, final_url = 404, error.url
                     etag, modified = error.headers.get('ETag'), error.headers.get('Last-Modified')
                     encoding = error.headers.get('Content-Encoding','').lower()
                     complete = True
-                elif error.code != 304 or policy.get('adapter')=='kg-bishkek-water':
+                elif error.code != 304 or policy.get('adapter') in ('kg-bishkek-water','cr-caribe'):
                     raise
                 else:
                     if not previous.get('lastSuccessAt'):
@@ -549,6 +568,8 @@ def fetch(policy, previous, now, fixture=None):
         result.update(httpStatus=status, finalUrl=final_url, bytes=len(raw),
                       wireBytes=wire_bytes, contentEncoding=encoding,
                       sha256=hashlib.sha256(raw).hexdigest(), etag=etag, lastModified=modified)
+        if wordpress_pagination is not None:
+            result['wordpressPagination'] = wordpress_pagination
         return result, raw
     except Exception as error:
         result.update(status='unavailable', lastSuccessAt=previous.get('lastSuccessAt'),
@@ -989,6 +1010,99 @@ def apply_archive_age(row, now):
         row['state'] = 'expired'
 
 
+def collect_news_records(source, policy, items, now, countries, areas, reviews, records, *, history_window=None):
+    """Shared complete-news admission rules for current collection and history."""
+    from local_news_archive import jcf_curfew_incidents
+    from public_news_runtime import automatic_news
+    bounds = None
+    if history_window is not None:
+        from public_news_backfill import configuration, timestamp
+        config = configuration(source, policy, now)
+        if history_window != policy['wordpressHistory']:
+            raise ValueError('News history interval differs from the reviewed policy')
+        bounds = (timestamp(config['from_']), timestamp(config['through']))
+    pending = news_discovery(source, items, now, countries)
+    incoming = []
+    if policy.get('format') != 'google-news-sitemap':
+        incoming = reviewed_news_incidents(source, items, reviews, now, countries, areas)
+        if bounds:
+            # A review can legitimately describe an older event. It remains in
+            # the normal collector, but cannot broaden an explicit archive job.
+            incoming = [row for row in incoming
+                if bounds[0] <= timestamp(row['occurredAt']) < bounds[1]
+                and all(bounds[0] <= timestamp(report['publishedAt']) < bounds[1]
+                        for report in row['reports'])]
+        incoming.extend(jcf_curfew_incidents(source, items, now, countries, areas, history_window=history_window))
+    automatic, decisions = automatic_news(source, policy, items, now, countries, areas, reviews, records,
+                                           history_window=history_window)
+    incoming.extend(automatic)
+    decisions_by_url = {decision['url']:decision for decision in decisions}
+    for discovery in pending:
+        decision = decisions_by_url.get(discovery['url'])
+        if decision:
+            discovery.update(status=decision['status'], reviewReason=decision['reason'])
+            if 'incidentId' in decision:
+                discovery.update(incidentId=decision['incidentId'], locationStatus='source-context-validated',
+                    note='Admitted by a reviewed complete-source event, place and date adapter.')
+    stats = dict(accepted=sum(d['status']=='automatic-source-record' for d in decisions),
+        held=sum(d['status']=='needs-review' for d in decisions),
+        heldReasons={reason:sum(d['reason']==reason for d in decisions)
+            for reason in sorted({d['reason'] for d in decisions if d['status']=='needs-review'})})
+    return incoming, pending, stats
+
+
+def stage_source_records(incoming, pending_discoveries, records, discoveries, now, geo, diagnostics, sid):
+    """Apply identical revision/geography/size gates before any source commit."""
+    now_text = stamp(now)
+    pending_records = {}
+    for row in incoming:
+            # Compare the state that would actually be published.
+            # Replaying an old reported event must not manufacture an
+            # expired -> reported -> expired revision on every fetch.
+            apply_archive_age(row, now)
+            old = records.get(row['id'])
+            if old and dt.datetime.fromisoformat(row['updatedAt'].replace('Z', '+00:00')) < dt.datetime.fromisoformat(old['updatedAt'].replace('Z', '+00:00')):
+                # A delayed provider response must not replace newer facts.
+                # Adapters merge genuinely new evidence into the current
+                # record before reaching this transaction.
+                continue
+            row = preserve_significant_history(row, old)
+            annotate_weather(row)
+            if (old and [(r['id'],r['contentHash'],r.get('independentGroup')) for r in old['reports']] == [(r['id'],r['contentHash'],r.get('independentGroup')) for r in row['reports']]
+                    and old['occurredAt'] == row['occurredAt']
+                    and old['updatedAt'] == row['updatedAt']
+                    and old['state'] == row['state']
+                    and old['location'] == row['location']
+                    and old.get('sourceMetadata') == row.get('sourceMetadata')):
+                continue
+            if old:
+                row['firstSeenAt'] = old['firstSeenAt']
+                row['revisions'] = old.get('revisions', []) + [dict(at=now_text,
+                    note='Refreshed source representation; prior archived report retained.', previousReports=old['reports'])]
+            if (old and row['location'].get('precision') == 'point' and old['location'] == row['location']
+                    and old.get('adminAssignment', {}).get('method') == 'strict_point_containment'
+                    and 'adminAssignment' not in row):
+                for key in ('admin1Id','admin1Code','admin1Name','admin2Id','admin2Code','admin2Name','adminAssignment'):
+                    if key in old:
+                        row[key] = old[key]
+            if 'adminAssignment' not in row:
+                with diagnostics.stage('geographic-assignment', sid, detail=False):
+                    geo.administrative(row)
+            # Fail this source transaction before admission, so one
+            # oversized complete record cannot block other feeds.
+            if len(encode(row))+3 > PART_LIMIT:
+                raise ValueError('Complete incident exceeds 12MB; source deferred without truncation: '+row['id'])
+            pending_records[row['id']] = row
+    for row in pending_discoveries:
+            old = discoveries.get(row['id'])
+            row['firstSeenAt'] = old.get('firstSeenAt', old['retrievedAt']) if old else now_text
+            if old and old['contentHash'] != row['contentHash']:
+                row['revisions'] = old.get('revisions', []) + [dict(at=now_text, previous=old['contentHash'])]
+            elif old and 'revisions' in old:
+                row['revisions'] = old['revisions']
+    return pending_records, pending_discoveries
+
+
 def run(root, now, fixtures=None, diagnostics=None):
     diagnostics = diagnostics or CollectionDiagnostics()
     startup_started = diagnostics.start()
@@ -1002,7 +1116,10 @@ def run(root, now, fixtures=None, diagnostics=None):
         SOURCE_ID as INFRASTRUCTURE_SOURCE_ID, prepare_infrastructure_policy, collect_infrastructure)
     from public_news_elmundo_fetch import (ADAPTERS as ELMUNDO_ADAPTERS,
         prepare_elmundo_policy, collect_elmundo_source)
-    from local_news_archive import jcf_curfew_incidents, expire_curfews
+    from public_news_caribe_fetch import (ADAPTERS as CARIBE_ADAPTERS, SOURCE_ID as CARIBE_SOURCE_ID,
+        LATEST_URL as CARIBE_URL, collect_caribe_source, validate_source_policy as validate_caribe_policy,
+        request_state as caribe_request_state)
+    from local_news_archive import expire_curfews
     from public_news_runtime import automatic_news, news_window
     now_text = stamp(now)
     data = root/'docs/data'
@@ -1047,7 +1164,8 @@ def run(root, now, fixtures=None, diagnostics=None):
     if not isinstance(areas, list):
         areas = []
     due = [p for p in policies if p['sourceId'] in sources and
-           (p.get('adapter') not in INFRASTRUCTURE_ADAPTERS or sources[p['sourceId']].get('enabled') is True) and
+           (p.get('adapter') not in INFRASTRUCTURE_ADAPTERS | CARIBE_ADAPTERS
+            or sources[p['sourceId']].get('enabled') is True and p.get('enabled') is not False) and
            source_due(p, states.get(p['sourceId'], {}), now)]
     due = [prepare_official_policy(p, states.get(p['sourceId'], {}), now_text)
            if p.get('adapter') in ADAPTERS else
@@ -1062,7 +1180,7 @@ def run(root, now, fixtures=None, diagnostics=None):
     diagnostics.end('geography-and-policy-setup', geography_started)
     changes, source_results = [], []
     def prefetch(policy):
-        if policy.get('adapter') in INFRASTRUCTURE_ADAPTERS:
+        if policy.get('adapter') in INFRASTRUCTURE_ADAPTERS | CARIBE_ADAPTERS:
             # Its initial request and child requests share one interruptible
             # source budget on the main thread, outside this worker pool.
             return dict(sourceId=policy['sourceId'],lastAttemptAt=now_text,url=policy['url']), None
@@ -1110,6 +1228,17 @@ def run(root, now, fixtures=None, diagnostics=None):
                     infrastructure_collected = (collect_infrastructure(source, policy, raw, now_text, countries,
                         previous, records, child_fetch, fixtures, history_from=snapshot['history']['from'])
                         if raw is not None else None)
+            if policy.get('adapter') in CARIBE_ADAPTERS:
+                validate_caribe_policy(source,policy,now_text,countries)
+                with source_deadline(CARIBE_DEADLINE_SECONDS, 'Caribe news'):
+                    result, raw = diagnostics.fetcher(sid, 'initial', fetch)(policy,
+                        caribe_request_state(policy, previous), now_text, fixtures)
+                    if raw is not None and (result.get('httpStatus')!=200 or result.get('finalUrl')!=CARIBE_URL):
+                        raise ValueError('Caribe listing did not return its complete exact HTTP 200 representation')
+                    caribe_collected = (collect_caribe_source(source, policy, raw, now_text, countries,
+                        previous, records, child_fetch, fixtures, reviews=reviews,
+                        history_from=max(snapshot['history']['from'],policy.get('historyFrom',snapshot['history']['from'])))
+                        if raw is not None else None)
             if policy['mode'] == 'discovery' and policy.get('format', 'rss-atom') not in DISCOVERY_FORMATS:
                 # Reject unknown formats even for an unchanged HTTP response.
                 raise ValueError('Discovery format has no reviewed adapter')
@@ -1119,7 +1248,7 @@ def run(root, now, fixtures=None, diagnostics=None):
                 if policy['mode'] == 'official':
                     pending_discoveries = []
                     official_receipts = None
-                    if policy.get('adapter') in ADAPTERS | SECURITY_ADAPTERS | TRANSPORT_ADAPTERS | ELMUNDO_ADAPTERS | INFRASTRUCTURE_ADAPTERS:
+                    if policy.get('adapter') in ADAPTERS | SECURITY_ADAPTERS | TRANSPORT_ADAPTERS | ELMUNDO_ADAPTERS | INFRASTRUCTURE_ADAPTERS | CARIBE_ADAPTERS:
                         if policy.get('adapter') in INFRASTRUCTURE_ADAPTERS and not policy.get('historyFrom'):
                             raise ValueError('Municipality collection requires a fixed historyFrom boundary')
                         elmundo_layers = None
@@ -1136,6 +1265,8 @@ def run(root, now, fixtures=None, diagnostics=None):
                             if policy.get('adapter') in ELMUNDO_ADAPTERS else
                             infrastructure_collected
                             if policy.get('adapter') in INFRASTRUCTURE_ADAPTERS else
+                            caribe_collected
+                            if policy.get('adapter') in CARIBE_ADAPTERS else
                             collect_transport(source, policy, raw, now_text, countries,
                             previous, records, child_fetch, fixtures,
                             history_from=max(snapshot['history']['from'], policy.get('historyFrom', snapshot['history']['from'])))
@@ -1147,14 +1278,14 @@ def run(root, now, fixtures=None, diagnostics=None):
                             previous, records, child_fetch, fixtures, initial_http_status=result.get('httpStatus', 200)))
                         incoming = collected['incidents']
                         pending_discoveries = collected['discoveries']
-                        if policy.get('adapter') in TRANSPORT_ADAPTERS | ELMUNDO_ADAPTERS | INFRASTRUCTURE_ADAPTERS:
+                        if policy.get('adapter') in TRANSPORT_ADAPTERS | ELMUNDO_ADAPTERS | INFRASTRUCTURE_ADAPTERS | CARIBE_ADAPTERS:
                             # A failed record/size gate must not advance a baseline
                             # page or exact-ID cursor in an otherwise healthy run.
                             transport_state = collected['state']
                         else:
                             result.update(collected['state'])
                         official_receipts = result['evidenceReceipts'] = collected['evidence']
-                        if policy.get('adapter') in ELMUNDO_ADAPTERS:
+                        if policy.get('adapter') in ELMUNDO_ADAPTERS | CARIBE_ADAPTERS:
                             article_health = dict(status=collected['sourceStatus'],message=collected['message'])
                         if policy.get('adapter') in INFRASTRUCTURE_ADAPTERS:
                             infrastructure_unresolved = transport_state['infrastructureUnresolvedCorrectionIds']
@@ -1179,29 +1310,11 @@ def run(root, now, fixtures=None, diagnostics=None):
                         message += f" Missing interval {gap['from']} through {gap['through']}: {gap['reason']}."
                 elif policy['mode'] == 'discovery':
                     items = parse_discovery_feed(raw, policy, source)
-                    pending_discoveries = news_discovery(source, items, now_text, countries)
-                    # A News sitemap supplies headlines and publication dates, not
-                    # sufficient event evidence. Never promote it into incidents.
-                    incoming = []
-                    if policy.get('format') != 'google-news-sitemap':
-                        incoming = reviewed_news_incidents(source, items, reviews, now_text, countries, areas)
-                        incoming.extend(jcf_curfew_incidents(source, items, now_text, countries, areas))
-                    automatic, decisions = automatic_news(source, policy, items, now_text, countries, areas, reviews, records)
-                    incoming.extend(automatic)
+                    incoming, pending_discoveries, automatic_stats = collect_news_records(
+                        source, policy, items, now_text, countries, areas, reviews, records)
                     if policy.get('newsAdapter'):
                         result.update(news_window(items, previous, now_text))
-                    decisions_by_url = {decision['url']:decision for decision in decisions}
-                    for discovery in pending_discoveries:
-                        decision = decisions_by_url.get(discovery['url'])
-                        if decision:
-                            discovery.update(status=decision['status'], reviewReason=decision['reason'])
-                            if 'incidentId' in decision:
-                                discovery.update(incidentId=decision['incidentId'], locationStatus='source-context-validated',
-                                    note='Admitted by a reviewed complete-source event, place and date adapter.')
-                    result['automaticNews'] = dict(accepted=sum(d['status']=='automatic-source-record' for d in decisions),
-                        held=sum(d['status']=='needs-review' for d in decisions),
-                        heldReasons={reason:sum(d['reason']==reason for d in decisions)
-                                     for reason in sorted({d['reason'] for d in decisions if d['status']=='needs-review'})})
+                    result['automaticNews'] = automatic_stats
                     accepted = len(incoming)
                     message = f'Complete feed parsed ({len(items)} items); {len(pending_discoveries)} discoveries; {accepted} reviewed or source-profile-validated incident records.'
                     if result.get('coverageGap'):
@@ -1210,52 +1323,8 @@ def run(root, now, fixtures=None, diagnostics=None):
                     raise ValueError('Collection mode has no reviewed adapter')
                 # Stage all source updates before committing any: a malformed item or
                 # geographic assignment cannot leave a partially accepted response.
-                pending_records = {}
-                for row in incoming:
-                        # Compare the state that would actually be published.
-                        # Replaying an old reported event must not manufacture an
-                        # expired -> reported -> expired revision on every fetch.
-                        apply_archive_age(row, now)
-                        old = records.get(row['id'])
-                        if old and dt.datetime.fromisoformat(row['updatedAt'].replace('Z', '+00:00')) < dt.datetime.fromisoformat(old['updatedAt'].replace('Z', '+00:00')):
-                            # A delayed provider response must not replace newer facts.
-                            # Adapters merge genuinely new evidence into the current
-                            # record before reaching this transaction.
-                            continue
-                        row = preserve_significant_history(row, old)
-                        annotate_weather(row)
-                        if (old and [(r['id'],r['contentHash'],r.get('independentGroup')) for r in old['reports']] == [(r['id'],r['contentHash'],r.get('independentGroup')) for r in row['reports']]
-                                and old['occurredAt'] == row['occurredAt']
-                                and old['updatedAt'] == row['updatedAt']
-                                and old['state'] == row['state']
-                                and old['location'] == row['location']
-                                and old.get('sourceMetadata') == row.get('sourceMetadata')):
-                            continue
-                        if old:
-                            row['firstSeenAt'] = old['firstSeenAt']
-                            row['revisions'] = old.get('revisions', []) + [dict(at=now_text,
-                                note='Refreshed source representation; prior archived report retained.', previousReports=old['reports'])]
-                        if (old and row['location'].get('precision') == 'point' and old['location'] == row['location']
-                                and old.get('adminAssignment', {}).get('method') == 'strict_point_containment'
-                                and 'adminAssignment' not in row):
-                            for key in ('admin1Id','admin1Code','admin1Name','admin2Id','admin2Code','admin2Name','adminAssignment'):
-                                if key in old:
-                                    row[key] = old[key]
-                        if 'adminAssignment' not in row:
-                            with diagnostics.stage('geographic-assignment', sid, detail=False):
-                                geo.administrative(row)
-                        # Fail this source transaction before admission, so one
-                        # oversized complete record cannot block other feeds.
-                        if len(encode(row))+3 > PART_LIMIT:
-                            raise ValueError('Complete incident exceeds 12MB; source deferred without truncation: '+row['id'])
-                        pending_records[row['id']] = row
-                for row in pending_discoveries:
-                        old = discoveries.get(row['id'])
-                        row['firstSeenAt'] = old.get('firstSeenAt', old['retrievedAt']) if old else now_text
-                        if old and old['contentHash'] != row['contentHash']:
-                            row['revisions'] = old.get('revisions', []) + [dict(at=now_text, previous=old['contentHash'])]
-                        elif old and 'revisions' in old:
-                            row['revisions'] = old['revisions']
+                pending_records, pending_discoveries = stage_source_records(
+                    incoming, pending_discoveries, records, discoveries, now, geo, diagnostics, sid)
                 records.update(pending_records)
                 result.update(transport_state)
                 changes.extend(pending_records)
@@ -1279,10 +1348,18 @@ def run(root, now, fixtures=None, diagnostics=None):
                         result['lastSuccessAt'] = previous.get('lastSuccessAt')
                         # Constructed only after a complete listing, independently
                         # validated articles, and all canonical record gates.
-                        result['validatedPartial'] = dict(adapter='sv-elmundo',sourceId=sid,
-                            listingValidated=True,checkedArticles=len(pending_discoveries),
-                            failedArticles=len(transport_state['elmundoQuarantine']),
-                            queuedArticles=len(transport_state['elmundoPending']))
+                        if policy.get('adapter') in CARIBE_ADAPTERS:
+                            result.update(lastPartialSuccessAt=now_text,validatedPartial=dict(
+                                adapter='cr-caribe',sourceId=sid,listingValidated=True,initialUrl=CARIBE_URL,
+                                listingContentHash=transport_state['caribeListingContentHash'],
+                                validatedRepresentations=transport_state['caribeValidatedRepresentations'],
+                                failedRechecks=transport_state['caribeFailedRechecks'],
+                                pendingRechecks=transport_state['caribePendingRechecks']))
+                        else:
+                            result['validatedPartial'] = dict(adapter='sv-elmundo',sourceId=sid,
+                                listingValidated=True,checkedArticles=len(pending_discoveries),
+                                failedArticles=len(transport_state['elmundoQuarantine']),
+                                queuedArticles=len(transport_state['elmundoPending']))
                 if policy.get('adapter') in INFRASTRUCTURE_ADAPTERS:
                     result['message'] = (f'Water notices checked; {accepted} records; '
                         f"{len(transport_state['infrastructurePending'])} upcoming; "
@@ -1329,7 +1406,8 @@ def run(root, now, fixtures=None, diagnostics=None):
     for sid, state in states.items():
         coverage[sid] = {k:state.get(k) for k in ('sourceId','lastAttemptAt','lastSuccessAt','status','message')}
     admitted_sources = {policy['sourceId'] for policy in policies if
-        policy.get('adapter') not in INFRASTRUCTURE_ADAPTERS or sources.get(policy['sourceId'],{}).get('enabled') is True}
+        policy.get('adapter') not in INFRASTRUCTURE_ADAPTERS | CARIBE_ADAPTERS
+        or sources.get(policy['sourceId'],{}).get('enabled') is True and policy.get('enabled') is not False}
     for sid in sources:
         coverage.setdefault(sid, dict(sourceId=sid, lastAttemptAt=None, lastSuccessAt=None,
             status='pending' if sid in admitted_sources else 'disabled',
@@ -1337,6 +1415,8 @@ def run(root, now, fixtures=None, diagnostics=None):
                     'Reference only; no automatic collection policy is enabled.'))
         if sid == INFRASTRUCTURE_SOURCE_ID and sources[sid].get('enabled') is not True:
             coverage[sid].update(status='disabled',message='Automatic drinking-water collection is disabled.')
+        if sid == CARIBE_SOURCE_ID and sid not in admitted_sources:
+            coverage[sid].update(status='disabled',message='Automatic Caribe Actual collection is disabled.')
     snapshot['coverage'] = list(coverage.values())
     snapshot['countries'] = list(countries.values())
     snapshot['sources'] = list(sources.values())

@@ -90,8 +90,17 @@ def curfew_time(match, published):
     if len(candidates)!=1:raise ValueError('Curfew date/year/weekday is ambiguous or contradictory')
     return candidates[0]
 
-def jcf_curfew_incidents(source,items,now,countries,areas):
+def jcf_curfew_incidents(source,items,now,countries,areas,*,history_window=None):
     if source['id']!=SOURCE_ID or source.get('url')!='https://jcf.gov.jm/' or 'JM' not in countries:return []
+    history_bounds=None
+    if history_window is not None:
+        from public_news_backfill import timestamp
+        if not isinstance(history_window,dict) or set(history_window)!={'from','through'}:
+            raise ValueError('Curfew history requires a complete reviewed UTC interval')
+        lower,upper=timestamp(history_window['from']),timestamp(history_window['through'])
+        if not lower<upper<=timestamp(now) or upper-lower>dt.timedelta(days=366):
+            raise ValueError('Curfew history interval is outside the supported baseline')
+        history_bounds=(lower,upper)
     rows=[]
     for item in items:
         if not re.search(r'\b48\s*[- ]\s*hour curfews?\b',item['title'],re.I):continue
@@ -107,7 +116,9 @@ def jcf_curfew_incidents(source,items,now,countries,areas):
         except ValueError:continue
         if (end-start).total_seconds()!=48*3600:continue
         current=dt.datetime.fromisoformat(now.replace('Z','+00:00'))
-        if start<current-dt.timedelta(days=366) or start>current+dt.timedelta(days=7):continue
+        if history_bounds:
+            if not history_bounds[0]<=published<history_bounds[1] or not history_bounds[0]<=start<history_bounds[1]:continue
+        elif start<current-dt.timedelta(days=366) or start>current+dt.timedelta(days=7):continue
         iid='jcf-curfew-'+item['guid']
         summary=(f'Jamaica Constabulary Force announced a 48-hour curfew from {start:%d %B %Y %H:%M} '
                  f'to {end:%d %B %Y %H:%M}, Jamaica time, for the limited areas described in its notice. '

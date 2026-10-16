@@ -250,7 +250,7 @@ def news_window(items, previous, now):
     return result
 
 
-def automatic_news(source, policy, items, now, countries, areas, reviews=(), existing=None):
+def automatic_news(source, policy, items, now, countries, areas, reviews=(), existing=None, *, history_window=None):
     """Return admitted records and auditable held decisions, without fetching.
 
     Opt-in is reviewed configuration, never a publisher-supplied field. Existing
@@ -271,6 +271,13 @@ def automatic_news(source, policy, items, now, countries, areas, reviews=(), exi
     code=profile['country']
     if code not in countries:return [], []
     current=instant(now);rows=[];decisions=[]
+    history_bounds = None
+    if history_window is not None:
+        from public_news_backfill import configuration
+        config = configuration(source, policy, now)
+        if history_window != policy['wordpressHistory']:
+            raise ValueError('News history interval differs from the reviewed policy')
+        history_bounds = (instant(config['from_']), instant(config['through']))
     manual_urls={r['url'] for r in reviews if r['sourceId']==source['id']}
     known=existing or {};seen_urls=set()
     for item in items:
@@ -310,7 +317,9 @@ def automatic_news(source, policy, items, now, countries, areas, reviews=(), exi
         if parts.scheme!='https' or parts.hostname!=profile['host'] or parts.username or parts.password:
             raise ValueError('Automatic news article identity changed')
         published=instant(item['publishedAt']);modified=instant(item.get('modifiedAt',item['publishedAt']))
-        if published>current+dt.timedelta(minutes=5) or modified>current+dt.timedelta(minutes=5) or published<current-dt.timedelta(days=366):
+        supported_publication = (history_bounds[0] <= published < history_bounds[1]
+            if history_bounds else published >= current-dt.timedelta(days=366))
+        if published>current+dt.timedelta(minutes=5) or modified>current+dt.timedelta(minutes=5) or not supported_publication:
             hold('publication-outside-supported-window');continue
         if pinned_review and not reviewed:hold('reviewed-complete-representation-changed');continue
         if not category:hold('changed-account-no-longer-supports-event');continue
@@ -365,7 +374,7 @@ def automatic_news(source, policy, items, now, countries, areas, reviews=(), exi
             if when is None and publication_anchor(statement,body,category,source['id']):
                 when=published.astimezone(ZoneInfo(profile['timezone'])).date();basis='publication'
             if when is None:continue
-            if when<current.astimezone(ZoneInfo(profile['timezone'])).date()-dt.timedelta(days=366):continue
+            if history_bounds is None and when<current.astimezone(ZoneInfo(profile['timezone'])).date()-dt.timedelta(days=366):continue
             candidates.append((when,location,basis))
         if conflicting_day:hold('conflicting-event-days-require-review');continue
         if not candidates:hold('primary-event-location-and-date-required');continue
@@ -374,6 +383,8 @@ def automatic_news(source, policy, items, now, countries, areas, reviews=(), exi
         when,(place,area),basis=candidates[0]
         occurred=(published.isoformat(timespec='seconds').replace('+00:00','Z') if basis in ('current-condition-reported-at-publication','publication')
                   else when.isoformat()+'T00:00:00Z')
+        if history_bounds and not history_bounds[0] <= instant(occurred) < history_bounds[1]:
+            hold('event-outside-reviewed-history-window');continue
         summary=reviewed['summary'] if reviewed else f'{source["name"]} reports: {title}'
         if investigation:
             summary=(f'{source["name"]} reports that police are investigating gunfire in Belize City '
