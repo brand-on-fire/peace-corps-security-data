@@ -5,6 +5,7 @@ warnings retain the existing eligibility rule. GDACS low-alert fire/cyclone/drou
 observations require reviewed, cited human exposure/impact before publication.
 """
 import copy
+import datetime as dt
 import re
 import unicodedata
 import xml.etree.ElementTree as ET
@@ -155,6 +156,45 @@ def decision(row):
     return dict(public=True)
 
 
+def prior_cap_occurrences(row, verdict, evidence, prior_hashes, since):
+    """Pair retained warning times with their own evidence, never cancellation times."""
+    meta = row.get('sourceMetadata', {})
+    if (verdict.get('reason') != 'routine_cap_weather' or row.get('severity') == 'severe'
+            or meta.get('provider') != CAP or meta.get('eventTimeBasis') != 'provider-warning-issued'
+            or meta.get('sent') != row.get('occurredAt')):
+        return []
+    def timestamp(value):
+        if not isinstance(value, str):
+            return None
+        try:
+            parsed = dt.datetime.fromisoformat(value.replace('Z', '+00:00'))
+            return parsed if parsed.tzinfo is not None else None
+        except ValueError:
+            return None
+    current = timestamp(row['occurredAt'])
+    earliest = timestamp(since + 'T00:00:00Z' if re.fullmatch(r'\d{4}-\d{2}-\d{2}', since) else since)
+    if current is None or earliest is None:
+        return []
+    hashes, pairs = set(prior_hashes), set()
+    legacy_id = re.compile('cap-' + re.escape(verdict['sourceId']) + r'-[a-f0-9]{24}-report')
+    for report in evidence:
+        if (report.get('sourceId') != verdict['sourceId'] or report.get('incidentId') != row['id']
+                or report.get('contentHash') not in hashes):
+            continue
+        identity, published = report.get('id', ''), report.get('publishedAt')
+        details = report.get('sourceMetadata', {})
+        if not isinstance(identity, str) or '-cancel-' in identity or not isinstance(details, dict):
+            continue
+        modern = details.get('messageType') in ('Alert', 'Update') and details.get('sent') == published
+        legacy = not details and legacy_id.fullmatch(identity) is not None
+        previous = timestamp(published)
+        if (modern or legacy) and previous is not None and earliest <= previous < current:
+            pairs.add((published, report['contentHash']))
+    if len(pairs) > 2_000:
+        raise ValueError('CAP prior occurrence evidence exceeds bounded ledger')
+    return [dict(occurredAt=at, contentHash=content_hash) for at, content_hash in sorted(pairs)]
+
+
 def exclusion_index(records, country_codes, since):
     result = []
     for row in sorted(records.values(), key=lambda r: r['id']):
@@ -172,9 +212,13 @@ def exclusion_index(records, country_codes, since):
             if report.get('sourceId') == verdict['sourceId']
             and re.fullmatch('[0-9a-f]{64}', report.get('contentHash', ''))
             and report['contentHash'] != verdict['contentHash']})
-        result.append({key: value for key, value in verdict.items() if key != 'public'} |
-                      dict(id=row['id'], countryCode=row['countryCode'], occurredAt=row['occurredAt'],
-                           priorSeverity=row['severity'], priorContentHashes=prior_hashes))
+        entry = {key: value for key, value in verdict.items() if key != 'public'} | dict(
+            id=row['id'], countryCode=row['countryCode'], occurredAt=row['occurredAt'],
+            priorSeverity=row['severity'], priorContentHashes=prior_hashes)
+        occurrences = prior_cap_occurrences(row, verdict, evidence, prior_hashes, since)
+        if occurrences:
+            entry['priorOccurrences'] = occurrences
+        result.append(entry)
     return result
 
 

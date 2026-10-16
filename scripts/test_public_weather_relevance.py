@@ -63,6 +63,14 @@ def gdacs(alert='Green', event='WF', hash_suffix='original'):
         sourceMetadata=dict(eventType=event, eventId='12345', providerAlert=alert))
 
 
+def routine_warning_history():
+    initial = message(severity='Moderate', sent='2026-10-14T21:00:00Z')
+    update = message(severity='Moderate', identifier='m2', kind='Update',
+        reference='issuer.example,m1,2026-10-14T21:00:00Z')
+    old = initial['record']
+    return cap.apply_lifecycle([update], {old['id']: old}, NOW)[0]
+
+
 class WeatherRelevanceTests(unittest.TestCase):
     def test_exact_reviewed_representations_require_matching_source_and_current_hash(self):
         for sid, cc, language, event, description in PROFILE_CASES:
@@ -167,6 +175,72 @@ class WeatherRelevanceTests(unittest.TestCase):
         entry = weather.exclusion_index({row['id']: row}, {'MX'}, '2025-10-15T00:00:00Z')[0]
         self.assertEqual(entry['contentHash'], current)
         self.assertEqual(entry['priorContentHashes'], ['a' * 64, 'b' * 64])
+
+    def test_prior_occurrences_pair_modern_and_legacy_warning_times_with_exact_hashes(self):
+        row = routine_warning_history()
+        prior = row['reports'][1]
+        expected = [dict(occurredAt=prior['publishedAt'], contentHash=prior['contentHash'])]
+        def entry(value):
+            return weather.exclusion_index({value['id']: value}, {'BJ'}, '2025-10-15T00:00:00Z')[0]
+        before = copy.deepcopy(row)
+        self.assertEqual(entry(row)['priorOccurrences'], expected)
+        self.assertEqual(row, before, 'ledger construction must not modify retained evidence')
+        # Legacy records predate per-report CAP metadata. Their exact warning ID
+        # shape and retained report identity provide the narrower migration path.
+        legacy = copy.deepcopy(prior)
+        legacy.pop('sourceMetadata')
+        legacy['id'] = legacy['id'].rsplit('-', 1)[0]
+        row['reports'] = row['reports'][:1]
+        row['revisions'] = [dict(previousReports=[legacy, copy.deepcopy(legacy)])]
+        self.assertEqual(entry(row)['priorOccurrences'], expected)
+        self.assertIn(expected[0]['contentHash'], entry(row)['priorContentHashes'])
+
+    def test_prior_occurrences_reject_unrelated_cancelled_and_unproven_representations(self):
+        original = routine_warning_history()
+        cases = [
+            ('foreign source', lambda row, report: report.update(sourceId='cap-other')),
+            ('wrong incident', lambda row, report: report.update(incidentId='other-incident')),
+            ('invalid hash', lambda row, report: report.update(contentHash='not-a-hash')),
+            ('current hash', lambda row, report: report.update(contentHash=row['reports'][0]['contentHash'])),
+            ('cancel control', lambda row, report: report['sourceMetadata'].update(messageType='Cancel')),
+            ('cancel identity', lambda row, report: report.update(id=row['id']+'-cancel-123456789abc')),
+            ('unsupported message', lambda row, report: report['sourceMetadata'].update(messageType='Ack')),
+            ('sent mismatch', lambda row, report: report['sourceMetadata'].update(sent='2026-10-14T20:00:00Z')),
+            ('unsupported time basis', lambda row, report: row['sourceMetadata'].update(eventTimeBasis='provider-impact-onset')),
+            ('wrong provider', lambda row, report: row['sourceMetadata'].update(provider='another provider')),
+            ('current occurrence mismatch', lambda row, report: row.update(occurredAt='2026-10-15T20:00:00Z')),
+            ('severe narrative conflict', lambda row, report: row.update(severity='severe')),
+        ]
+        for name, change in cases:
+            with self.subTest(name=name):
+                row = copy.deepcopy(original)
+                change(row, row['reports'][1])
+                entries = weather.exclusion_index({row['id']: row}, {'BJ'}, '2025-10-15T00:00:00Z')
+                self.assertTrue(entries)
+                self.assertNotIn('priorOccurrences', entries[0])
+        for identity in ('arbitrary-report', original['id']+'-cancel-123456789abc',
+                         original['id']+'-report-unverified'):
+            with self.subTest(legacy_id=identity):
+                row = copy.deepcopy(original)
+                row['reports'][1].pop('sourceMetadata')
+                row['reports'][1]['id'] = identity
+                entry = weather.exclusion_index({row['id']: row}, {'BJ'}, '2025-10-15T00:00:00Z')[0]
+                self.assertNotIn('priorOccurrences', entry)
+
+    def test_prior_occurrence_dates_stay_inside_history_and_precede_current_warning(self):
+        for at in ('2025-10-14T23:59:59Z', '2026-10-15T21:00:00Z', '2026-10-15T22:00:00Z',
+                   '2026-10-14T21:00:00', 'invalid-time'):
+            with self.subTest(at=at):
+                row = routine_warning_history()
+                row['reports'][1]['publishedAt'] = at
+                row['reports'][1]['sourceMetadata']['sent'] = at
+                entry = weather.exclusion_index({row['id']: row}, {'BJ'}, '2025-10-15T00:00:00Z')[0]
+                self.assertNotIn('priorOccurrences', entry)
+        row = routine_warning_history()
+        row['reports'][1]['publishedAt'] = '2025-10-15T00:00:00Z'
+        row['reports'][1]['sourceMetadata']['sent'] = '2025-10-15T00:00:00Z'
+        self.assertEqual(weather.exclusion_index({row['id']: row}, {'BJ'}, '2025-10-15')[0]
+                         ['priorOccurrences'][0]['occurredAt'], '2025-10-15T00:00:00Z')
 
     def test_orange_to_green_retains_real_hazard_history_and_complete_update(self):
         old = gdacs('Orange'); new = gdacs('Green', hash_suffix='update')
