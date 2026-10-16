@@ -6772,5 +6772,23 @@
     "verifiedAt": "2026-10-16T01:29:39Z",
     "termsUrl": "https://www.bishkek.gov.kg/ru",
     "notes": "Anonymous municipal HTML, including its public search, supplies complete Russian notice text. Robots allows these paths; the municipality reserves copyright. Publish factual intervals, original headlines, named service-area descriptions and source links only; retain complete responses locally for verification. Dated drinking-water schedules and narrowly matched postponements only. No validated service-area polygons, comprehensive outage coverage, restoration stream or advance-warning UI. Publication time is available only as a local calendar date."
+  },
+  {
+    "id": "cap-th-tmd-en",
+    "name": "Thai Meteorological Department — official severe-weather warnings",
+    "url": "https://alertingauthority.wmo.int/authorities.php?recId=164",
+    "feedUrl": "https://www.tmd.go.th/en/api/xml/CAP",
+    "countryCodes": [
+      "TH"
+    ],
+    "kind": "cap",
+    "tier": "official",
+    "language": "en",
+    "cadenceMinutes": 15,
+    "enabled": true,
+    "access": "public-feed",
+    "verifiedAt": "2026-10-16T03:52:32Z",
+    "termsUrl": "https://www.tmd.go.th/en/api/xml/CAP",
+    "notes": "WMO explicitly registers TMD and this English CAP feed; RSS declares public domain. Complete current replay preserves five Actual/Public Severe/Likely heavy-rain warnings, their flash-flood/overflow risk language, and all issuer polygons. These are issued risk warnings, not observed flood/landslide events. Use CAP sent/effective/expiry clocks; RSS item pubDate is inconsistently seven hours earlier. No provider geocode-to-app administrative crosswalk is approved. Current sample has independent Alert identities with no explicit references; do not infer incident deduplication, cancellation or resolution from repeated wording, new issues or index absence. XML signature verification is not claimed."
   }
 ]

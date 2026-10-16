@@ -1,6 +1,8 @@
 import copy
 import pathlib
 import unittest
+from unittest.mock import patch
+import public_cap
 from public_cap import parse_alert, apply_lifecycle, collect_cap, collect_cap_batch, expire_warnings, feed_links, info_blocks, deduplicate_info_blocks
 
 ROOT=pathlib.Path(__file__).resolve().parent.parent
@@ -226,4 +228,27 @@ class CapPartialTests(unittest.TestCase):
   def collect(raw,previous=()):return collect_cap_batch(SOURCE,{'url':URL},raw,NOW,COUNTRIES,[],lambda *a:self.fail('direct document fetched twice'),previous_quarantined=previous)
   bad=collect(self.bad());self.assertEqual(bad['status'],'partial')
   good=collect(self.bulletin(),bad['quarantined']);self.assertEqual(good['status'],'complete');self.assertEqual(len(good['messages']),1)
+ def test_late_final_response_rejects_entire_batch(self):
+  clock=[0]
+  def fetch(*args):clock[0]=90;return {},self.bulletin()
+  with patch('public_cap.time.monotonic',side_effect=lambda:clock[0]):
+   with self.assertRaisesRegex(ValueError,'90-second collection deadline'):
+    collect_cap_batch(SOURCE,{'url':URL},self.feed(['last']),NOW,COUNTRIES,[],fetch)
+ def test_slow_direct_parse_is_not_a_success_or_quarantined_prefix(self):
+  real_parse=public_cap.parse_alert
+  for invalid in (False,True):
+   clock=[0]
+   def slow(*args):
+    clock[0]=91
+    if invalid:raise ValueError('Synthetic parser failure after deadline')
+    return real_parse(*args)
+   with patch('public_cap.time.monotonic',side_effect=lambda:clock[0]),patch('public_cap.parse_alert',side_effect=slow):
+    with self.assertRaisesRegex(ValueError,'90-second collection deadline'):
+     collect_cap_batch(SOURCE,{'url':URL},self.bulletin(),NOW,COUNTRIES,[],lambda *args:self.fail('Unexpected request'))
+ def test_slow_empty_index_is_not_fresh_success(self):
+  real_links=public_cap.feed_links;clock=[0]
+  def slow(raw):clock[0]=91;return real_links(raw)
+  with patch('public_cap.time.monotonic',side_effect=lambda:clock[0]),patch('public_cap.feed_links',side_effect=slow):
+   with self.assertRaisesRegex(ValueError,'90-second collection deadline'):
+    collect_cap_batch(SOURCE,{'url':URL},self.feed([]),NOW,COUNTRIES,[],lambda *args:self.fail('Unexpected request'))
 if __name__=='__main__':unittest.main()

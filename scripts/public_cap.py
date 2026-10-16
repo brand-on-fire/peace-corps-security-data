@@ -343,6 +343,10 @@ def collect_cap_batch(source, policy, raw, now, countries, areas, fetcher,
 
 def _collect_cap(source, policy, raw, now, countries, areas, fetcher, fixtures,
                  partial, previous_quarantined=()):
+    deadline = time.monotonic()+90
+    def check_deadline():
+        if time.monotonic() >= deadline:
+            raise ValueError('CAP source exceeded 90-second collection deadline; entire source deferred')
     links, inconsistent_empty = (jamaica_atom_links(raw, policy)
         if policy.get('format') == 'jamaica-cap-atom' else (feed_links(raw), False))
     messages, quarantined, total = [], [], len(raw)
@@ -352,13 +356,16 @@ def _collect_cap(source, policy, raw, now, countries, areas, fetcher, fixtures,
                  indexContentHash=hashlib.sha256(raw).hexdigest(),
                  indexUrl=policy['url'], retrievedAt=now)
     def parse(content, url):
+        check_deadline()
         try:
             parsed = parse_alert(source, content, url, now, countries, areas)
         except (ValueError, ET.ParseError) as error:
+            check_deadline()
             if not partial:
                 raise
             quarantined.append(quarantine_diagnostic(source, content, url, now, error))
             return
+        check_deadline()
         if parsed:
             if inconsistent_empty and parsed['record'] is not None:
                 parsed['record']['sourceMetadata'].update(
@@ -387,12 +394,11 @@ def _collect_cap(source, policy, raw, now, countries, areas, fetcher, fixtures,
         parse(raw, policy['url'])
     # Small parallel batches bound duration; every response is fully parsed.
     import concurrent.futures
-    deadline = time.monotonic()+90
     def one(url):
-        if time.monotonic() > deadline:
-            raise ValueError('CAP source exceeded 90-second collection deadline; entire source deferred')
+        check_deadline()
         child = dict(sourceId=source['id']+'-'+hashlib.sha256(url.encode()).hexdigest()[:24],url=url)
         result, content = fetcher(child,{},now,fixtures)
+        check_deadline()
         if content is None:
             raise ValueError('CAP bulletin fetch failed: '+str(result.get('message')))
         return url,content
@@ -405,6 +411,7 @@ def _collect_cap(source, policy, raw, now, countries, areas, fetcher, fixtures,
                 if total > MAX_BYTES:
                     raise ValueError('CAP complete source exceeds byte budget; deferred without publication')
                 parse(content, url)
+    check_deadline()
     batch['status'] = 'partial' if quarantined else 'complete'
     return batch
 

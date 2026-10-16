@@ -172,6 +172,19 @@ class CapPartialPipelineTests(unittest.TestCase):
   result=self.run_refresh(client({'bad':None,'new':body('new')},names=['new']),now='2026-10-16T03:15:00Z')
   self.assertEqual(result['outcome'],'failed');self.assertEqual(self.before(),before);self.assertNotIn('validatedPartial',result['sources'][0])
 
+ def test_late_last_child_preserves_records_quarantine_and_success_clock(self):
+  self.baseline();self.run_refresh(client({'bad':self.bad(),'a':body()}));before=self.before()
+  prior=copy.deepcopy(self.state());clock=[0];base=client({'bad':body('bad'),'new':body('new')},names=['new'])
+  def late(policy,*args):
+   response=base(policy,*args)
+   if policy['url']==HOST+'/bad':clock[0]=91
+   return response
+  with patch('public_cap.time.monotonic',side_effect=lambda:clock[0]):
+   result=self.run_refresh(late,now='2026-10-16T03:15:00Z')
+  self.assertEqual(result['outcome'],'failed');self.assertEqual(self.before(),before);self.assertEqual(self.state(),prior)
+  self.assertNotIn('validatedPartial',result['sources'][0])
+  self.assertIn('90-second collection deadline',result['sources'][0]['message'])
+
  def test_record_size_failure_rolls_back_new_records_and_quarantine_checkpoint(self):
   self.baseline();before=self.before()
   with patch.object(pipeline,'PART_LIMIT',200):result=self.run_refresh(client({'bad':self.bad(),'a':body()}))

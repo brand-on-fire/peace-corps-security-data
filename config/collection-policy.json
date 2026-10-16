@@ -1271,6 +1271,16 @@
       "cadenceMinutes": 60,
       "historyFrom": "2025-10-16T00:00:00Z",
       "url": "https://www.bishkek.gov.kg/ru/post"
+    },
+    {
+      "sourceId": "cap-th-tmd-en",
+      "mode": "official",
+      "cadenceMinutes": 15,
+      "url": "https://www.tmd.go.th/en/api/xml/CAP",
+      "bulletinHosts": [
+        "www.tmd.go.th"
+      ],
+      "enabled": true
     }
   ],
   "policy": {
