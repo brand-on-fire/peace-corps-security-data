@@ -75,7 +75,8 @@ class WeatherRelevanceTests(unittest.TestCase):
     def test_exact_reviewed_representations_require_matching_source_and_current_hash(self):
         for sid, cc, language, event, description in PROFILE_CASES:
             row = message(sid, cc, language, event, 'Legacy compact representation')['record']
-            row['sourceMetadata'].pop('infoBlocks')
+            row['sourceMetadata'].pop('infoBlocksReportId')
+            row['reports'][0]['sourceMetadata'].pop('infoBlocks')
             row['reports'][0]['contentHash'] = weather.REVIEWED_HASHES[sid]
             self.assertEqual(weather.decision(row)['reason'], 'cap_severity_narrative_conflict')
             row['reports'][0]['contentHash'] = 'a' * 64
@@ -125,8 +126,39 @@ class WeatherRelevanceTests(unittest.TestCase):
         self.assertTrue(weather.decision(message(event='Flood warning', severity='Moderate')['record'])['public'])
 
     def test_invalid_complete_profile_xml_fails_instead_of_using_a_prefix(self):
-        row = message()['record']; row['sourceMetadata']['infoBlocks'].append('<info>broken')
+        row = message()['record']; cap.info_blocks(row).append('<info>broken')
         with self.assertRaises(Exception): weather.decision(row)
+
+    def test_report_backed_narratives_and_legacy_inline_blocks_give_same_decision(self):
+        row = message()['record']; before = copy.deepcopy(row)
+        self.assertEqual(weather.decision(row)['reason'], 'cap_severity_narrative_conflict')
+        legacy = copy.deepcopy(row)
+        legacy['sourceMetadata']['infoBlocks'] = copy.deepcopy(cap.info_blocks(row))
+        legacy['sourceMetadata'].pop('infoBlocksReportId')
+        self.assertEqual(weather.cap_blocks(legacy), weather.cap_blocks(row))
+        self.assertEqual(weather.decision(legacy), weather.decision(row))
+        self.assertEqual(row, before)
+
+    def test_missing_malformed_or_conflicting_report_reference_fails_closed(self):
+        original = message()['record']
+        changes = [
+            lambda r: r['sourceMetadata'].pop('infoBlocksReportId'),
+            lambda r: r['sourceMetadata'].update(infoBlocksReportId='missing'),
+            lambda r: r['sourceMetadata'].update(infoBlocksReportId=[]),
+            lambda r: r['reports'].append(copy.deepcopy(r['reports'][0])),
+            lambda r: r['reports'][0].update(sourceId='other-issuer'),
+            lambda r: r['reports'][0].update(incidentId='other-incident'),
+            lambda r: r['reports'][0].update(publishedAt='2026-10-14T21:00:00Z'),
+            lambda r: r['reports'][0]['sourceMetadata'].update(sent='2026-10-14T21:00:00Z'),
+            lambda r: r['reports'][0]['sourceMetadata'].update(recordId='other-warning'),
+            lambda r: r['reports'][0]['sourceMetadata'].update(messageType='Cancel'),
+            lambda r: r['reports'][0]['sourceMetadata'].pop('infoBlocks'),
+            lambda r: r['sourceMetadata'].update(infoBlocks=['<info>different</info>']),
+        ]
+        for change in changes:
+            row = copy.deepcopy(original); change(row)
+            with self.assertRaisesRegex(ValueError, 'CAP infoBlocks reference'):
+                weather.decision(row)
 
     def test_gdacs_low_fire_and_cyclone_need_impact_while_orange_red_remain(self):
         for event in ('WF', 'TC', 'DR'):

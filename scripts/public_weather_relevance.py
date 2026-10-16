@@ -9,6 +9,7 @@ import datetime as dt
 import re
 import unicodedata
 import xml.etree.ElementTree as ET
+from public_cap import info_blocks
 
 SCOPE = 'security-weather-v2'
 CAP = 'CAP 1.2'
@@ -47,7 +48,7 @@ def source_hash(row, source_id):
 
 
 def cap_blocks(row):
-    blocks = row.get('sourceMetadata', {}).get('infoBlocks')
+    blocks = info_blocks(row)
     if not isinstance(blocks, list) or not blocks:
         return []
     result = []

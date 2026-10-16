@@ -133,6 +133,36 @@ class RefreshTests(unittest.TestCase):
         self.assertEqual(result['outcome'],'failed')
         self.assertEqual((self.data/'snapshot.json').read_bytes(),original)
 
+    def test_compact_cap_pointer_is_validated_against_complete_archived_narrative(self):
+        from test_public_weather_relevance import message, COUNTRIES
+        full=message(description='Des vents destructeurs sont attendus.')['record']
+        compact=pipeline.public_snapshot_record(full)
+        self.assertIn('infoBlocksReportId',compact['sourceMetadata'])
+        self.assertNotIn('infoBlocks',compact['reports'][0]['sourceMetadata'])
+        self.assertTrue(pipeline.public_incident(full))
+        with self.assertRaisesRegex(ValueError,'CAP infoBlocks'):
+            pipeline.public_incident(compact)
+        with tempfile.TemporaryDirectory() as temporary:
+            stage=Path(temporary)
+            countries={'GH':self.country,'BJ':COUNTRIES['BJ']}
+            pipeline.save(stage/'config/countries.json',list(countries.values()))
+            pipeline.save(stage/'config/collection-policy.json',{'sources':[]})
+            rows={self.row['id']:self.row,full['id']:full}
+            snapshot=dict(generatedAt='2026-10-16T00:00:00Z',countries=list(countries.values()),
+                incidents=[self.row,compact],archiveTotal=2,
+                history={'recordCount':2,'from':'2025-10-05T00:00:00Z','to':'2026-10-16T00:00:00Z'})
+            snapshot['publication']=dict(activeCountryCodes=sorted(countries),revision=pipeline.publication_revision(snapshot))
+            pipeline.write_archive(stage/'docs/data',rows,countries,countries,snapshot['publication'])
+            pipeline.save(stage/'docs/data/snapshot.json',snapshot)
+            self.assertEqual(refresh.validate_candidate(stage,self.data)['incidents'],[self.row,compact])
+            manifest=pipeline.load(stage/'docs/data/history/BJ.json')
+            part=stage/'docs/data/history'/(Path(manifest['parts'][0]).name if isinstance(manifest,dict) else 'BJ.json')
+            records=pipeline.load(part)
+            records[0]['sourceMetadata']['infoBlocksReportId']='missing-report'
+            pipeline.save(part,records)
+            with self.assertRaisesRegex(ValueError,'CAP infoBlocks'):
+                refresh.validate_candidate(stage,self.data)
+
     def test_publication_time_must_advance_when_content_changes(self):
         for when in ['2026-10-05T01:59:59Z','2026-10-05T02:00:00Z']:
             with self.subTest(when=when),tempfile.TemporaryDirectory() as temporary:

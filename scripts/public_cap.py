@@ -131,6 +131,64 @@ def geometry(info):
     return polygons, circles, descriptions
 
 
+def info_blocks(row):
+    """Resolve complete current CAP XML, retaining legacy inline provenance.
+
+    A reference is never permission to skip narrative validation: it must name
+    one complete report belonging to this incident, issuer and warning time.
+    """
+    metadata = row.get('sourceMetadata', {})
+    legacy = metadata.get('infoBlocks')
+    if 'infoBlocksReportId' not in metadata:
+        if legacy is None and any('infoBlocks' in r.get('sourceMetadata', {}) for r in row.get('reports', [])):
+            raise ValueError('CAP infoBlocks reference is missing')
+        return legacy
+    pointer = metadata['infoBlocksReportId']
+    reports = [r for r in row.get('reports', []) if r.get('id') == pointer]
+    if not isinstance(pointer, str) or not pointer or len(reports) != 1:
+        raise ValueError('CAP infoBlocks reference is missing or ambiguous')
+    report = reports[0]
+    details = report.get('sourceMetadata', {})
+    blocks = details.get('infoBlocks')
+    if (row.get('sourceIds') != [report.get('sourceId')]
+            or report.get('incidentId') != row.get('id')
+            or not metadata.get('sent')
+            or report.get('publishedAt') != metadata['sent']
+            or details.get('sent') != metadata['sent']
+            or details.get('recordId') != metadata.get('recordId')
+            or details.get('messageType') != metadata.get('messageType')
+            or not re.fullmatch(r'[0-9a-f]{64}', report.get('contentHash', ''))
+            or not isinstance(blocks, list) or not blocks
+            or not all(isinstance(block, str) for block in blocks)
+            or legacy is not None and legacy != blocks):
+        raise ValueError('CAP infoBlocks reference conflicts with retained source evidence')
+    return blocks
+
+
+def deduplicate_info_blocks(row):
+    """Remove only an exact duplicate whose complete report copy is proven."""
+    metadata = row.get('sourceMetadata', {})
+    blocks = metadata.get('infoBlocks')
+    if 'infoBlocksReportId' in metadata:
+        info_blocks(row)
+        metadata.pop('infoBlocks', None)
+        return row
+    if not isinstance(blocks, list) or not blocks:
+        return row
+    for report in row.get('reports', []):
+        if report.get('sourceMetadata', {}).get('infoBlocks') != blocks:
+            continue
+        candidate = dict(row, sourceMetadata=dict(metadata, infoBlocksReportId=report.get('id')))
+        try:
+            info_blocks(candidate)
+        except ValueError:
+            continue
+        metadata['infoBlocksReportId'] = report['id']
+        del metadata['infoBlocks']
+        break
+    return row
+
+
 def parse_alert(source, raw, url, now, countries, areas):
     root = xml(raw)
     if root.tag != '{'+NS+'}alert':
@@ -214,7 +272,7 @@ def parse_alert(source, raw, url, now, countries, areas):
         area=matches['ADM2'][0];parent=next((a for a in areas if a['id']==area.get('parentId') and a['level']=='ADM1' and a['countryCode']==code),None)
         if parent:
             record.update(admin1Code=parent['id'],admin1Name=parent['name'],admin2Code=area['id'],admin2Name=area['name'])
-    return dict(control=control, record=record)
+    return dict(control=control, record=deduplicate_info_blocks(record))
 
 
 def collect_cap(source, policy, raw, now, countries, areas, fetcher, fixtures=None):
@@ -313,7 +371,7 @@ def apply_lifecycle(messages, records, now):
                     meta['severityDowngrade']=dict(at=c['sent'],providerSeverity=update['sourceMetadata']['providerSeverity'],url=c['url'])
                     row['summary']+='\nThe issuer replaced this severe warning with a '+update['sourceMetadata']['providerSeverity']+' warning.'
                 meta['currentProviderSeverity']=update['sourceMetadata']['providerSeverity']
-                meta['downgradeInfoBlocks']=copy.deepcopy(update['sourceMetadata']['infoBlocks'])
+                meta['downgradeInfoBlocks']=copy.deepcopy(info_blocks(update))
                 meta['expires']=min(meta.get('expires') or c['sent'],c['sent'])
                 row['reports']=update['reports']
         elif len(targets)>1:
@@ -322,7 +380,7 @@ def apply_lifecycle(messages, records, now):
                 old=working.get(iid,records.get(iid))
                 if c['sent']>=old['updatedAt']:
                     prior=copy.deepcopy(old);prior['state']='expired';prior['sourceMetadata']['supersededBy']=row['id'];working[iid]=prior
-        working[row['id']]=row;lookup[own]=row['id']
+        working[row['id']]=deduplicate_info_blocks(row);lookup[own]=row['id']
     return list(working.values())
 
 

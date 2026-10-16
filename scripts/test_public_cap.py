@@ -1,7 +1,7 @@
 import copy
 import pathlib
 import unittest
-from public_cap import parse_alert, apply_lifecycle, collect_cap, expire_warnings, feed_links
+from public_cap import parse_alert, apply_lifecycle, collect_cap, expire_warnings, feed_links, info_blocks, deduplicate_info_blocks
 
 ROOT=pathlib.Path(__file__).resolve().parent.parent
 FIXTURE=ROOT/'tests/fixtures/cap/bmkg.xml'
@@ -41,6 +41,7 @@ class CapTests(unittest.TestCase):
   original=self.parse();row=original['record'];cancel=self.control('Cancel','cancel','2026-10-05T08:00:00Z',self.reference())
   changed=apply_lifecycle([cancel],{row['id']:row},NOW);self.assertEqual(len(changed),1);self.assertEqual(changed[0]['state'],'cancelled')
   self.assertEqual(changed[0]['id'],row['id']);self.assertEqual(len(changed[0]['reports']),2)
+  self.assertEqual(info_blocks(changed[0]),info_blocks(row))
   self.assertEqual(apply_lifecycle([original],{row['id']:changed[0]},NOW),[])
  def test_update_chain_is_single_incident(self):
   original=self.parse();update=self.control('Update','updated','2026-10-05T07:30:00Z',self.reference(),True)
@@ -49,7 +50,7 @@ class CapTests(unittest.TestCase):
   self.assertEqual(len(row['reports']),2)
   self.assertCountEqual([r['contentHash'] for r in row['reports']], [m['control']['contentHash'] for m in (original,update)])
   self.assertTrue(all(r['incidentId']==row['id'] for r in row['reports']))
-  self.assertEqual(row['reports'][1]['sourceMetadata']['infoBlocks'], original['record']['sourceMetadata']['infoBlocks'])
+  self.assertEqual(row['reports'][1]['sourceMetadata']['infoBlocks'], info_blocks(original['record']))
   self.assertEqual(apply_lifecycle([original,update],{row['id']:row},NOW),[])
  def test_update_across_runs_retains_original_source_evidence(self):
   original=self.parse();update=self.control('Update','updated','2026-10-05T07:30:00Z',self.reference(),True)
@@ -58,12 +59,42 @@ class CapTests(unittest.TestCase):
   self.assertEqual(original['record'],before)
   self.assertEqual(len(result['reports']),2)
   self.assertEqual(result['reports'][1],before['reports'][0])
+ def test_complete_xml_is_stored_once_and_bound_to_its_report(self):
+  import xml.etree.ElementTree as E
+  row=self.parse()['record'];expected=[E.tostring(i,encoding='unicode') for i in E.fromstring(RAW).findall('{*}info')]
+  self.assertNotIn('infoBlocks',row['sourceMetadata'])
+  self.assertEqual(row['sourceMetadata']['infoBlocksReportId'],row['reports'][0]['id'])
+  self.assertEqual(info_blocks(row),expected)
+  self.assertEqual(row['reports'][0]['sourceMetadata']['infoBlocks'],expected)
+  self.assertEqual(row['reports'][0]['contentHash'],__import__('hashlib').sha256(RAW).hexdigest())
+ def test_legacy_inline_blocks_and_reports_remain_lossless(self):
+  row=self.parse()['record'];blocks=copy.deepcopy(info_blocks(row))
+  row['sourceMetadata'].pop('infoBlocksReportId');row['sourceMetadata']['infoBlocks']=blocks
+  before_reports=copy.deepcopy(row['reports']);before_location=copy.deepcopy(row['location'])
+  self.assertEqual(info_blocks(row),blocks)
+  deduplicate_info_blocks(row)
+  self.assertNotIn('infoBlocks',row['sourceMetadata']);self.assertEqual(info_blocks(row),blocks)
+  self.assertEqual(row['reports'],before_reports);self.assertEqual(row['location'],before_location)
+  row['sourceMetadata'].pop('infoBlocksReportId');row['sourceMetadata']['infoBlocks']=blocks
+  row['reports'][0].pop('sourceMetadata')
+  self.assertIs(deduplicate_info_blocks(row),row)
+  self.assertEqual(row['sourceMetadata']['infoBlocks'],blocks)
+ def test_legacy_severe_downgrade_retains_original_and_update_xml(self):
+  original=self.parse(RAW.replace(b'<severity>Moderate</severity>',b'<severity>Severe</severity>'))
+  old=original['record'];blocks=copy.deepcopy(info_blocks(old))
+  old['sourceMetadata']['infoBlocks']=blocks;old['sourceMetadata'].pop('infoBlocksReportId')
+  update=self.control('Update','updated','2026-10-05T07:30:00Z',self.reference(),True)
+  row=apply_lifecycle([update],{old['id']:old},NOW)[0]
+  self.assertEqual(info_blocks(row),blocks)
+  self.assertEqual(row['sourceMetadata']['downgradeInfoBlocks'],info_blocks(update['record']))
+  self.assertEqual(row['reports'][1],old['reports'][0]);self.assertEqual(row['location'],old['location'])
  def test_same_batch_update_then_cancel_retains_all_three_messages(self):
   original=self.parse();update=self.control('Update','updated','2026-10-05T07:30:00Z',self.reference(),True)
   reference='cuaca.ekstrem@bmkg.go.id,updated,2026-10-05T07:30:00Z'
   cancel=self.control('Cancel','cancel','2026-10-05T08:00:00Z',reference)
   row=apply_lifecycle([cancel,update,original],{},NOW)[0]
   self.assertEqual(row['state'],'cancelled');self.assertEqual(len(row['reports']),3)
+  self.assertEqual(info_blocks(row),info_blocks(update['record']))
   self.assertEqual(len(row['sourceMetadata']['capMessageKeys']),3)
   self.assertEqual(apply_lifecycle([cancel,update,original],{row['id']:row},NOW),[])
  def test_severe_downgrade_preserves_both_bulletins_without_duplicate_reports(self):
@@ -75,6 +106,8 @@ class CapTests(unittest.TestCase):
   self.assertEqual(row['sourceMetadata']['currentProviderSeverity'],'Moderate')
   self.assertEqual(len(row['reports']),2)
   self.assertEqual(row['location'],original['record']['location'])
+  self.assertEqual(info_blocks(row),info_blocks(original['record']))
+  self.assertEqual(row['sourceMetadata']['downgradeInfoBlocks'],info_blocks(update['record']))
   self.assertTrue(public_incident(row));self.assertFalse(public_incident(update['record']))
   self.assertEqual(apply_lifecycle([update,original],{row['id']:row},NOW),[])
  def test_conflicting_provider_times_still_reject_instead_of_being_corrected(self):

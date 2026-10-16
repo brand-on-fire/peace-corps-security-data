@@ -93,8 +93,22 @@ def validate_candidate(root, baseline):
         raise ValueError('Candidate current incidents duplicated')
     for row in current:
         archived = records.get(row['id'])
-        if row['countryCode'] not in codes or row['historical'] or not pipeline.public_incident(row) or archived is None or pipeline.public_snapshot_record(archived) != row:
+        if (row['countryCode'] not in codes or row['historical'] or archived is None
+                or not pipeline.public_incident(archived) or pipeline.public_snapshot_record(archived) != row):
             raise ValueError('Candidate current incident differs from complete archive')
+    advisories = snapshot.get('advisoryRecords', [])
+    if (not isinstance(advisories, list) or any(not isinstance(row, dict) for row in advisories)
+            or len({row.get('id') for row in advisories}) != len(advisories)):
+        raise ValueError('Candidate advisory records malformed or duplicated')
+    expected_advisories = pipeline.advisory_snapshot_rows(
+        records, codes, snapshot['history']['from'], snapshot['history'].get('to', snapshot['generatedAt']))
+    if advisories != expected_advisories:
+        raise ValueError('Candidate advisory records differ from complete archive projection')
+    # Both projections must describe the same original incident, never two
+    # competing representations or an extra record in archive totals.
+    by_id = {row['id']:row for row in current}
+    if any(row['id'] in by_id and by_id[row['id']] != row for row in advisories):
+        raise ValueError('Candidate advisory and current incident disagree')
     unsigned = dict(snapshot)
     publication = unsigned.pop('publication')
     if publication['revision'] != pipeline.publication_revision(unsigned):

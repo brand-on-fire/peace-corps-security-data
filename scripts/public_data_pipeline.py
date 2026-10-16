@@ -642,6 +642,50 @@ def current_snapshot_rows(records, countries):
             if not row['historical'] and row['countryCode'] in countries and public_incident(row)]
 
 
+def advisory_snapshot_rows(records, countries, history_from, history_to):
+    """Complete projections of the reviewed CDC identities, including withdrawals.
+
+    Listing status selects the UI's active subset, never archive membership. Keep
+    terminal evidence here so a later publication cannot silently lose a notice.
+    """
+    from public_security_official import CDC_PROFILES
+    start = dt.datetime.fromisoformat(history_from.replace('Z', '+00:00'))
+    end = dt.datetime.fromisoformat(history_to.replace('Z', '+00:00'))
+    if start.tzinfo is None or end.tzinfo is None or start > end:
+        raise ValueError('Invalid advisory history interval')
+    profiles = {'cdc-'+slug+'-'+profile[0]:(slug,profile[0]) for slug,profile in CDC_PROFILES.items()}
+    rows = []
+    for row in records.values():
+        profile = profiles.get(row.get('id'))
+        metadata = row.get('sourceMetadata', {})
+        if (profile is None or row.get('countryCode') not in countries or row['countryCode'] != profile[1]
+                or row.get('sourceIds') != ['cdc-travel-notices'] or row.get('category') != 'health'
+                or row.get('severity') != 'unknown' or row.get('location', {}).get('precision') not in ('area','country')
+                or metadata.get('provider') != 'CDC'
+                or metadata.get('eventTimeBasis') != 'notice_publication_not_outbreak_onset'
+                or metadata.get('firstPublicationTime') != row.get('occurredAt')
+                or type(metadata.get('providerActiveNotice')) is not bool
+                or type(metadata.get('providerListed')) is not bool):
+            continue
+        if metadata['providerActiveNotice'] and (not metadata['providerListed']
+                or row.get('state') != 'reported' or row.get('evidenceStatus') != 'official'):
+            continue
+        citation = r'https://wwwnc\.cdc\.gov/travel/notices/level[1-3]/'+re.escape(profile[0])
+        reports = row.get('reports', []) + [report for revision in row.get('revisions', [])
+                                           for report in revision.get('previousReports', [])]
+        if (not row.get('reports') or not any(report.get('publishedAt') == row['occurredAt'] for report in reports)
+                or not all(
+                report.get('sourceId') == 'cdc-travel-notices' and report.get('incidentId') == row['id']
+                and re.fullmatch(citation, report.get('url', '')) for report in reports)):
+            continue
+        occurred = dt.datetime.fromisoformat(row['occurredAt'].replace('Z', '+00:00'))
+        if occurred.tzinfo is None:
+            raise ValueError('Advisory publication date requires a time zone')
+        if start <= occurred <= end:
+            rows.append(public_snapshot_record(row))
+    return sorted(rows, key=lambda row:(row['occurredAt'],row['id']), reverse=True)
+
+
 def write_archive(data, records, countries, public_country_codes=None, publication=None):
     # Retain complete previously collected country files, while exposing only
     # the currently admitted roster in the public index and manifest.
@@ -900,6 +944,7 @@ def run(root, now, fixtures=None):
     snapshot['archiveTotal'] = snapshot['history']['recordCount'] = sum(row['countryCode'] in countries and public_incident(row) for row in records.values())
     snapshot['incidents'] = current_snapshot_rows(records, countries)
     snapshot['history']['to'] = now_text
+    snapshot['advisoryRecords'] = advisory_snapshot_rows(records, countries, snapshot['history']['from'], now_text)
     snapshot['collector'] = dict(kind='public-standard-runner', requestedOfficialCadenceMinutes=15,
                                   requestedNewsCadenceMinutes=360, latestRunAt=now_text,
                                   activeReviewedCountries=len(countries), discoveryCount=len(discoveries),
